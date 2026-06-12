@@ -155,8 +155,35 @@ M4b notes:
   selfcheck unchanged-green; standalone-check PASS.
 
 ## M5 — Deep tests + SDK polish + Colab
-- [ ] Coverage/property/negative-corpus gates green; mutation baseline.
-- [ ] Logo, README (badges, BYO-agent quickstart hero, operator table per agent kind, "is my agent traceable?" section, security section, LLM-connection guide, roadmap link), Colab notebook (incl. BYO-agent + LangGraph cells), API docstrings.
+- [x] Coverage/property/negative-corpus gates green; mutation baseline.
+- [x] Logo, README (badges, BYO-agent quickstart hero, operator table per agent kind, "is my agent traceable?" section, security section, LLM-connection guide, roadmap link), Colab notebook (incl. BYO-agent + LangGraph cells), API docstrings.
+
+M5 notes:
+- **Mutation baseline (make mutation, [tool.mutmut] in pyproject):**
+  2799 mutants over `metrics/` + `perturb/` (image/audio research modules
+  excluded — unexported backlog code, mirroring the coverage gates):
+  1787 killed/timeout, 1010 survived, 2 uncovered → **63.9%**. Survivors
+  concentrate in perturbation operators (939/1010); the paper-critical
+  `metrics/` math has 76. The 70% gate from the build plan is the ratchet
+  target, tracked here; mutation stays verify-deep/nightly only.
+- New `traxr/viz.py` ([viz] extra): per-pair d_norm bars (+ noise-floor
+  line), t*/T histogram, manifestation breakdown — needed by the notebook.
+- Logo: pixelated diverging-traces glyph (shared prefix, amber t*, blue
+  clean run, coral corrupted branch); `assets/{logo,mark}{,-dark}.svg`;
+  README uses a light/dark `<picture>`.
+- README rewritten per plan §M5; security text split into SECURITY.md
+  (5 points near-verbatim from the plan) + a README summary; honest-limits
+  caveats inline in "Is my agent traceable?".
+- Notebook `notebooks/traxr_quickstart.ipynb`: executes top-to-bottom with
+  NO key (`make notebook` via nbconvert into a scratch dir; nbconvert +
+  ipykernel added to dev extras). Real-model cell gated on
+  OPENAI_API_KEY; LangGraph cell is keyless (fake chat model) and
+  import-gated. Ruff lints notebook cells too.
+- Doctests: examples added to `scoring.py`; `tests/unit/test_doctests.py`
+  runs doctest over the curated modules.
+- Gates: 584 tests; coverage 97.36/94.88/93.93; notebook/property/
+  analyzer-goldens/selfcheck/goldens/standalone-check green. README
+  quickstart fresh-venv verification recorded below after push.
 
 ## M6 — Website + v1.0.0 release (FINAL)
 - [ ] Landing page (`web/`) + MkDocs docs (`--strict`, mkdocstrings), shared logo/palette, deploy assembly to GitHub Pages.

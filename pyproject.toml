@@ -52,6 +52,9 @@ dev = [
     "mutmut",
     "httpx",
     "build",
+    # Notebook execution gate (make notebook).
+    "nbconvert",
+    "ipykernel",
     # The built-in reference agent (traxr/mas) needs pandas; its tests run
     # in every dev environment.
     "pandas",
@@ -161,3 +164,14 @@ pythonpath = ["src"]
 # perturb/audio.py are copied for fidelity but not exported/tested (backlog) —
 # same rationale.
 omit = ["*/mas/*", "*/perturb/image.py", "*/perturb/audio.py"]
+
+[tool.mutmut]
+# Scoped per the build plan: mutation testing covers the metric/perturbation
+# math only (slow; verify-deep + nightly).
+source_paths = ["src/traxr/metrics", "src/traxr/perturb"]
+# image/audio operators are unexported research code (backlog) — excluded
+# from the coverage gates and from mutation alike.
+do_not_mutate = ["*/perturb/image.py", "*/perturb/audio.py"]
+# The whole package must be importable from the mutants/ sandbox.
+also_copy = ["src/traxr", "scripts"]
+pytest_add_cli_args_test_selection = ["tests/unit"]

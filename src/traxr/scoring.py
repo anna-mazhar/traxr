@@ -18,6 +18,11 @@ def normalize_answer(answer: str | None) -> str:
 
     Lowercases, collapses internal whitespace, strips surrounding whitespace
     and quotes, and drops a trailing period. ``None`` normalizes to ``""``.
+
+    >>> normalize_answer("  The  Answer. ")
+    'the answer'
+    >>> normalize_answer(None)
+    ''
     """
     if answer is None:
         return ""
@@ -30,6 +35,13 @@ def check_answer_match(expected: str | None, actual: str | None) -> bool:
 
     Numeric answers compare as floats (so ``"42"`` matches ``"42.0"``);
     everything else is normalized string equality.
+
+    >>> check_answer_match("Paris", " PARIS. ")
+    True
+    >>> check_answer_match("1,000", "$1000")
+    True
+    >>> check_answer_match("42", "43")
+    False
     """
     norm_expected = normalize_answer(expected)
     norm_actual = normalize_answer(actual)

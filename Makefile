@@ -54,8 +54,11 @@ external-golden:
 selfcheck:
 	$(PYTHON) -m traxr.selfcheck
 
+# Executes top-to-bottom with NO API key (real-model cells are skip-safe).
+# Output goes to a scratch dir so the committed notebook stays output-free.
 notebook:
-	@echo "notebook: not yet built — lands in M5 (jupyter nbconvert --execute notebooks/traxr_quickstart.ipynb)" >&2; exit 1
+	rm -rf .nbbuild && mkdir -p .nbbuild
+	$(PYTHON) -m nbconvert --to notebook --execute --output-dir .nbbuild notebooks/traxr_quickstart.ipynb
 
 build:
 	rm -rf dist .build-venv
