@@ -9,7 +9,7 @@ from traxr import errors
 
 __version__ = "0.1.0.dev0"
 
-from traxr.agents import AgentRunner, Task, builtin_agent
+from traxr.agents import AgentRunner, Task, builtin_agent, from_langgraph
 from traxr.capture import emit, instrument
 from traxr.experiment import Experiment, ExperimentConfig
 from traxr.llm import DeterministicLLMStub, LLMClient, OpenAICompatibleClient
@@ -28,8 +28,7 @@ def __getattr__(name: str) -> object:
     raise AttributeError(f"module 'traxr' has no attribute {name!r}")
 
 
-# Curated public API. Placeholder: from_langgraph lands in M4b.
-# patch_openai stays under traxr.capture.
+# Curated public API. patch_openai stays under traxr.capture.
 __all__ = [
     "AgentRunner",
     "DeterministicLLMStub",
@@ -43,6 +42,7 @@ __all__ = [
     "Task",
     "__version__",
     "builtin_agent",
+    "from_langgraph",
     "emit",
     "errors",
     "instrument",

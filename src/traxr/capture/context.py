@@ -114,19 +114,38 @@ class CaptureSession:
         *,
         agent_name: str = "external",
         step_num: int | None = None,
+        count_thread: bool = True,
     ) -> TraceEvent:
-        """Emit an event to this run's collector at the given (or current) step."""
+        """Emit an event to this run's collector at the given (or current) step.
+
+        An explicit ``step_num`` also advances the session's step floor, so
+        later default-step events (e.g. the harness's ``final_answer``) land
+        at the run's last step. ``count_thread=False`` opts out of the
+        multi-thread concurrency heuristic — for emitters like the Tier 1
+        adapter whose callbacks legitimately arrive on executor threads
+        (they detect real LLM-call overlap themselves).
+        """
         with self._lock:
-            self._emit_threads.add(threading.get_ident())
-            if len(self._emit_threads) > 1:
-                self._note_concurrency_locked()
-            step = self._step if step_num is None else step_num
+            if count_thread:
+                self._emit_threads.add(threading.get_ident())
+                if len(self._emit_threads) > 1:
+                    self._note_concurrency_locked()
+            if step_num is None:
+                step = self._step
+            else:
+                step = step_num
+                self._step = max(self._step, step_num)
         return self.collector.emit(
             event_type=event_type,
             step_num=step,
             agent_name=agent_name,
             payload=payload,
         )
+
+    def note_concurrency(self) -> None:
+        """Flag this run as concurrent (warns once); for Tier 1 adapters."""
+        with self._lock:
+            self._note_concurrency_locked()
 
     def _note_concurrency_locked(self) -> None:
         """Record concurrent tracing (caller holds the lock); warn once per run."""
