@@ -216,3 +216,9 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Traxr make build scratch venv
+.build-venv/
+
+# macOS
+.DS_Store

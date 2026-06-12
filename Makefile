@@ -1,0 +1,70 @@
+# Traxr — single command surface (build-plan execution contract).
+# Targets land incrementally: stubbed ones fail with a clear
+# "not yet built — lands in MN" message until their milestone.
+
+PYTHON ?= python
+
+.PHONY: install lint typecheck test cov property mutation analyzer-goldens standalone-check golden \
+	external-golden selfcheck notebook build site verify-all verify-deep
+
+install:
+	$(PYTHON) -m pip install -e ".[dev,document,openai,langgraph,viz]"
+
+lint:
+	$(PYTHON) -m ruff check .
+	$(PYTHON) -m ruff format --check .
+
+typecheck:
+	$(PYTHON) -m mypy src/traxr
+
+test:
+	$(PYTHON) -m pytest -q
+
+# mas/ is omitted via [tool.coverage.run] in pyproject (informational only).
+cov:
+	$(PYTHON) -m pytest --cov=traxr.metrics --cov=traxr.perturb --cov=traxr.trace --cov-fail-under=90
+	$(PYTHON) -m pytest --cov=traxr.capture --cov=traxr.agents --cov-fail-under=85
+	$(PYTHON) -m pytest --cov=traxr --cov-fail-under=75
+
+property:
+	$(PYTHON) -m pytest tests/property -q --hypothesis-seed=0
+
+mutation:
+	$(PYTHON) -m mutmut run
+
+analyzer-goldens:
+	$(PYTHON) scripts/check_analyzer_goldens.py
+
+# Standalone gate: the repo must contain zero source-repo references.
+standalone-check:
+	@! git grep -rIiE 'mas[_-]?debug|mas[_-]?eval|72ede6d|huzaifasuri|Speena' -- . ':!Makefile' || (echo 'standalone-check: FAIL — forbidden references found' >&2; exit 1)
+	@echo 'standalone-check: PASS'
+
+golden:
+	@echo "golden: not yet built — lands in M4 (pytest tests/e2e/test_golden.py)" >&2; exit 1
+
+external-golden:
+	@echo "external-golden: not yet built — lands in M4 (pytest tests/e2e/test_external_golden.py)" >&2; exit 1
+
+selfcheck:
+	@echo "selfcheck: not yet built — lands in M4 (python -m traxr.selfcheck)" >&2; exit 1
+
+notebook:
+	@echo "notebook: not yet built — lands in M5 (jupyter nbconvert --execute notebooks/traxr_quickstart.ipynb)" >&2; exit 1
+
+build:
+	rm -rf dist .build-venv
+	$(PYTHON) -m build
+	$(PYTHON) -m venv .build-venv
+	.build-venv/bin/python -m pip install --quiet dist/*.whl
+	.build-venv/bin/python -c "import traxr; print('traxr', traxr.__version__)"
+	# M4 upgrades this smoke to: python -c "import traxr; traxr.selfcheck()"
+
+site:
+	@echo "site: not yet built — lands in M6 (web/ + mkdocs build --strict)" >&2; exit 1
+
+# The global Definition of Done: everything except mutation.
+verify-all: install lint typecheck test cov property analyzer-goldens standalone-check golden external-golden selfcheck notebook build site
+
+# Milestone boundaries + nightly.
+verify-deep: verify-all mutation

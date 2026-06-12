@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: make install
+      - name: Lint
+        run: make lint
+      - name: Typecheck
+        run: make typecheck
+
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install
+        run: make install
+      - name: Test
+        run: make test
+
+  # Dedicated job for the [langgraph] extra (adapter + category 11 tests).
+  # Placeholder until the adapter lands in M4b.
+  langgraph:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Placeholder
+        run: echo "langgraph extra job — lands in M4b"
+
+  standalone-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: make standalone-check

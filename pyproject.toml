@@ -1,0 +1,109 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "traxr"
+version = "0.1.0.dev0"
+description = "Point your own agent at your own data, run controlled-perturbation experiments, and get back contamination/divergence metrics."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+authors = [{ name = "Anna Mazhar" }, { name = "Huzaifa Suri" }]
+keywords = [
+    "multi-agent",
+    "llm",
+    "tracing",
+    "contamination",
+    "perturbation",
+    "divergence",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+# Core deps stay minimal (stdlib-only for now). instrument() imports openai
+# lazily; users bringing an OpenAI-SDK agent already have it installed.
+dependencies = []
+
+[project.optional-dependencies]
+document = ["PyMuPDF", "pdfplumber", "openpyxl"]
+openai = ["openai"]
+langgraph = ["langchain-core>=0.3,<2.0", "langgraph"]
+viz = ["matplotlib"]
+pandas = ["pandas"]
+# Report exporter needs dataframes + plots. Provisional membership — refined
+# when results.py lands in M4 (tracked in PROGRESS.md).
+report = ["traxr[pandas,viz]"]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "hypothesis",
+    "ruff",
+    "mypy",
+    "mutmut",
+    "httpx",
+    "build",
+]
+
+[project.urls]
+Homepage = "https://github.com/anna-mazhar/traxr"
+Repository = "https://github.com/anna-mazhar/traxr"
+Changelog = "https://github.com/anna-mazhar/traxr/blob/main/CHANGELOG.md"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "UP", # pyupgrade
+    "B",  # flake8-bugbear
+]
+
+[tool.mypy]
+python_version = "3.10"
+files = ["src/traxr"]
+strict = true
+# Disabled until traxr/mas/ exists (M3): with it on, the lenient override
+# below is flagged as an unused config section.
+warn_unused_configs = false
+
+# traxr/mas/ is research code, exercised by integration/golden/smoke
+# tests rather than strict typing. Lenient per-module overrides live here (with
+# this comment) instead of blanket inline ignores — see the build plan's
+# typecheck gate. All curated modules (errors.py, capture/, agents/, llm/,
+# experiment.py, results.py, scoring.py, data/, perturb/, metrics/, trace/)
+# remain under strict.
+[[tool.mypy.overrides]]
+module = "traxr.mas.*"
+disallow_untyped_defs = false
+disallow_untyped_calls = false
+disallow_incomplete_defs = false
+check_untyped_defs = false
+disallow_any_generics = false
+warn_return_any = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.coverage.run]
+# mas/ (extracted research code) is exercised by integration/golden/smoke
+# tests; its coverage is informational, not gated.
+omit = ["*/mas/*"]

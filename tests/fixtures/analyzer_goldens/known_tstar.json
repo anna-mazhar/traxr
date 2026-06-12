@@ -1,0 +1,670 @@
+{
+  "case": "known_tstar",
+  "description": "Shared prefix through step 2; reroute at step 3 (known t*), extra step 4, changed answer.",
+  "input": {
+    "clean_trace": {
+      "event_count": 8,
+      "events": [
+        {
+          "agent_name": "router",
+          "content_hash": "5afd3c2a9fe73a91",
+          "event_type": "routing_decision",
+          "payload": {
+            "chosen_agent": "researcher",
+            "reasoning_hash": "r1"
+          },
+          "sequence_index": 0,
+          "step_num": 1,
+          "timestamp": "2026-06-10T00:00:00+00:00"
+        },
+        {
+          "agent_name": "researcher",
+          "content_hash": "7543d12d8a22e9c8",
+          "event_type": "tool_invocation",
+          "payload": {
+            "arguments": {
+              "path": "q3_financials.csv"
+            },
+            "operation": "read",
+            "output_hash": "out1",
+            "output_preview": "month,revenue",
+            "success": true,
+            "tool_name": "csv_tool"
+          },
+          "sequence_index": 1,
+          "step_num": 1,
+          "timestamp": "2026-06-10T00:00:00+00:00"
+        },
+        {
+          "agent_name": "researcher",
+          "content_hash": "a2f05797a11a6333",
+          "event_type": "memory_write",
+          "payload": {
+            "confidence": 0.9,
+            "content_hash": "c1",
+            "entry_id": "m1",
+            "entry_type": "note"
+          },
+          "sequence_index": 2,
+          "step_num": 1,
+          "timestamp": "2026-06-10T00:00:00+00:00"
+        },
+        {
+          "agent_name": "router",
+          "content_hash": "e0b0e6c9ca086f6f",
+          "event_type": "routing_decision",
+          "payload": {
+            "chosen_agent": "critic",
+            "reasoning_hash": "r2"
+          },
+          "sequence_index": 3,
+          "step_num": 2,
+          "timestamp": "2026-06-10T00:00:00+00:00"
+        },
+        {
+          "agent_name": "critic",
+          "content_hash": "c3e39a68ff2f5a3b",
+          "event_type": "memory_read",
+          "payload": {
+            "entry_ids": [
+              "m1"
+            ],
+            "entry_types": [
+              "note"
+            ]
+          },
+          "sequence_index": 4,
+          "step_num": 2,
+          "timestamp": "2026-06-10T00:00:00+00:00"
+        },
+        {
+          "agent_name": "critic",
+          "content_hash": "44e5d45a5a376392",
+          "event_type": "agent_output",
+          "payload": {
+            "action": "critique",
+            "citation_ids": [
+              "m1"
+            ],
+            "content_hash": "c2",
+            "is_final_answer": false
+          },
+          "sequence_index": 5,
+          "step_num": 2,
+          "timestamp": "2026-06-10T00:00:00+00:00"
+        },
+        {
+          "agent_name": "router",
+          "content_hash": "abe19d85097446c2",
+          "event_type": "routing_decision",
+          "payload": {
+            "chosen_agent": "synthesizer",
+            "reasoning_hash": "r3"
+          },
+          "sequence_index": 6,
+          "step_num": 3,
+          "timestamp": "2026-06-10T00:00:00+00:00"
+        },
+        {
+          "agent_name": "synthesizer",
+          "content_hash": "22f97ec4063918dd",
+          "event_type": "final_answer",
+          "payload": {
+            "answer": "$4.2M",
+            "answer_hash": "a1"
+          },
+          "sequence_index": 7,
+          "step_num": 3,
+          "timestamp": "2026-06-10T00:00:00+00:00"
+        }
+      ],
+      "run_label": "baseline"
+    },
+    "perturbed_trace": {
+      "event_count": 10,
+      "events": [
+        {
+          "agent_name": "router",
+          "content_hash": "5afd3c2a9fe73a91",
+          "event_type": "routing_decision",
+          "payload": {
+            "chosen_agent": "researcher",
+            "reasoning_hash": "r1"
+          },
+          "sequence_index": 0,
+          "step_num": 1,
+          "timestamp": "2026-06-10T00:00:00+00:00"
+        },
+        {
+          "agent_name": "researcher",
+          "content_hash": "7543d12d8a22e9c8",
+          "event_type": "tool_invocation",
+          "payload": {
+            "arguments": {
+              "path": "q3_financials.csv"
+            },
+            "operation": "read",
+            "output_hash": "out1",
+            "output_preview": "month,revenue",
+            "success": true,
+            "tool_name": "csv_tool"
+          },
+          "sequence_index": 1,
+          "step_num": 1,
+          "timestamp": "2026-06-10T00:00:00+00:00"
+        },
+        {
+          "agent_name": "researcher",
+          "content_hash": "a2f05797a11a6333",
+          "event_type": "memory_write",
+          "payload": {
+            "confidence": 0.9,
+            "content_hash": "c1",
+            "entry_id": "m1",
+            "entry_type": "note"
+          },
+          "sequence_index": 2,
+          "step_num": 1,
+          "timestamp": "2026-06-10T00:00:00+00:00"
+        },
+        {
+          "agent_name": "router",
+          "content_hash": "e0b0e6c9ca086f6f",
+          "event_type": "routing_decision",
+          "payload": {
+            "chosen_agent": "critic",
+            "reasoning_hash": "r2"
+          },
+          "sequence_index": 3,
+          "step_num": 2,
+          "timestamp": "2026-06-10T00:00:00+00:00"
+        },
+        {
+          "agent_name": "critic",
+          "content_hash": "c3e39a68ff2f5a3b",
+          "event_type": "memory_read",
+          "payload": {
+            "entry_ids": [
+              "m1"
+            ],
+            "entry_types": [
+              "note"
+            ]
+          },
+          "sequence_index": 4,
+          "step_num": 2,
+          "timestamp": "2026-06-10T00:00:00+00:00"
+        },
+        {
+          "agent_name": "critic",
+          "content_hash": "44e5d45a5a376392",
+          "event_type": "agent_output",
+          "payload": {
+            "action": "critique",
+            "citation_ids": [
+              "m1"
+            ],
+            "content_hash": "c2",
+            "is_final_answer": false
+          },
+          "sequence_index": 5,
+          "step_num": 2,
+          "timestamp": "2026-06-10T00:00:00+00:00"
+        },
+        {
+          "agent_name": "router",
+          "content_hash": "c35979f33de2baa0",
+          "event_type": "routing_decision",
+          "payload": {
+            "chosen_agent": "researcher",
+            "reasoning_hash": "r3"
+          },
+          "sequence_index": 6,
+          "step_num": 3,
+          "timestamp": "2026-06-10T00:00:00+00:00"
+        },
+        {
+          "agent_name": "researcher",
+          "content_hash": "f69197a961026839",
+          "event_type": "tool_invocation",
+          "payload": {
+            "arguments": {
+              "path": "q3_financials.csv"
+            },
+            "operation": "summarize",
+            "output_hash": "out2",
+            "output_preview": "totals",
+            "success": true,
+            "tool_name": "csv_tool"
+          },
+          "sequence_index": 7,
+          "step_num": 3,
+          "timestamp": "2026-06-10T00:00:00+00:00"
+        },
+        {
+          "agent_name": "router",
+          "content_hash": "e189391a0a5eebf5",
+          "event_type": "routing_decision",
+          "payload": {
+            "chosen_agent": "synthesizer",
+            "reasoning_hash": "r4"
+          },
+          "sequence_index": 8,
+          "step_num": 4,
+          "timestamp": "2026-06-10T00:00:00+00:00"
+        },
+        {
+          "agent_name": "synthesizer",
+          "content_hash": "ecfb98c919a95205",
+          "event_type": "final_answer",
+          "payload": {
+            "answer": "$3.9M",
+            "answer_hash": "a2"
+          },
+          "sequence_index": 9,
+          "step_num": 4,
+          "timestamp": "2026-06-10T00:00:00+00:00"
+        }
+      ],
+      "run_label": "known_tstar"
+    },
+    "task_id": "parity_known_tstar"
+  },
+  "output": {
+    "detail": {
+      "aligned_pairs": [
+        {
+          "clean_event": {
+            "agent_name": "researcher",
+            "content_hash": "a2f05797a11a6333",
+            "event_type": "memory_write",
+            "payload": {
+              "confidence": 0.9,
+              "content_hash": "c1",
+              "entry_id": "m1",
+              "entry_type": "note"
+            },
+            "sequence_index": 2,
+            "step_num": 1,
+            "timestamp": "2026-06-10T00:00:00+00:00"
+          },
+          "divergence_type": null,
+          "index": 0,
+          "is_match": true,
+          "perturbed_event": {
+            "agent_name": "researcher",
+            "content_hash": "a2f05797a11a6333",
+            "event_type": "memory_write",
+            "payload": {
+              "confidence": 0.9,
+              "content_hash": "c1",
+              "entry_id": "m1",
+              "entry_type": "note"
+            },
+            "sequence_index": 2,
+            "step_num": 1,
+            "timestamp": "2026-06-10T00:00:00+00:00"
+          }
+        },
+        {
+          "clean_event": {
+            "agent_name": "router",
+            "content_hash": "5afd3c2a9fe73a91",
+            "event_type": "routing_decision",
+            "payload": {
+              "chosen_agent": "researcher",
+              "reasoning_hash": "r1"
+            },
+            "sequence_index": 0,
+            "step_num": 1,
+            "timestamp": "2026-06-10T00:00:00+00:00"
+          },
+          "divergence_type": null,
+          "index": 1,
+          "is_match": true,
+          "perturbed_event": {
+            "agent_name": "router",
+            "content_hash": "5afd3c2a9fe73a91",
+            "event_type": "routing_decision",
+            "payload": {
+              "chosen_agent": "researcher",
+              "reasoning_hash": "r1"
+            },
+            "sequence_index": 0,
+            "step_num": 1,
+            "timestamp": "2026-06-10T00:00:00+00:00"
+          }
+        },
+        {
+          "clean_event": {
+            "agent_name": "researcher",
+            "content_hash": "7543d12d8a22e9c8",
+            "event_type": "tool_invocation",
+            "payload": {
+              "arguments": {
+                "path": "q3_financials.csv"
+              },
+              "operation": "read",
+              "output_hash": "out1",
+              "output_preview": "month,revenue",
+              "success": true,
+              "tool_name": "csv_tool"
+            },
+            "sequence_index": 1,
+            "step_num": 1,
+            "timestamp": "2026-06-10T00:00:00+00:00"
+          },
+          "divergence_type": null,
+          "index": 2,
+          "is_match": true,
+          "perturbed_event": {
+            "agent_name": "researcher",
+            "content_hash": "7543d12d8a22e9c8",
+            "event_type": "tool_invocation",
+            "payload": {
+              "arguments": {
+                "path": "q3_financials.csv"
+              },
+              "operation": "read",
+              "output_hash": "out1",
+              "output_preview": "month,revenue",
+              "success": true,
+              "tool_name": "csv_tool"
+            },
+            "sequence_index": 1,
+            "step_num": 1,
+            "timestamp": "2026-06-10T00:00:00+00:00"
+          }
+        },
+        {
+          "clean_event": {
+            "agent_name": "critic",
+            "content_hash": "44e5d45a5a376392",
+            "event_type": "agent_output",
+            "payload": {
+              "action": "critique",
+              "citation_ids": [
+                "m1"
+              ],
+              "content_hash": "c2",
+              "is_final_answer": false
+            },
+            "sequence_index": 5,
+            "step_num": 2,
+            "timestamp": "2026-06-10T00:00:00+00:00"
+          },
+          "divergence_type": null,
+          "index": 3,
+          "is_match": true,
+          "perturbed_event": {
+            "agent_name": "critic",
+            "content_hash": "44e5d45a5a376392",
+            "event_type": "agent_output",
+            "payload": {
+              "action": "critique",
+              "citation_ids": [
+                "m1"
+              ],
+              "content_hash": "c2",
+              "is_final_answer": false
+            },
+            "sequence_index": 5,
+            "step_num": 2,
+            "timestamp": "2026-06-10T00:00:00+00:00"
+          }
+        },
+        {
+          "clean_event": {
+            "agent_name": "critic",
+            "content_hash": "c3e39a68ff2f5a3b",
+            "event_type": "memory_read",
+            "payload": {
+              "entry_ids": [
+                "m1"
+              ],
+              "entry_types": [
+                "note"
+              ]
+            },
+            "sequence_index": 4,
+            "step_num": 2,
+            "timestamp": "2026-06-10T00:00:00+00:00"
+          },
+          "divergence_type": null,
+          "index": 4,
+          "is_match": true,
+          "perturbed_event": {
+            "agent_name": "critic",
+            "content_hash": "c3e39a68ff2f5a3b",
+            "event_type": "memory_read",
+            "payload": {
+              "entry_ids": [
+                "m1"
+              ],
+              "entry_types": [
+                "note"
+              ]
+            },
+            "sequence_index": 4,
+            "step_num": 2,
+            "timestamp": "2026-06-10T00:00:00+00:00"
+          }
+        },
+        {
+          "clean_event": {
+            "agent_name": "router",
+            "content_hash": "e0b0e6c9ca086f6f",
+            "event_type": "routing_decision",
+            "payload": {
+              "chosen_agent": "critic",
+              "reasoning_hash": "r2"
+            },
+            "sequence_index": 3,
+            "step_num": 2,
+            "timestamp": "2026-06-10T00:00:00+00:00"
+          },
+          "divergence_type": null,
+          "index": 5,
+          "is_match": true,
+          "perturbed_event": {
+            "agent_name": "router",
+            "content_hash": "e0b0e6c9ca086f6f",
+            "event_type": "routing_decision",
+            "payload": {
+              "chosen_agent": "critic",
+              "reasoning_hash": "r2"
+            },
+            "sequence_index": 3,
+            "step_num": 2,
+            "timestamp": "2026-06-10T00:00:00+00:00"
+          }
+        },
+        {
+          "clean_event": {
+            "agent_name": "synthesizer",
+            "content_hash": "22f97ec4063918dd",
+            "event_type": "final_answer",
+            "payload": {
+              "answer": "$4.2M",
+              "answer_hash": "a1"
+            },
+            "sequence_index": 7,
+            "step_num": 3,
+            "timestamp": "2026-06-10T00:00:00+00:00"
+          },
+          "divergence_type": "event_missing_in_perturbed",
+          "index": 6,
+          "is_match": false,
+          "perturbed_event": null
+        },
+        {
+          "clean_event": {
+            "agent_name": "router",
+            "content_hash": "abe19d85097446c2",
+            "event_type": "routing_decision",
+            "payload": {
+              "chosen_agent": "synthesizer",
+              "reasoning_hash": "r3"
+            },
+            "sequence_index": 6,
+            "step_num": 3,
+            "timestamp": "2026-06-10T00:00:00+00:00"
+          },
+          "divergence_type": "different_agent_routed",
+          "index": 7,
+          "is_match": false,
+          "perturbed_event": {
+            "agent_name": "router",
+            "content_hash": "c35979f33de2baa0",
+            "event_type": "routing_decision",
+            "payload": {
+              "chosen_agent": "researcher",
+              "reasoning_hash": "r3"
+            },
+            "sequence_index": 6,
+            "step_num": 3,
+            "timestamp": "2026-06-10T00:00:00+00:00"
+          }
+        },
+        {
+          "clean_event": null,
+          "divergence_type": "event_missing_in_clean",
+          "index": 8,
+          "is_match": false,
+          "perturbed_event": {
+            "agent_name": "researcher",
+            "content_hash": "f69197a961026839",
+            "event_type": "tool_invocation",
+            "payload": {
+              "arguments": {
+                "path": "q3_financials.csv"
+              },
+              "operation": "summarize",
+              "output_hash": "out2",
+              "output_preview": "totals",
+              "success": true,
+              "tool_name": "csv_tool"
+            },
+            "sequence_index": 7,
+            "step_num": 3,
+            "timestamp": "2026-06-10T00:00:00+00:00"
+          }
+        },
+        {
+          "clean_event": null,
+          "divergence_type": "event_missing_in_clean",
+          "index": 9,
+          "is_match": false,
+          "perturbed_event": {
+            "agent_name": "synthesizer",
+            "content_hash": "ecfb98c919a95205",
+            "event_type": "final_answer",
+            "payload": {
+              "answer": "$3.9M",
+              "answer_hash": "a2"
+            },
+            "sequence_index": 9,
+            "step_num": 4,
+            "timestamp": "2026-06-10T00:00:00+00:00"
+          }
+        },
+        {
+          "clean_event": null,
+          "divergence_type": "event_missing_in_clean",
+          "index": 10,
+          "is_match": false,
+          "perturbed_event": {
+            "agent_name": "router",
+            "content_hash": "e189391a0a5eebf5",
+            "event_type": "routing_decision",
+            "payload": {
+              "chosen_agent": "synthesizer",
+              "reasoning_hash": "r4"
+            },
+            "sequence_index": 8,
+            "step_num": 4,
+            "timestamp": "2026-06-10T00:00:00+00:00"
+          }
+        }
+      ],
+      "answer_changed": true,
+      "baseline_answer": "$4.2M",
+      "baseline_events": 8,
+      "baseline_routing_turns": 3,
+      "baseline_steps": 3,
+      "baseline_tool_calls": 1,
+      "control_flow_changes": {
+        "early_termination": false,
+        "extended_execution": true,
+        "extra_routing_cycles": 1,
+        "missing_routing_cycles": 0,
+        "reroutes": 1,
+        "tool_calls_added": 1,
+        "tool_calls_removed": 0,
+        "tool_failures_avoided": 0,
+        "tool_failures_introduced": 0,
+        "tool_state_changes": 0,
+        "total_changes": 4
+      },
+      "divergence_normalized_position": 0.75,
+      "edit_distance": {
+        "baseline_length": 8,
+        "deletions": 0,
+        "distance": 2,
+        "insertions": 2,
+        "normalized": 0.2,
+        "perturbed_length": 10,
+        "substitutions": 0
+      },
+      "first_divergence_step": 3,
+      "first_divergence_type": "event_missing_in_perturbed",
+      "perturbation_type": "known_tstar",
+      "perturbed_answer": "$3.9M",
+      "perturbed_events": 10,
+      "perturbed_routing_turns": 4,
+      "perturbed_steps": 4,
+      "perturbed_tool_calls": 2,
+      "task_id": "parity_known_tstar"
+    },
+    "summary": {
+      "answer_changed": true,
+      "baseline_answer": "$4.2M",
+      "baseline_events": 8,
+      "baseline_routing_turns": 3,
+      "baseline_steps": 3,
+      "baseline_tool_calls": 1,
+      "control_flow_changes": {
+        "early_termination": false,
+        "extended_execution": true,
+        "extra_routing_cycles": 1,
+        "missing_routing_cycles": 0,
+        "reroutes": 1,
+        "tool_calls_added": 1,
+        "tool_calls_removed": 0,
+        "tool_failures_avoided": 0,
+        "tool_failures_introduced": 0,
+        "tool_state_changes": 0,
+        "total_changes": 4
+      },
+      "divergence_normalized_position": 0.75,
+      "edit_distance": {
+        "baseline_length": 8,
+        "deletions": 0,
+        "distance": 2,
+        "insertions": 2,
+        "normalized": 0.2,
+        "perturbed_length": 10,
+        "substitutions": 0
+      },
+      "first_divergence_step": 3,
+      "first_divergence_type": "event_missing_in_perturbed",
+      "perturbation_type": "known_tstar",
+      "perturbed_answer": "$3.9M",
+      "perturbed_events": 10,
+      "perturbed_routing_turns": 4,
+      "perturbed_steps": 4,
+      "perturbed_tool_calls": 2,
+      "task_id": "parity_known_tstar"
+    }
+  }
+}
