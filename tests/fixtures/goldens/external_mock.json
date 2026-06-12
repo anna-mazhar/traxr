@@ -1,0 +1,432 @@
+{
+  "aggregates": {
+    "divergence_summary": {
+      "max_d_norm": 0.0,
+      "mean_d_norm": 0.0,
+      "mean_t_star_norm": null,
+      "pairs_measured": 2
+    },
+    "manifestation_prevalence": {
+      "no_observable_effect": 1.0
+    },
+    "recovery_rate": 0.0,
+    "token_overhead_summary": {
+      "max": 1.0,
+      "mean": 1.0
+    }
+  },
+  "answers": {
+    "baseline": "the answer is 42",
+    "noise_floor_1": "the answer is 42",
+    "sample.csv::column_swap": "the answer is 42",
+    "sample.csv::null_content": "the answer is 42"
+  },
+  "fingerprint": {
+    "agent_kind": "external",
+    "capture_tier": "tier0",
+    "environment": {
+      "traxr_version": "0.1.0.dev0"
+    },
+    "expected_answer": "the answer is 42",
+    "files": [
+      "sample.csv"
+    ],
+    "llm_client": null,
+    "max_llm_calls_per_run": 50,
+    "model_ids": [
+      "mock-model"
+    ],
+    "noise_floor_runs": 1,
+    "perturbations": [
+      "column_swap",
+      "null_content"
+    ],
+    "question": "What is the total revenue?",
+    "scorer": "check_answer_match",
+    "seed": 1234
+  },
+  "noise_floor": 0.0,
+  "noise_floor_runs": 1,
+  "pairs": [
+    {
+      "answer_changed": false,
+      "control_flow_changes": {
+        "early_termination": false,
+        "extended_execution": false,
+        "extra_routing_cycles": 0,
+        "missing_routing_cycles": 0,
+        "reroutes": 0,
+        "tool_calls_added": 0,
+        "tool_calls_removed": 0,
+        "tool_failures_avoided": 0,
+        "tool_failures_introduced": 0,
+        "tool_state_changes": 0,
+        "total_changes": 0
+      },
+      "d_norm": 0.0,
+      "delivery": "round_trip",
+      "divergence_type": null,
+      "item_id": "sample.csv",
+      "manifestation": "no_observable_effect",
+      "order_nondeterministic": false,
+      "paper_group": "no_observable_effect",
+      "perturbation": "column_swap",
+      "recovery": false,
+      "status_baseline": "ok",
+      "status_perturbed": "ok",
+      "t_star": null,
+      "t_star_norm": null,
+      "task_success": true,
+      "token_overhead": 1.0,
+      "warnings": [],
+      "within_noise_floor": true
+    },
+    {
+      "answer_changed": false,
+      "control_flow_changes": {
+        "early_termination": false,
+        "extended_execution": false,
+        "extra_routing_cycles": 0,
+        "missing_routing_cycles": 0,
+        "reroutes": 0,
+        "tool_calls_added": 0,
+        "tool_calls_removed": 0,
+        "tool_failures_avoided": 0,
+        "tool_failures_introduced": 0,
+        "tool_state_changes": 0,
+        "total_changes": 0
+      },
+      "d_norm": 0.0,
+      "delivery": "round_trip",
+      "divergence_type": null,
+      "item_id": "sample.csv",
+      "manifestation": "no_observable_effect",
+      "order_nondeterministic": false,
+      "paper_group": "no_observable_effect",
+      "perturbation": "null_content",
+      "recovery": false,
+      "status_baseline": "ok",
+      "status_perturbed": "ok",
+      "t_star": null,
+      "t_star_norm": null,
+      "task_success": true,
+      "token_overhead": 1.0,
+      "warnings": [],
+      "within_noise_floor": true
+    }
+  ],
+  "traces": {
+    "baseline": {
+      "event_count": 5,
+      "events": [
+        {
+          "agent_name": "external",
+          "content_hash": "28eb57f12d9d1922",
+          "event_type": "llm_call",
+          "payload": {
+            "content_hash": "e3b0c44298fc1c14",
+            "finish_reason": "tool_calls",
+            "model": "mock-model",
+            "tool_call_names": [
+              "lookup"
+            ],
+            "usage": {
+              "completion_tokens": 5,
+              "prompt_tokens": 10,
+              "total_tokens": 15
+            }
+          },
+          "sequence_index": 0,
+          "step_num": 1
+        },
+        {
+          "agent_name": "external",
+          "content_hash": "144c49e5d17881a9",
+          "event_type": "tool_request",
+          "payload": {
+            "arguments_hash": "b734541e6c1c6e7f",
+            "call_id": "call_g1",
+            "tool_name": "lookup"
+          },
+          "sequence_index": 1,
+          "step_num": 1
+        },
+        {
+          "agent_name": "external",
+          "content_hash": "b0e0028633b72aef",
+          "event_type": "tool_result",
+          "payload": {
+            "call_id": "call_g1",
+            "content_hash": "73475cb40a568e8d",
+            "tool_name": "lookup"
+          },
+          "sequence_index": 2,
+          "step_num": 1
+        },
+        {
+          "agent_name": "external",
+          "content_hash": "34714f40b289c3c7",
+          "event_type": "llm_call",
+          "payload": {
+            "content_hash": "ff29438fb7a23c7e",
+            "finish_reason": "stop",
+            "model": "mock-model",
+            "tool_call_names": [],
+            "usage": {
+              "completion_tokens": 5,
+              "prompt_tokens": 10,
+              "total_tokens": 15
+            }
+          },
+          "sequence_index": 3,
+          "step_num": 2
+        },
+        {
+          "agent_name": "harness",
+          "content_hash": "ce8ac0d1fc9556c1",
+          "event_type": "final_answer",
+          "payload": {
+            "answer_hash": "ff29438fb7a23c7e"
+          },
+          "sequence_index": 4,
+          "step_num": 2
+        }
+      ],
+      "run_label": "baseline"
+    },
+    "noise_floor_1": {
+      "event_count": 5,
+      "events": [
+        {
+          "agent_name": "external",
+          "content_hash": "28eb57f12d9d1922",
+          "event_type": "llm_call",
+          "payload": {
+            "content_hash": "e3b0c44298fc1c14",
+            "finish_reason": "tool_calls",
+            "model": "mock-model",
+            "tool_call_names": [
+              "lookup"
+            ],
+            "usage": {
+              "completion_tokens": 5,
+              "prompt_tokens": 10,
+              "total_tokens": 15
+            }
+          },
+          "sequence_index": 0,
+          "step_num": 1
+        },
+        {
+          "agent_name": "external",
+          "content_hash": "144c49e5d17881a9",
+          "event_type": "tool_request",
+          "payload": {
+            "arguments_hash": "b734541e6c1c6e7f",
+            "call_id": "call_g1",
+            "tool_name": "lookup"
+          },
+          "sequence_index": 1,
+          "step_num": 1
+        },
+        {
+          "agent_name": "external",
+          "content_hash": "b0e0028633b72aef",
+          "event_type": "tool_result",
+          "payload": {
+            "call_id": "call_g1",
+            "content_hash": "73475cb40a568e8d",
+            "tool_name": "lookup"
+          },
+          "sequence_index": 2,
+          "step_num": 1
+        },
+        {
+          "agent_name": "external",
+          "content_hash": "34714f40b289c3c7",
+          "event_type": "llm_call",
+          "payload": {
+            "content_hash": "ff29438fb7a23c7e",
+            "finish_reason": "stop",
+            "model": "mock-model",
+            "tool_call_names": [],
+            "usage": {
+              "completion_tokens": 5,
+              "prompt_tokens": 10,
+              "total_tokens": 15
+            }
+          },
+          "sequence_index": 3,
+          "step_num": 2
+        },
+        {
+          "agent_name": "harness",
+          "content_hash": "ce8ac0d1fc9556c1",
+          "event_type": "final_answer",
+          "payload": {
+            "answer_hash": "ff29438fb7a23c7e"
+          },
+          "sequence_index": 4,
+          "step_num": 2
+        }
+      ],
+      "run_label": "noise_floor_1"
+    },
+    "sample.csv::column_swap": {
+      "event_count": 5,
+      "events": [
+        {
+          "agent_name": "external",
+          "content_hash": "28eb57f12d9d1922",
+          "event_type": "llm_call",
+          "payload": {
+            "content_hash": "e3b0c44298fc1c14",
+            "finish_reason": "tool_calls",
+            "model": "mock-model",
+            "tool_call_names": [
+              "lookup"
+            ],
+            "usage": {
+              "completion_tokens": 5,
+              "prompt_tokens": 10,
+              "total_tokens": 15
+            }
+          },
+          "sequence_index": 0,
+          "step_num": 1
+        },
+        {
+          "agent_name": "external",
+          "content_hash": "144c49e5d17881a9",
+          "event_type": "tool_request",
+          "payload": {
+            "arguments_hash": "b734541e6c1c6e7f",
+            "call_id": "call_g1",
+            "tool_name": "lookup"
+          },
+          "sequence_index": 1,
+          "step_num": 1
+        },
+        {
+          "agent_name": "external",
+          "content_hash": "b0e0028633b72aef",
+          "event_type": "tool_result",
+          "payload": {
+            "call_id": "call_g1",
+            "content_hash": "73475cb40a568e8d",
+            "tool_name": "lookup"
+          },
+          "sequence_index": 2,
+          "step_num": 1
+        },
+        {
+          "agent_name": "external",
+          "content_hash": "34714f40b289c3c7",
+          "event_type": "llm_call",
+          "payload": {
+            "content_hash": "ff29438fb7a23c7e",
+            "finish_reason": "stop",
+            "model": "mock-model",
+            "tool_call_names": [],
+            "usage": {
+              "completion_tokens": 5,
+              "prompt_tokens": 10,
+              "total_tokens": 15
+            }
+          },
+          "sequence_index": 3,
+          "step_num": 2
+        },
+        {
+          "agent_name": "harness",
+          "content_hash": "ce8ac0d1fc9556c1",
+          "event_type": "final_answer",
+          "payload": {
+            "answer_hash": "ff29438fb7a23c7e"
+          },
+          "sequence_index": 4,
+          "step_num": 2
+        }
+      ],
+      "run_label": "sample.csv::column_swap"
+    },
+    "sample.csv::null_content": {
+      "event_count": 5,
+      "events": [
+        {
+          "agent_name": "external",
+          "content_hash": "28eb57f12d9d1922",
+          "event_type": "llm_call",
+          "payload": {
+            "content_hash": "e3b0c44298fc1c14",
+            "finish_reason": "tool_calls",
+            "model": "mock-model",
+            "tool_call_names": [
+              "lookup"
+            ],
+            "usage": {
+              "completion_tokens": 5,
+              "prompt_tokens": 10,
+              "total_tokens": 15
+            }
+          },
+          "sequence_index": 0,
+          "step_num": 1
+        },
+        {
+          "agent_name": "external",
+          "content_hash": "144c49e5d17881a9",
+          "event_type": "tool_request",
+          "payload": {
+            "arguments_hash": "b734541e6c1c6e7f",
+            "call_id": "call_g1",
+            "tool_name": "lookup"
+          },
+          "sequence_index": 1,
+          "step_num": 1
+        },
+        {
+          "agent_name": "external",
+          "content_hash": "b0e0028633b72aef",
+          "event_type": "tool_result",
+          "payload": {
+            "call_id": "call_g1",
+            "content_hash": "73475cb40a568e8d",
+            "tool_name": "lookup"
+          },
+          "sequence_index": 2,
+          "step_num": 1
+        },
+        {
+          "agent_name": "external",
+          "content_hash": "34714f40b289c3c7",
+          "event_type": "llm_call",
+          "payload": {
+            "content_hash": "ff29438fb7a23c7e",
+            "finish_reason": "stop",
+            "model": "mock-model",
+            "tool_call_names": [],
+            "usage": {
+              "completion_tokens": 5,
+              "prompt_tokens": 10,
+              "total_tokens": 15
+            }
+          },
+          "sequence_index": 3,
+          "step_num": 2
+        },
+        {
+          "agent_name": "harness",
+          "content_hash": "ce8ac0d1fc9556c1",
+          "event_type": "final_answer",
+          "payload": {
+            "answer_hash": "ff29438fb7a23c7e"
+          },
+          "sequence_index": 4,
+          "step_num": 2
+        }
+      ],
+      "run_label": "sample.csv::null_content"
+    }
+  }
+}

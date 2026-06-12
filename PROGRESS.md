@@ -91,9 +91,38 @@ M3b notes:
   standalone-check PASS; mypy strict clean on `capture/` + `agents/task.py`.
 
 ## M4 — Experiment runner + results + CLI
-- [ ] `traxr/experiment.py`: `agent`/`agent_factory`/`llm` resolution; run loop (fresh temp dirs, original basenames, contextvar binding, harness-emitted `final_answer`, noise-floor with external default = 1, `dry_run`, caps); wire the built-in injection producer and the external pdf_inplace path into perturbation delivery.
-- [ ] `traxr/results.py` (incl. `order_nondeterministic`, noise-floor caveat in `summary()`), `traxr/cli.py` (`--agent module:callable`, `--dry-run`), `python -m traxr.selfcheck`.
-- [ ] Tests: categories 10, 12, 13, 14 (both goldens; selfcheck).
+- [x] `traxr/experiment.py`: `agent`/`agent_factory`/`llm` resolution; run loop (fresh temp dirs, original basenames, contextvar binding, harness-emitted `final_answer`, noise-floor with external default = 1, `dry_run`, caps); wire the built-in injection producer and the external pdf_inplace path into perturbation delivery.
+- [x] `traxr/results.py` (incl. `order_nondeterministic`, noise-floor caveat in `summary()`), `traxr/cli.py` (`--agent module:callable`, `--dry-run`), `python -m traxr.selfcheck`.
+- [x] Tests: categories 10, 12, 13, 14 (both goldens; selfcheck).
+
+M4 notes:
+- New modules: `experiment.py`, `results.py`, `scoring.py`, `cli.py`
+  (`traxr` console script in pyproject), `selfcheck.py` (degrades to a
+  metrics-only check on a bare install, so the wheel smoke passes without
+  pandas). Public API += Experiment/ExperimentConfig/ExperimentResults/
+  PairResult/selfcheck (selfcheck via lazy `__getattr__` to keep
+  `python -m traxr.selfcheck` warning-free).
+- Surgical extensions, not rewrites: `invoke_agent(session=...)` lets the
+  runner read `concurrent_detected` per run; `BuiltinAgent.last_cost`
+  exposes the per-run token CostProxy. External token counts come from
+  captured `llm_call` usage.
+- Injection delivery extracts PDF text via the data loader (the engine's
+  `apply_from_file` reads raw bytes — wrong input for text operators).
+- Run statuses: ok / crashed / empty / skipped. "Empty" for external runs
+  means zero captured `llm_call`s (the harness's own final_answer event
+  doesn't count). Skipped perturbations never invoke the agent.
+- Goldens (`tests/fixtures/goldens/`): byte-stable run-vs-run, plus a
+  committed-snapshot compare with `fingerprint.environment` normalized
+  (version strings vary across CI matrix entries).
+- Determinism fix for goldens: memory entry IDs are now content-derived
+  hashes instead of random (`mas/core/state.py`) — also makes paired
+  memory-event comparison meaningful.
+- Fixed a latent test bug exposed by the new suites: an M2 pdf_inplace
+  test restored a saved `staticmethod` as a bare function, breaking
+  `_fit_fontsize` for any later caller in the same session.
+- Gates: 562 tests (76 new); coverage 97.49/95.06/93.75 vs gates 90/85/75;
+  selfcheck/golden/external-golden/build un-stubbed and green;
+  analyzer-goldens 5/5; standalone-check PASS.
 
 ## M4b — LangGraph adapter
 - [ ] `agents/langgraph.py`: `BaseCallbackHandler` mapping; `from_langgraph()` with `input_builder`/`output_extractor`; double-count suppression; version pins.

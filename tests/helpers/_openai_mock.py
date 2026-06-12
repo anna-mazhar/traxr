@@ -86,16 +86,22 @@ class MockOpenAIServer:
     """Serves a fixed sequence of canned responses; records request bodies.
 
     Each item in ``responses`` is either a completion dict (JSON response)
-    or a list of chunk dicts (served as an SSE stream).
+    or a list of chunk dicts (served as an SSE stream). With ``cycle=True``
+    the sequence repeats — for multi-run experiments where every run makes
+    the same calls.
     """
 
-    def __init__(self, responses: list[Any]):
+    def __init__(self, responses: list[Any], *, cycle: bool = False):
         self._responses = list(responses)
+        self._cycle = cycle
         self.requests: list[dict[str, Any]] = []
 
     def handler(self, request: httpx.Request) -> httpx.Response:
         self.requests.append(json.loads(request.content))
-        spec = self._responses[len(self.requests) - 1]
+        index = len(self.requests) - 1
+        if self._cycle:
+            index %= len(self._responses)
+        spec = self._responses[index]
         if isinstance(spec, list):
             payload = b"".join(b"data: " + json.dumps(c).encode() + b"\n\n" for c in spec)
             payload += b"data: [DONE]\n\n"

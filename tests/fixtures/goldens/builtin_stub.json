@@ -1,0 +1,1017 @@
+{
+  "aggregates": {
+    "divergence_summary": {
+      "max_d_norm": 0.8095238095238095,
+      "mean_d_norm": 0.40476190476190477,
+      "mean_t_star_norm": 0.08333333333333333,
+      "pairs_measured": 2
+    },
+    "manifestation_prevalence": {
+      "loop_or_extended_execution": 0.5,
+      "no_observable_effect": 0.5
+    },
+    "recovery_rate": 0.5,
+    "token_overhead_summary": {
+      "max": 3.0,
+      "mean": 2.0
+    }
+  },
+  "answers": {
+    "baseline": "42",
+    "sample.csv::column_swap": "42",
+    "sample.csv::null_content": "42"
+  },
+  "fingerprint": {
+    "agent_kind": "builtin",
+    "capture_tier": "builtin",
+    "environment": {
+      "traxr_version": "0.1.0.dev0"
+    },
+    "expected_answer": "42",
+    "files": [
+      "sample.csv"
+    ],
+    "llm_client": "DeterministicLLMStub",
+    "max_llm_calls_per_run": 50,
+    "model_ids": [],
+    "noise_floor_runs": 0,
+    "perturbations": [
+      "column_swap",
+      "null_content"
+    ],
+    "question": "What is the total revenue?",
+    "scorer": "check_answer_match",
+    "seed": 1234
+  },
+  "noise_floor": null,
+  "noise_floor_runs": 0,
+  "pairs": [
+    {
+      "answer_changed": false,
+      "control_flow_changes": {
+        "early_termination": false,
+        "extended_execution": false,
+        "extra_routing_cycles": 0,
+        "missing_routing_cycles": 0,
+        "reroutes": 0,
+        "tool_calls_added": 0,
+        "tool_calls_removed": 0,
+        "tool_failures_avoided": 0,
+        "tool_failures_introduced": 0,
+        "tool_state_changes": 0,
+        "total_changes": 0
+      },
+      "d_norm": 0.0,
+      "delivery": "round_trip",
+      "divergence_type": null,
+      "item_id": "sample.csv",
+      "manifestation": "no_observable_effect",
+      "order_nondeterministic": false,
+      "paper_group": "no_observable_effect",
+      "perturbation": "column_swap",
+      "recovery": false,
+      "status_baseline": "ok",
+      "status_perturbed": "ok",
+      "t_star": null,
+      "t_star_norm": null,
+      "task_success": true,
+      "token_overhead": 1.0,
+      "warnings": [],
+      "within_noise_floor": null
+    },
+    {
+      "answer_changed": false,
+      "control_flow_changes": {
+        "early_termination": false,
+        "extended_execution": true,
+        "extra_routing_cycles": 9,
+        "missing_routing_cycles": 0,
+        "reroutes": 1,
+        "tool_calls_added": 0,
+        "tool_calls_removed": 1,
+        "tool_failures_avoided": 0,
+        "tool_failures_introduced": 0,
+        "tool_state_changes": 0,
+        "total_changes": 12
+      },
+      "d_norm": 0.8095238095238095,
+      "delivery": "round_trip",
+      "divergence_type": "different_action",
+      "item_id": "sample.csv",
+      "manifestation": "loop_or_extended_execution",
+      "order_nondeterministic": false,
+      "paper_group": "behavioral_detours",
+      "perturbation": "null_content",
+      "recovery": true,
+      "status_baseline": "ok",
+      "status_perturbed": "ok",
+      "t_star": 1,
+      "t_star_norm": 0.08333333333333333,
+      "task_success": true,
+      "token_overhead": 3.0,
+      "warnings": [],
+      "within_noise_floor": null
+    }
+  ],
+  "traces": {
+    "baseline": {
+      "event_count": 12,
+      "events": [
+        {
+          "agent_name": "router",
+          "content_hash": "88685d3424d06174",
+          "event_type": "routing_decision",
+          "payload": {
+            "chosen_agent": "planner",
+            "reasoning_hash": ""
+          },
+          "sequence_index": 0,
+          "step_num": 0
+        },
+        {
+          "agent_name": "planner",
+          "content_hash": "2175fb1c60d0af4b",
+          "event_type": "memory_write",
+          "payload": {
+            "confidence": 0.5,
+            "content_hash": "86e60dedebe6a990",
+            "entry_id": "726dd4d4",
+            "entry_type": "plan"
+          },
+          "sequence_index": 1,
+          "step_num": 0
+        },
+        {
+          "agent_name": "planner",
+          "content_hash": "74083a048d47c17a",
+          "event_type": "agent_output",
+          "payload": {
+            "action": "write_plan",
+            "citation_ids": [],
+            "content_hash": "86e60dedebe6a990",
+            "is_final_answer": false
+          },
+          "sequence_index": 2,
+          "step_num": 0
+        },
+        {
+          "agent_name": "router",
+          "content_hash": "c7835afc3edcd303",
+          "event_type": "routing_decision",
+          "payload": {
+            "chosen_agent": "data_analyst",
+            "reasoning_hash": ""
+          },
+          "sequence_index": 3,
+          "step_num": 1
+        },
+        {
+          "agent_name": "data_analyst",
+          "content_hash": "107345995bb3e8c0",
+          "event_type": "tool_invocation",
+          "payload": {
+            "arguments": {
+              "code_length": 61
+            },
+            "operation": "run",
+            "output_hash": "38224be2ae195b2c",
+            "output_preview": "Answer: 5\nTable shape: (5, 5)\n",
+            "success": true,
+            "tool_name": "python"
+          },
+          "sequence_index": 4,
+          "step_num": 1
+        },
+        {
+          "agent_name": "data_analyst",
+          "content_hash": "b9978ed8f05e307f",
+          "event_type": "memory_write",
+          "payload": {
+            "confidence": 0.82,
+            "content_hash": "182734ee58e0253a",
+            "entry_id": "f0865079",
+            "entry_type": "analysis"
+          },
+          "sequence_index": 5,
+          "step_num": 1
+        },
+        {
+          "agent_name": "data_analyst",
+          "content_hash": "c2139e252907e028",
+          "event_type": "agent_output",
+          "payload": {
+            "action": "write_analysis",
+            "citation_ids": [],
+            "content_hash": "182734ee58e0253a",
+            "is_final_answer": false
+          },
+          "sequence_index": 6,
+          "step_num": 1
+        },
+        {
+          "agent_name": "router",
+          "content_hash": "1f66f0ec47a91d71",
+          "event_type": "routing_decision",
+          "payload": {
+            "chosen_agent": "synthesizer",
+            "reasoning_hash": ""
+          },
+          "sequence_index": 7,
+          "step_num": 2
+        },
+        {
+          "agent_name": "synthesizer",
+          "content_hash": "70fabb53636bdcc3",
+          "event_type": "memory_read",
+          "payload": {
+            "entry_ids": [
+              "726dd4d4",
+              "f0865079"
+            ],
+            "entry_types": [
+              "analysis",
+              "plan"
+            ]
+          },
+          "sequence_index": 8,
+          "step_num": 2
+        },
+        {
+          "agent_name": "synthesizer",
+          "content_hash": "52c5697867dfd0ff",
+          "event_type": "memory_write",
+          "payload": {
+            "confidence": 0.8,
+            "content_hash": "73475cb40a568e8d",
+            "entry_id": "f3b8f8f3",
+            "entry_type": "answer"
+          },
+          "sequence_index": 9,
+          "step_num": 2
+        },
+        {
+          "agent_name": "synthesizer",
+          "content_hash": "3810aba0d8f6aadd",
+          "event_type": "agent_output",
+          "payload": {
+            "action": "final_answer",
+            "citation_ids": [],
+            "content_hash": "73475cb40a568e8d",
+            "is_final_answer": true
+          },
+          "sequence_index": 10,
+          "step_num": 2
+        },
+        {
+          "agent_name": "synthesizer",
+          "content_hash": "05caac84b19d8b2a",
+          "event_type": "final_answer",
+          "payload": {
+            "answer": "42",
+            "answer_hash": "73475cb40a568e8d"
+          },
+          "sequence_index": 11,
+          "step_num": 2
+        }
+      ],
+      "run_label": "baseline"
+    },
+    "sample.csv::column_swap": {
+      "event_count": 12,
+      "events": [
+        {
+          "agent_name": "router",
+          "content_hash": "88685d3424d06174",
+          "event_type": "routing_decision",
+          "payload": {
+            "chosen_agent": "planner",
+            "reasoning_hash": ""
+          },
+          "sequence_index": 0,
+          "step_num": 0
+        },
+        {
+          "agent_name": "planner",
+          "content_hash": "2175fb1c60d0af4b",
+          "event_type": "memory_write",
+          "payload": {
+            "confidence": 0.5,
+            "content_hash": "86e60dedebe6a990",
+            "entry_id": "726dd4d4",
+            "entry_type": "plan"
+          },
+          "sequence_index": 1,
+          "step_num": 0
+        },
+        {
+          "agent_name": "planner",
+          "content_hash": "74083a048d47c17a",
+          "event_type": "agent_output",
+          "payload": {
+            "action": "write_plan",
+            "citation_ids": [],
+            "content_hash": "86e60dedebe6a990",
+            "is_final_answer": false
+          },
+          "sequence_index": 2,
+          "step_num": 0
+        },
+        {
+          "agent_name": "router",
+          "content_hash": "c7835afc3edcd303",
+          "event_type": "routing_decision",
+          "payload": {
+            "chosen_agent": "data_analyst",
+            "reasoning_hash": ""
+          },
+          "sequence_index": 3,
+          "step_num": 1
+        },
+        {
+          "agent_name": "data_analyst",
+          "content_hash": "107345995bb3e8c0",
+          "event_type": "tool_invocation",
+          "payload": {
+            "arguments": {
+              "code_length": 61
+            },
+            "operation": "run",
+            "output_hash": "38224be2ae195b2c",
+            "output_preview": "Answer: 5\nTable shape: (5, 5)\n",
+            "success": true,
+            "tool_name": "python"
+          },
+          "sequence_index": 4,
+          "step_num": 1
+        },
+        {
+          "agent_name": "data_analyst",
+          "content_hash": "b9978ed8f05e307f",
+          "event_type": "memory_write",
+          "payload": {
+            "confidence": 0.82,
+            "content_hash": "182734ee58e0253a",
+            "entry_id": "f0865079",
+            "entry_type": "analysis"
+          },
+          "sequence_index": 5,
+          "step_num": 1
+        },
+        {
+          "agent_name": "data_analyst",
+          "content_hash": "c2139e252907e028",
+          "event_type": "agent_output",
+          "payload": {
+            "action": "write_analysis",
+            "citation_ids": [],
+            "content_hash": "182734ee58e0253a",
+            "is_final_answer": false
+          },
+          "sequence_index": 6,
+          "step_num": 1
+        },
+        {
+          "agent_name": "router",
+          "content_hash": "1f66f0ec47a91d71",
+          "event_type": "routing_decision",
+          "payload": {
+            "chosen_agent": "synthesizer",
+            "reasoning_hash": ""
+          },
+          "sequence_index": 7,
+          "step_num": 2
+        },
+        {
+          "agent_name": "synthesizer",
+          "content_hash": "70fabb53636bdcc3",
+          "event_type": "memory_read",
+          "payload": {
+            "entry_ids": [
+              "726dd4d4",
+              "f0865079"
+            ],
+            "entry_types": [
+              "analysis",
+              "plan"
+            ]
+          },
+          "sequence_index": 8,
+          "step_num": 2
+        },
+        {
+          "agent_name": "synthesizer",
+          "content_hash": "52c5697867dfd0ff",
+          "event_type": "memory_write",
+          "payload": {
+            "confidence": 0.8,
+            "content_hash": "73475cb40a568e8d",
+            "entry_id": "f3b8f8f3",
+            "entry_type": "answer"
+          },
+          "sequence_index": 9,
+          "step_num": 2
+        },
+        {
+          "agent_name": "synthesizer",
+          "content_hash": "3810aba0d8f6aadd",
+          "event_type": "agent_output",
+          "payload": {
+            "action": "final_answer",
+            "citation_ids": [],
+            "content_hash": "73475cb40a568e8d",
+            "is_final_answer": true
+          },
+          "sequence_index": 10,
+          "step_num": 2
+        },
+        {
+          "agent_name": "synthesizer",
+          "content_hash": "05caac84b19d8b2a",
+          "event_type": "final_answer",
+          "payload": {
+            "answer": "42",
+            "answer_hash": "73475cb40a568e8d"
+          },
+          "sequence_index": 11,
+          "step_num": 2
+        }
+      ],
+      "run_label": "sample.csv::column_swap"
+    },
+    "sample.csv::null_content": {
+      "event_count": 42,
+      "events": [
+        {
+          "agent_name": "router",
+          "content_hash": "88685d3424d06174",
+          "event_type": "routing_decision",
+          "payload": {
+            "chosen_agent": "planner",
+            "reasoning_hash": ""
+          },
+          "sequence_index": 0,
+          "step_num": 0
+        },
+        {
+          "agent_name": "planner",
+          "content_hash": "2175fb1c60d0af4b",
+          "event_type": "memory_write",
+          "payload": {
+            "confidence": 0.5,
+            "content_hash": "86e60dedebe6a990",
+            "entry_id": "726dd4d4",
+            "entry_type": "plan"
+          },
+          "sequence_index": 1,
+          "step_num": 0
+        },
+        {
+          "agent_name": "planner",
+          "content_hash": "74083a048d47c17a",
+          "event_type": "agent_output",
+          "payload": {
+            "action": "write_plan",
+            "citation_ids": [],
+            "content_hash": "86e60dedebe6a990",
+            "is_final_answer": false
+          },
+          "sequence_index": 2,
+          "step_num": 0
+        },
+        {
+          "agent_name": "router",
+          "content_hash": "c7835afc3edcd303",
+          "event_type": "routing_decision",
+          "payload": {
+            "chosen_agent": "data_analyst",
+            "reasoning_hash": ""
+          },
+          "sequence_index": 3,
+          "step_num": 1
+        },
+        {
+          "agent_name": "data_analyst",
+          "content_hash": "00fe9841355ae138",
+          "event_type": "agent_output",
+          "payload": {
+            "action": "error",
+            "citation_ids": [],
+            "content_hash": "4039fa3f6c30918e",
+            "is_final_answer": false
+          },
+          "sequence_index": 4,
+          "step_num": 1
+        },
+        {
+          "agent_name": "router",
+          "content_hash": "88685d3424d06174",
+          "event_type": "routing_decision",
+          "payload": {
+            "chosen_agent": "planner",
+            "reasoning_hash": ""
+          },
+          "sequence_index": 5,
+          "step_num": 2
+        },
+        {
+          "agent_name": "planner",
+          "content_hash": "ee2a1e37c176f501",
+          "event_type": "memory_read",
+          "payload": {
+            "entry_ids": [
+              "726dd4d4"
+            ],
+            "entry_types": [
+              "plan"
+            ]
+          },
+          "sequence_index": 6,
+          "step_num": 2
+        },
+        {
+          "agent_name": "planner",
+          "content_hash": "01564919af72f581",
+          "event_type": "memory_write",
+          "payload": {
+            "confidence": 0.5,
+            "content_hash": "86e60dedebe6a990",
+            "entry_id": "fdad4121",
+            "entry_type": "plan"
+          },
+          "sequence_index": 7,
+          "step_num": 2
+        },
+        {
+          "agent_name": "planner",
+          "content_hash": "74083a048d47c17a",
+          "event_type": "agent_output",
+          "payload": {
+            "action": "write_plan",
+            "citation_ids": [],
+            "content_hash": "86e60dedebe6a990",
+            "is_final_answer": false
+          },
+          "sequence_index": 8,
+          "step_num": 2
+        },
+        {
+          "agent_name": "router",
+          "content_hash": "88685d3424d06174",
+          "event_type": "routing_decision",
+          "payload": {
+            "chosen_agent": "planner",
+            "reasoning_hash": ""
+          },
+          "sequence_index": 9,
+          "step_num": 3
+        },
+        {
+          "agent_name": "planner",
+          "content_hash": "d6e5ebabe2f47e7e",
+          "event_type": "memory_read",
+          "payload": {
+            "entry_ids": [
+              "726dd4d4",
+              "fdad4121"
+            ],
+            "entry_types": [
+              "plan"
+            ]
+          },
+          "sequence_index": 10,
+          "step_num": 3
+        },
+        {
+          "agent_name": "planner",
+          "content_hash": "2981eb08b75c1c67",
+          "event_type": "memory_write",
+          "payload": {
+            "confidence": 0.5,
+            "content_hash": "86e60dedebe6a990",
+            "entry_id": "1c4cb2bc",
+            "entry_type": "plan"
+          },
+          "sequence_index": 11,
+          "step_num": 3
+        },
+        {
+          "agent_name": "planner",
+          "content_hash": "74083a048d47c17a",
+          "event_type": "agent_output",
+          "payload": {
+            "action": "write_plan",
+            "citation_ids": [],
+            "content_hash": "86e60dedebe6a990",
+            "is_final_answer": false
+          },
+          "sequence_index": 12,
+          "step_num": 3
+        },
+        {
+          "agent_name": "router",
+          "content_hash": "c7835afc3edcd303",
+          "event_type": "routing_decision",
+          "payload": {
+            "chosen_agent": "data_analyst",
+            "reasoning_hash": ""
+          },
+          "sequence_index": 13,
+          "step_num": 4
+        },
+        {
+          "agent_name": "data_analyst",
+          "content_hash": "00fe9841355ae138",
+          "event_type": "agent_output",
+          "payload": {
+            "action": "error",
+            "citation_ids": [],
+            "content_hash": "4039fa3f6c30918e",
+            "is_final_answer": false
+          },
+          "sequence_index": 14,
+          "step_num": 4
+        },
+        {
+          "agent_name": "router",
+          "content_hash": "dee287996967c5d7",
+          "event_type": "routing_decision",
+          "payload": {
+            "chosen_agent": "critic",
+            "reasoning_hash": ""
+          },
+          "sequence_index": 15,
+          "step_num": 5
+        },
+        {
+          "agent_name": "critic",
+          "content_hash": "513c136c79154258",
+          "event_type": "memory_read",
+          "payload": {
+            "entry_ids": [
+              "1c4cb2bc",
+              "726dd4d4",
+              "fdad4121"
+            ],
+            "entry_types": [
+              "plan"
+            ]
+          },
+          "sequence_index": 16,
+          "step_num": 5
+        },
+        {
+          "agent_name": "critic",
+          "content_hash": "3ac96f4709dcdd35",
+          "event_type": "memory_write",
+          "payload": {
+            "confidence": 0.5,
+            "content_hash": "cfc4b55da948077d",
+            "entry_id": "3d81494c",
+            "entry_type": "critique"
+          },
+          "sequence_index": 17,
+          "step_num": 5
+        },
+        {
+          "agent_name": "critic",
+          "content_hash": "bcbd785ce060e39e",
+          "event_type": "agent_output",
+          "payload": {
+            "action": "write_critique",
+            "citation_ids": [],
+            "content_hash": "cfc4b55da948077d",
+            "is_final_answer": false
+          },
+          "sequence_index": 18,
+          "step_num": 5
+        },
+        {
+          "agent_name": "router",
+          "content_hash": "88685d3424d06174",
+          "event_type": "routing_decision",
+          "payload": {
+            "chosen_agent": "planner",
+            "reasoning_hash": ""
+          },
+          "sequence_index": 19,
+          "step_num": 6
+        },
+        {
+          "agent_name": "planner",
+          "content_hash": "6689c737256d239a",
+          "event_type": "memory_read",
+          "payload": {
+            "entry_ids": [
+              "1c4cb2bc",
+              "3d81494c",
+              "726dd4d4",
+              "fdad4121"
+            ],
+            "entry_types": [
+              "critique",
+              "plan"
+            ]
+          },
+          "sequence_index": 20,
+          "step_num": 6
+        },
+        {
+          "agent_name": "planner",
+          "content_hash": "23496f7a4944ec75",
+          "event_type": "memory_write",
+          "payload": {
+            "confidence": 0.5,
+            "content_hash": "86e60dedebe6a990",
+            "entry_id": "b5c9b36e",
+            "entry_type": "plan"
+          },
+          "sequence_index": 21,
+          "step_num": 6
+        },
+        {
+          "agent_name": "planner",
+          "content_hash": "74083a048d47c17a",
+          "event_type": "agent_output",
+          "payload": {
+            "action": "write_plan",
+            "citation_ids": [],
+            "content_hash": "86e60dedebe6a990",
+            "is_final_answer": false
+          },
+          "sequence_index": 22,
+          "step_num": 6
+        },
+        {
+          "agent_name": "router",
+          "content_hash": "88685d3424d06174",
+          "event_type": "routing_decision",
+          "payload": {
+            "chosen_agent": "planner",
+            "reasoning_hash": ""
+          },
+          "sequence_index": 23,
+          "step_num": 7
+        },
+        {
+          "agent_name": "planner",
+          "content_hash": "6142f723e949001d",
+          "event_type": "memory_read",
+          "payload": {
+            "entry_ids": [
+              "1c4cb2bc",
+              "3d81494c",
+              "726dd4d4",
+              "b5c9b36e",
+              "fdad4121"
+            ],
+            "entry_types": [
+              "critique",
+              "plan"
+            ]
+          },
+          "sequence_index": 24,
+          "step_num": 7
+        },
+        {
+          "agent_name": "planner",
+          "content_hash": "c2e5911a17c170b2",
+          "event_type": "memory_write",
+          "payload": {
+            "confidence": 0.5,
+            "content_hash": "86e60dedebe6a990",
+            "entry_id": "e0ba703b",
+            "entry_type": "plan"
+          },
+          "sequence_index": 25,
+          "step_num": 7
+        },
+        {
+          "agent_name": "planner",
+          "content_hash": "74083a048d47c17a",
+          "event_type": "agent_output",
+          "payload": {
+            "action": "write_plan",
+            "citation_ids": [],
+            "content_hash": "86e60dedebe6a990",
+            "is_final_answer": false
+          },
+          "sequence_index": 26,
+          "step_num": 7
+        },
+        {
+          "agent_name": "router",
+          "content_hash": "c7835afc3edcd303",
+          "event_type": "routing_decision",
+          "payload": {
+            "chosen_agent": "data_analyst",
+            "reasoning_hash": ""
+          },
+          "sequence_index": 27,
+          "step_num": 8
+        },
+        {
+          "agent_name": "data_analyst",
+          "content_hash": "00fe9841355ae138",
+          "event_type": "agent_output",
+          "payload": {
+            "action": "error",
+            "citation_ids": [],
+            "content_hash": "4039fa3f6c30918e",
+            "is_final_answer": false
+          },
+          "sequence_index": 28,
+          "step_num": 8
+        },
+        {
+          "agent_name": "router",
+          "content_hash": "88685d3424d06174",
+          "event_type": "routing_decision",
+          "payload": {
+            "chosen_agent": "planner",
+            "reasoning_hash": ""
+          },
+          "sequence_index": 29,
+          "step_num": 9
+        },
+        {
+          "agent_name": "planner",
+          "content_hash": "5ba6cf7295fdc374",
+          "event_type": "memory_read",
+          "payload": {
+            "entry_ids": [
+              "1c4cb2bc",
+              "3d81494c",
+              "726dd4d4",
+              "b5c9b36e",
+              "e0ba703b",
+              "fdad4121"
+            ],
+            "entry_types": [
+              "critique",
+              "plan"
+            ]
+          },
+          "sequence_index": 30,
+          "step_num": 9
+        },
+        {
+          "agent_name": "planner",
+          "content_hash": "6e262bb267d30df7",
+          "event_type": "memory_write",
+          "payload": {
+            "confidence": 0.5,
+            "content_hash": "86e60dedebe6a990",
+            "entry_id": "8ffe42a8",
+            "entry_type": "plan"
+          },
+          "sequence_index": 31,
+          "step_num": 9
+        },
+        {
+          "agent_name": "planner",
+          "content_hash": "74083a048d47c17a",
+          "event_type": "agent_output",
+          "payload": {
+            "action": "write_plan",
+            "citation_ids": [],
+            "content_hash": "86e60dedebe6a990",
+            "is_final_answer": false
+          },
+          "sequence_index": 32,
+          "step_num": 9
+        },
+        {
+          "agent_name": "router",
+          "content_hash": "88685d3424d06174",
+          "event_type": "routing_decision",
+          "payload": {
+            "chosen_agent": "planner",
+            "reasoning_hash": ""
+          },
+          "sequence_index": 33,
+          "step_num": 10
+        },
+        {
+          "agent_name": "planner",
+          "content_hash": "0b399f446ae5ab55",
+          "event_type": "memory_read",
+          "payload": {
+            "entry_ids": [
+              "1c4cb2bc",
+              "3d81494c",
+              "726dd4d4",
+              "8ffe42a8",
+              "b5c9b36e",
+              "e0ba703b",
+              "fdad4121"
+            ],
+            "entry_types": [
+              "critique",
+              "plan"
+            ]
+          },
+          "sequence_index": 34,
+          "step_num": 10
+        },
+        {
+          "agent_name": "planner",
+          "content_hash": "a060c7d8e65b659b",
+          "event_type": "memory_write",
+          "payload": {
+            "confidence": 0.5,
+            "content_hash": "86e60dedebe6a990",
+            "entry_id": "bf36d85f",
+            "entry_type": "plan"
+          },
+          "sequence_index": 35,
+          "step_num": 10
+        },
+        {
+          "agent_name": "planner",
+          "content_hash": "74083a048d47c17a",
+          "event_type": "agent_output",
+          "payload": {
+            "action": "write_plan",
+            "citation_ids": [],
+            "content_hash": "86e60dedebe6a990",
+            "is_final_answer": false
+          },
+          "sequence_index": 36,
+          "step_num": 10
+        },
+        {
+          "agent_name": "router",
+          "content_hash": "1f66f0ec47a91d71",
+          "event_type": "routing_decision",
+          "payload": {
+            "chosen_agent": "synthesizer",
+            "reasoning_hash": ""
+          },
+          "sequence_index": 37,
+          "step_num": 11
+        },
+        {
+          "agent_name": "synthesizer",
+          "content_hash": "099434e3753bb0ee",
+          "event_type": "memory_read",
+          "payload": {
+            "entry_ids": [
+              "1c4cb2bc",
+              "3d81494c",
+              "726dd4d4",
+              "8ffe42a8",
+              "b5c9b36e",
+              "bf36d85f",
+              "e0ba703b",
+              "fdad4121"
+            ],
+            "entry_types": [
+              "critique",
+              "plan"
+            ]
+          },
+          "sequence_index": 38,
+          "step_num": 11
+        },
+        {
+          "agent_name": "synthesizer",
+          "content_hash": "c116c56a5bd3339a",
+          "event_type": "memory_write",
+          "payload": {
+            "confidence": 0.8,
+            "content_hash": "73475cb40a568e8d",
+            "entry_id": "1827f2d0",
+            "entry_type": "answer"
+          },
+          "sequence_index": 39,
+          "step_num": 11
+        },
+        {
+          "agent_name": "synthesizer",
+          "content_hash": "3810aba0d8f6aadd",
+          "event_type": "agent_output",
+          "payload": {
+            "action": "final_answer",
+            "citation_ids": [],
+            "content_hash": "73475cb40a568e8d",
+            "is_final_answer": true
+          },
+          "sequence_index": 40,
+          "step_num": 11
+        },
+        {
+          "agent_name": "synthesizer",
+          "content_hash": "05caac84b19d8b2a",
+          "event_type": "final_answer",
+          "payload": {
+            "answer": "42",
+            "answer_hash": "73475cb40a568e8d"
+          },
+          "sequence_index": 41,
+          "step_num": 11
+        }
+      ],
+      "run_label": "sample.csv::null_content"
+    }
+  }
+}

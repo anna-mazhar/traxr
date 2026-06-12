@@ -320,8 +320,10 @@ def test_overflow_skip_is_recorded(fixtures_dir: Path, tmp_path: Path) -> None:
     from traxr.perturb import pdf_inplace as mod
 
     editor = PDFInPlaceEditor(seed=42)
-    # Force every fit attempt to fail.
-    original_fit = mod.PDFInPlaceEditor._fit_fontsize
+    # Force every fit attempt to fail. Save the staticmethod DESCRIPTOR
+    # (class __dict__), not the unwrapped function — restoring the bare
+    # function would rebind it as an instance method and break later tests.
+    original_fit = mod.PDFInPlaceEditor.__dict__["_fit_fontsize"]
     try:
         mod.PDFInPlaceEditor._fit_fontsize = staticmethod(  # type: ignore[method-assign]
             lambda fitz, text, width, original_size: None

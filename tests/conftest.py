@@ -1,10 +1,14 @@
 """Shared pytest fixtures for the Traxr test suite."""
 
+import sys
 from pathlib import Path
 
 import pytest
 
 from traxr.trace import registry
+
+# Shared test doubles (e.g. _openai_mock) importable from every test dir.
+sys.path.insert(0, str(Path(__file__).resolve().parent / "helpers"))
 
 FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures"
 
