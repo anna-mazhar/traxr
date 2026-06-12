@@ -46,13 +46,13 @@ standalone-check:
 	@echo 'standalone-check: PASS'
 
 golden:
-	@echo "golden: not yet built — lands in M4 (pytest tests/e2e/test_golden.py)" >&2; exit 1
+	$(PYTHON) -m pytest tests/e2e/test_golden.py -q
 
 external-golden:
-	@echo "external-golden: not yet built — lands in M4 (pytest tests/e2e/test_external_golden.py)" >&2; exit 1
+	$(PYTHON) -m pytest tests/e2e/test_external_golden.py -q
 
 selfcheck:
-	@echo "selfcheck: not yet built — lands in M4 (python -m traxr.selfcheck)" >&2; exit 1
+	$(PYTHON) -m traxr.selfcheck
 
 notebook:
 	@echo "notebook: not yet built — lands in M5 (jupyter nbconvert --execute notebooks/traxr_quickstart.ipynb)" >&2; exit 1
@@ -62,8 +62,8 @@ build:
 	$(PYTHON) -m build
 	$(PYTHON) -m venv .build-venv
 	.build-venv/bin/python -m pip install --quiet dist/*.whl
-	.build-venv/bin/python -c "import traxr; print('traxr', traxr.__version__)"
-	# M4 upgrades this smoke to: python -c "import traxr; traxr.selfcheck()"
+	# Bare install: selfcheck degrades to the metrics-only check (no pandas).
+	.build-venv/bin/python -c "import traxr; print('traxr', traxr.__version__); traxr.selfcheck()"
 
 site:
 	@echo "site: not yet built — lands in M6 (web/ + mkdocs build --strict)" >&2; exit 1
