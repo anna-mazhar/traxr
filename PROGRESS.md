@@ -18,9 +18,15 @@ M0 notes / assumptions:
   `traxr.selfcheck()` per the execution contract.
 
 ## M1 — Extract + refactor the analytical core (registry work happens HERE)
-- [ ] `divergence/` → `traxr/trace/{events,collector}.py` + `traxr/metrics/analyzer.py`; add `tool_failure`/`agent_halt`; open `event_type` validation; add `emit()` lock.
-- [ ] Build `trace/registry.py` and refactor `_event_to_signature`, `_classify_divergence`, `STRUCTURAL_DIVERGENCE_TYPES`, `_key_field_compare` to registry dispatch; register built-in types with existing behavior; add external types (`llm_call`, `tool_request`, `tool_result`, `agent_error`) with signatures + divergence classifiers. Analyzer-golden gate proves built-in behavior unchanged.
-- [ ] `classify_manifestation` → `traxr/metrics/manifest.py`; `metrics/` → `traxr/metrics/cost.py`. Tests: categories 3, 4, 6.
+- [x] `divergence/` → `traxr/trace/{events,collector}.py` + `traxr/metrics/analyzer.py`; add `tool_failure`/`agent_halt`; open `event_type` validation; add `emit()` lock.
+- [x] Build `trace/registry.py` and refactor `_event_to_signature`, `_classify_divergence`, `STRUCTURAL_DIVERGENCE_TYPES`, `_key_field_compare` to registry dispatch; register built-in types with existing behavior; add external types (`llm_call`, `tool_request`, `tool_result`, `agent_error`) with signatures + divergence classifiers. Analyzer-golden gate proves built-in behavior unchanged.
+- [x] `classify_manifestation` → `traxr/metrics/manifest.py`; `metrics/` → `traxr/metrics/cost.py`. Tests: categories 3, 4, 6.
+
+M1 notes:
+- Analyzer-golden gate: PASS — all 5 fixture cases reproduce the committed
+  golden outputs exactly.
+- Coverage on `traxr.trace` + `traxr.metrics`: 99.45% (gate: 90%). Full
+  `make cov` still fails on `traxr.perturb` — that module lands in M2.
 
 ## M2 — Extract perturbation + data; build PDF in-place
 - [ ] `perturbations/` → `traxr/perturb/`; `file_handler`+`file_inspector` → `traxr/data/loader.py`; DOCUMENT = PDF/TXT/MD (update `UnsupportedModalityError` messages).

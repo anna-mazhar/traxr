@@ -22,6 +22,7 @@ __all__ = [
     "MalformedEventError",
     "ControlledVariableError",
     "TraxrWarning",
+    "UnknownEventTypeWarning",
     "EmptyTraceWarning",
     "NonDeterminismWarning",
     "ConcurrentTraceWarning",
@@ -99,6 +100,15 @@ class ControlledVariableError(TraxrError):
 
 class TraxrWarning(UserWarning):
     """Base class for all Traxr warnings (non-fatal, collected per pair)."""
+
+
+class UnknownEventTypeWarning(TraxrWarning):
+    """An unregistered event type fell back to the ``unknown:{event_type}`` signature.
+
+    Emitted once per unknown type; upgrade the type via
+    ``traxr.register_signature()`` to include its structure in divergence
+    metrics.
+    """
 
 
 class EmptyTraceWarning(TraxrWarning):
