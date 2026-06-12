@@ -125,8 +125,34 @@ M4 notes:
   analyzer-goldens 5/5; standalone-check PASS.
 
 ## M4b — LangGraph adapter
-- [ ] `agents/langgraph.py`: `BaseCallbackHandler` mapping; `from_langgraph()` with `input_builder`/`output_extractor`; double-count suppression; version pins.
-- [ ] Fixture graph (`GenericFakeChatModel`); dedicated CI job for the `[langgraph]` extra. Tests: category 11.
+- [x] `agents/langgraph.py`: `BaseCallbackHandler` mapping; `from_langgraph()` with `input_builder`/`output_extractor`; double-count suppression; version pins.
+- [x] Fixture graph (`GenericFakeChatModel`); dedicated CI job for the `[langgraph]` extra. Tests: category 11.
+
+M4b notes:
+- Mapping verified empirically against langgraph 1.2.4 / langchain-core
+  1.4.6 before coding: node entry arrives as `on_chain_start` with
+  `langgraph_node`/`langgraph_step` metadata (deduped per
+  node+step+checkpoint_ns — inner runnables inherit the metadata); model
+  identity comes from `invocation_params` at `*_start` time; usage from
+  `message.usage_metadata` (fallback `llm_output.token_usage`, else None
+  + TokenUnavailableWarning).
+- Version pins set to the CI-exercised range (`langchain-core>=1.0,<2.0`,
+  `langgraph>=1.0,<2.0`) — the build plan's `<1.0` figure predates
+  langgraph 1.0.
+- Concurrency heuristic refined: LangGraph fires tool callbacks on
+  executor threads even for sequential execution, so handler emissions
+  use the new `CaptureSession.emit(count_thread=False)` opt-out and the
+  adapter flags real parallelism itself (overlapping in-flight LLM runs
+  → `session.note_concurrency()`). Session step floor now advances on
+  explicit step_num so the harness final_answer lands at the last step.
+- `max_llm_calls_per_run` is NOT enforced for LangGraph runs in v1
+  (Tier 0 is suppressed; the budget lives in the Tier 0 wrapper) —
+  documented in the module docstring.
+- CI `langgraph` job installs only `[dev,langgraph]` (proves no other
+  extras needed); the one openai-dependent test skips there. Verified in
+  a fresh venv: 10 passed, 1 skipped.
+- Gates: 573 tests (11 new); coverage 97.49/94.88/93.83; goldens +
+  selfcheck unchanged-green; standalone-check PASS.
 
 ## M5 — Deep tests + SDK polish + Colab
 - [ ] Coverage/property/negative-corpus gates green; mutation baseline.

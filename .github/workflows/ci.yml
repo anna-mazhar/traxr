@@ -38,12 +38,18 @@ jobs:
         run: make test
 
   # Dedicated job for the [langgraph] extra (adapter + category 11 tests).
-  # Placeholder until the adapter lands in M4b.
+  # Installs only [dev,langgraph]: proves the adapter needs no other extras.
   langgraph:
     runs-on: ubuntu-latest
     steps:
-      - name: Placeholder
-        run: echo "langgraph extra job — lands in M4b"
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install (langgraph extra only)
+        run: python -m pip install -e ".[dev,langgraph]"
+      - name: Adapter tests
+        run: python -m pytest tests/integration/test_langgraph_adapter.py -q
 
   standalone-check:
     runs-on: ubuntu-latest
