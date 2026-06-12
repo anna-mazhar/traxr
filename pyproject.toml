@@ -51,6 +51,9 @@ dev = [
     "mutmut",
     "httpx",
     "build",
+    # The built-in reference agent (traxr/mas) needs pandas; its tests run
+    # in every dev environment.
+    "pandas",
 ]
 
 [project.urls]
@@ -80,21 +83,30 @@ select = [
 # Copied research code, kept verbatim for fidelity (not exported — backlog).
 "src/traxr/perturb/image.py" = ["UP", "B", "E501", "I", "F401"]
 "src/traxr/perturb/audio.py" = ["UP", "B", "E501", "I", "F401"]
+# Long system-prompt string literals; E501 relaxed.
+"src/traxr/llm/openai_compat.py" = ["E501"]
+# Reference MAS (internal, surfaced via traxr.agents.builtin):
+# research-grade code, linted leniently by design.
+# F821 hits are string annotations ("ToolSchema") resolved by lazy imports.
+"src/traxr/mas/**" = ["UP", "B", "E501", "E741", "I", "F401", "F541", "F821", "F841"]
+
+[tool.ruff.format]
+# mas/ keeps its original formatting; excluded from the formatter.
+exclude = ["src/traxr/mas/**"]
 
 [tool.mypy]
 python_version = "3.10"
 files = ["src/traxr"]
 strict = true
-# Disabled until traxr/mas/ exists (M3): with it on, the lenient override
-# below is flagged as an unused config section.
-warn_unused_configs = false
+warn_unused_configs = true
 
 # traxr/mas/ is research code, exercised by integration/golden/smoke
 # tests rather than strict typing. Lenient per-module overrides live here (with
 # this comment) instead of blanket inline ignores — see the build plan's
 # typecheck gate. All curated modules (errors.py, capture/, agents/, llm/,
 # experiment.py, results.py, scoring.py, data/, perturb/, metrics/, trace/)
-# remain under strict.
+# remain under strict. ignore_errors matches the perturb/image.py precedent:
+# the code predates annotations (e.g. `metadata: dict = None` defaults).
 [[tool.mypy.overrides]]
 module = "traxr.mas.*"
 disallow_untyped_defs = false
@@ -103,6 +115,7 @@ disallow_incomplete_defs = false
 check_untyped_defs = false
 disallow_any_generics = false
 warn_return_any = false
+ignore_errors = true
 
 # perturb/image.py + perturb/audio.py are copied research code (not exported,
 # not documented, not tested — backlog), same rationale as traxr/mas/. Their
@@ -116,7 +129,8 @@ ignore_errors = true
 [[tool.mypy.overrides]]
 module = [
     "fitz",
-    "fitz.*",
+    "pandas",
+    "pandas.*",
     "pdfplumber",
     "pdfplumber.*",
     "openpyxl",
@@ -126,7 +140,6 @@ module = [
     "numpy",
     "pydub",
     "scipy",
-    "scipy.*",
 ]
 ignore_missing_imports = true
 

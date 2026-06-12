@@ -21,10 +21,15 @@ test:
 	$(PYTHON) -m pytest -q
 
 # mas/ is omitted via [tool.coverage.run] in pyproject (informational only).
+# Sources are paths (not dotted packages): coverage resolves dotted sources by
+# importing them inside its sys_modules_saved block, which unloads the numpy
+# C extension that `import traxr` pulls in transitively (fitz/PyMuPDF) — any
+# later pandas/numpy import then fails with "cannot load module more than
+# once per process".
 cov:
-	$(PYTHON) -m pytest --cov=traxr.metrics --cov=traxr.perturb --cov=traxr.trace --cov-fail-under=90
-	$(PYTHON) -m pytest --cov=traxr.capture --cov=traxr.agents --cov-fail-under=85
-	$(PYTHON) -m pytest --cov=traxr --cov-fail-under=75
+	$(PYTHON) -m pytest --cov=src/traxr/metrics --cov=src/traxr/perturb --cov=src/traxr/trace --cov-fail-under=90
+	$(PYTHON) -m pytest --cov=src/traxr/capture --cov=src/traxr/agents --cov-fail-under=85
+	$(PYTHON) -m pytest --cov=src/traxr --cov-fail-under=75
 
 property:
 	$(PYTHON) -m pytest tests/property -q --hypothesis-seed=0
