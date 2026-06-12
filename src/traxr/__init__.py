@@ -6,14 +6,16 @@ token overhead).
 """
 
 from traxr import errors
+from traxr.perturb.types import PerturbationType
 from traxr.trace.registry import register_signature
 
 __version__ = "0.1.0.dev0"
 
 # Curated public API. Placeholder: Experiment, ExperimentResults, Task,
 # instrument, from_langgraph, builtin_agent, emit, OpenAICompatibleClient,
-# LLMClient, PerturbationType land across M2–M4b.
+# LLMClient land across M3–M4b.
 __all__ = [
+    "PerturbationType",
     "__version__",
     "errors",
     "register_signature",
