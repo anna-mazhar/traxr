@@ -182,8 +182,13 @@ M5 notes:
 - Doctests: examples added to `scoring.py`; `tests/unit/test_doctests.py`
   runs doctest over the curated modules.
 - Gates: 584 tests; coverage 97.36/94.88/93.93; notebook/property/
-  analyzer-goldens/selfcheck/goldens/standalone-check green. README
-  quickstart fresh-venv verification recorded below after push.
+  analyzer-goldens/selfcheck/goldens/standalone-check green.
+- **README quickstart verified in a fresh venv from the git URL** — and
+  the verification caught two real bugs: (a) the plan's install line
+  lacked pandas, which the built-in agent (the no-key demo!) needs —
+  install commands now say `[document,openai,pandas]`; (b) a live
+  `requests.Session` annotation broke `import traxr.mas` without
+  requests (optional dep) — string-quoted.
 
 ## M6 — Website + v1.0.0 release (FINAL)
 - [ ] Landing page (`web/`) + MkDocs docs (`--strict`, mkdocstrings), shared logo/palette, deploy assembly to GitHub Pages.
