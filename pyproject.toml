@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "traxr"
-version = "0.1.0.dev0"
+version = "1.0.0"
 description = "Point your own agent at your own data, run controlled-perturbation experiments, and get back contamination/divergence metrics."
 readme = "README.md"
 license = { text = "MIT" }
@@ -55,6 +55,9 @@ dev = [
     # Notebook execution gate (make notebook).
     "nbconvert",
     "ipykernel",
+    # Docs site gate (make site).
+    "mkdocs-material",
+    "mkdocstrings[python]",
     # The built-in reference agent (traxr/mas) needs pandas; its tests run
     # in every dev environment.
     "pandas",

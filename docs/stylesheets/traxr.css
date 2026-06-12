@@ -1,0 +1,11 @@
+/* traxr palette: ink #0f172a, accent #3b82f6 — matching the landing page. */
+:root {
+  --md-primary-fg-color: #0f172a;
+  --md-accent-fg-color: #3b82f6;
+  --md-typeset-a-color: #3b82f6;
+}
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color: #0f172a;
+  --md-accent-fg-color: #60a5fa;
+  --md-typeset-a-color: #60a5fa;
+}

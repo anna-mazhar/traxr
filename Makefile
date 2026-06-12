@@ -68,8 +68,13 @@ build:
 	# Bare install: selfcheck degrades to the metrics-only check (no pandas).
 	.build-venv/bin/python -c "import traxr; print('traxr', traxr.__version__); traxr.selfcheck()"
 
+# Assemble the Pages artifact: landing at the root, docs under /docs/.
 site:
-	@echo "site: not yet built — lands in M6 (web/ + mkdocs build --strict)" >&2; exit 1
+	rm -rf staging
+	mkdir -p staging
+	cp -R web/. staging/
+	$(PYTHON) -m mkdocs build --strict -d staging/docs
+	$(PYTHON) scripts/check_site_links.py staging
 
 # The global Definition of Done: everything except mutation.
 verify-all: install lint typecheck test cov property analyzer-goldens standalone-check golden external-golden selfcheck notebook build site
