@@ -55,9 +55,17 @@ class MemoryEntry:
         status: str = "preliminary",
         confidence: float = 0.5,
     ) -> "MemoryEntry":
-        """Create a new memory entry with generated ID."""
+        """Create a new memory entry with generated ID.
+
+        The ID is content-derived (not random) so identical runs produce
+        identical traces — required by the experiment goldens and for
+        cross-run memory-event comparability.
+        """
+        import hashlib
+
+        digest = hashlib.sha256(f"{agent_name}:{entry_type}:{step}:{content}".encode()).hexdigest()
         return cls(
-            id=str(uuid.uuid4())[:8],
+            id=digest[:8],
             agent_name=agent_name,
             content=content,
             entry_type=entry_type,

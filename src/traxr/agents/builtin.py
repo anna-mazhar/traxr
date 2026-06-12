@@ -64,6 +64,9 @@ class BuiltinAgent:
         self._max_tokens = max_tokens
         self._python_tool_timeout = python_tool_timeout
         self._seed = seed
+        #: Token/step cost of the most recent run (set by :meth:`run`),
+        #: read by the experiment runner for token-overhead metrics.
+        self.last_cost: Any = None
 
     def run(
         self,
@@ -148,6 +151,7 @@ class BuiltinAgent:
             task_input=task_input,
             trace_collector=collector,
         )
+        self.last_cost = result.cost
         return result.final_answer
 
     __call__ = run
