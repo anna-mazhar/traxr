@@ -24,12 +24,13 @@ talks to an OpenAI-compatible endpoint through the OpenAI SDK.
 ## Install
 
 ```bash
-pip install "traxr[document,openai] @ git+https://github.com/anna-mazhar/traxr.git@main"
+pip install "traxr[document,openai,pandas] @ git+https://github.com/anna-mazhar/traxr.git@main"
 ```
 
 Extras: `[document]` (PDF/XLSX support), `[openai]` (the built-in reference
-agent's client), `[langgraph]` (LangGraph adapter), `[viz]` (plots),
-`[pandas]` (DataFrame export).
+agent's client), `[pandas]` (DataFrame export; also required by the built-in
+reference agent), `[langgraph]` (LangGraph adapter), `[viz]` (plots).
+External agents with their own OpenAI client need **no extras at all**.
 
 ## Quickstart — bring your own agent
 
