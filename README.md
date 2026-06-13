@@ -9,7 +9,7 @@
   <a href="https://github.com/anna-mazhar/traxr/actions/workflows/ci.yml"><img src="https://github.com/anna-mazhar/traxr/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <img src="https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue" alt="Python versions">
   <img src="https://img.shields.io/badge/license-MIT-green" alt="MIT license">
-  <a href="https://www.caisconf.org/program/2026/papers/trace-level-analysis-of-information-contamination-in-multi-agent-systems/"><img src="https://img.shields.io/badge/paper-CAIS%202026-8b5cf6" alt="Paper"></a>
+  <a href="https://dl.acm.org/doi/10.1145/3786335.3813147"><img src="https://img.shields.io/badge/paper-CAIS%202026-8b5cf6" alt="Paper"></a>
 </p>
 
 **Evaluate multi-agent systems beyond final-answer accuracy.** A multi-agent
@@ -21,7 +21,7 @@ manifested, and what it cost in tokens. Controlled input perturbation is the
 instrument; the trace is the measurement.
 
 Traxr operationalizes the paper *“Trace-Level Analysis of Information
-Contamination in Multi-Agent Systems”* ([CAIS 2026](https://www.caisconf.org/program/2026/papers/trace-level-analysis-of-information-contamination-in-multi-agent-systems/);
+Contamination in Multi-Agent Systems”* ([CAIS 2026](https://dl.acm.org/doi/10.1145/3786335.3813147);
 Mazhar, Suri, Galhotra) as an SDK, for any Python agent that talks to an
 OpenAI-compatible endpoint through the OpenAI SDK.
 

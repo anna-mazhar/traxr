@@ -10,7 +10,7 @@ instrument; the trace is the measurement.
 
 traxr operationalizes the paper *“Trace-Level Analysis of Information
 Contamination in Multi-Agent Systems”*
-([CAIS 2026](https://www.caisconf.org/program/2026/papers/trace-level-analysis-of-information-contamination-in-multi-agent-systems/);
+([CAIS 2026](https://dl.acm.org/doi/10.1145/3786335.3813147);
 Mazhar, Suri, Galhotra) as an SDK, for any Python agent that talks to an
 OpenAI-compatible endpoint through the OpenAI SDK.
 
