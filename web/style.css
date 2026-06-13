@@ -115,7 +115,7 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .lede em { font-style: normal; color: var(--ink-strong); font-weight: 600; }
 
 /* the divergence figure — centered under the headline */
-.strip { margin: 32px auto 26px; max-width: 600px; }
+.strip { margin: 8px auto 26px; max-width: 600px; }
 .strip svg { width: 100%; height: auto; display: block; }
 .strip .strip-labels text { font-family: var(--mono); }
 .strip figcaption {
@@ -339,9 +339,11 @@ td:first-child, td:last-child { white-space: nowrap; }
   grid-template-columns: 1fr 1fr;
   border-bottom: 1px solid var(--rule);
 }
-.callout { background: var(--blue-50); }
-.callout.security { background: var(--rose-50); border-left: 1px solid var(--rule); }
+/* flat notices — no fill (colored links/code read badly on a wash);
+   the column rule plus the eyebrow color distinguishes them */
+.callout.security { border-left: 1px solid var(--rule); }
 .callout.security .eyebrow { color: #be123c; }
+.callout.security .eyebrow::before { background: #e11d48; }
 
 /* footer / colophon */
 footer { padding: 22px 28px 26px; }
