@@ -148,6 +148,10 @@ experiment = traxr.Experiment(
 experiment.run(dry_run=<span class="k">True</span>)  <span class="c"># the full plan — zero LLM calls</span>
 results = experiment.run()
 print(results.summary())</code></pre>
+    <a class="colab-btn" href="https://colab.research.google.com/github/anna-mazhar/traxr/blob/main/notebooks/traxr_quickstart.ipynb">
+      <svg class="ico-colab" viewBox="0 0 24 24" fill="#f9ab00" aria-hidden="true"><path d="M16.94 4.98a7.03 7.03 0 0 0-4.93 2.06 7.03 7.03 0 0 0-.12 9.81l2.4-2.4a3.65 3.65 0 0 1 5.15-5.15l2.4-2.4a7.03 7.03 0 0 0-4.9-1.92zM7.07 4.99a7.03 7.03 0 0 0-4.89 1.93l2.4 2.4a3.65 3.65 0 0 1 5.15 5.15l-2.4 2.4a7.03 7.03 0 0 0 .07-9.96l-.07-.07a7.03 7.03 0 0 0-.26 0zm-.08 5.98a3.65 3.65 0 0 0 0 5.15l-2.39 2.4a7.03 7.03 0 0 0 9.75.12l.12-.12-2.4-2.4a3.65 3.65 0 0 1-5.15-.02l-.02-.03zm9.97.02l-2.4 2.4a3.65 3.65 0 0 1-5.15 5.14l2.4 2.4a7.03 7.03 0 0 0 9.96-.07l.07-.07a7.03 7.03 0 0 0 0-9.86z"/></svg>
+      <span>Try in Colab</span>
+    </a>
     <p class="aside">
       No key? <code>llm=traxr.DeterministicLLMStub()</code> runs the bundled
       reference agent entirely offline. LangGraph graph?

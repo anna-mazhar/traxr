@@ -14,6 +14,7 @@
   --accent: #2563eb;
 
   --blue-50: #eef4ff;
+  --amber-50: #fff6e6;
   --rose-50: #fff4f5;
   --amber: #d97706;
 
@@ -223,6 +224,35 @@ h2 {
 p { margin: 0 0 14px; }
 section p:last-child { margin-bottom: 0; }
 .aside { color: var(--muted); font-size: 14.5px; }
+
+/* "Try in Colab" — a flat pixel button that presses on hover (8-bit feel);
+   Colab orange ties into the amber t* already in the palette */
+.colab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin: 20px 0 6px;
+  padding: 9px 15px;
+  font-family: var(--mono);
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink-strong);
+  background: var(--sheet);
+  border: 1px solid var(--ink-strong);
+  box-shadow: 3px 3px 0 var(--amber-50);
+  transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.08s ease;
+}
+.colab-btn:hover {
+  text-decoration: none;
+  background: var(--amber-50);
+  transform: translate(1px, 1px);
+  box-shadow: 2px 2px 0 var(--amber-50);
+}
+.colab-btn:active {
+  transform: translate(3px, 3px);
+  box-shadow: 0 0 0 var(--amber-50);
+}
+.ico-colab { width: 18px; height: 18px; flex: none; }
 
 code {
   font-family: var(--mono);
