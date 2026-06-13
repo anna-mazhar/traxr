@@ -9,17 +9,21 @@
   <a href="https://github.com/anna-mazhar/traxr/actions/workflows/ci.yml"><img src="https://github.com/anna-mazhar/traxr/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <img src="https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue" alt="Python versions">
   <img src="https://img.shields.io/badge/license-MIT-green" alt="MIT license">
+  <a href="https://www.caisconf.org/program/2026/papers/trace-level-analysis-of-information-contamination-in-multi-agent-systems/"><img src="https://img.shields.io/badge/paper-CAIS%202026-8b5cf6" alt="Paper"></a>
 </p>
 
-Point **your own agent** at **your own data**, run controlled-perturbation
-experiments, and get back contamination/divergence metrics: how much the
-execution trace diverged (`d_norm`), where it started (`t*`), how the damage
-manifested, and what it cost in tokens.
+**Evaluate multi-agent systems beyond final-answer accuracy.** A multi-agent
+system can land the right answer through the wrong process — and answer-level
+metrics never see it. Traxr evaluates the **execution trace itself**: point
+your own agent at your own data, run paired experiments, and measure how its
+behavior diverged — how much (`d_norm`), where it started (`t*`), how it
+manifested, and what it cost in tokens. Controlled input perturbation is the
+instrument; the trace is the measurement.
 
 Traxr operationalizes the paper *“Trace-Level Analysis of Information
-Contamination in Multi-Agent Systems”* (Mazhar, Suri, Galhotra) as an SDK:
-the same paired clean-vs-perturbed methodology, for any Python agent that
-talks to an OpenAI-compatible endpoint through the OpenAI SDK.
+Contamination in Multi-Agent Systems”* ([CAIS 2026](https://www.caisconf.org/program/2026/papers/trace-level-analysis-of-information-contamination-in-multi-agent-systems/);
+Mazhar, Suri, Galhotra) as an SDK, for any Python agent that talks to an
+OpenAI-compatible endpoint through the OpenAI SDK.
 
 ## Install
 

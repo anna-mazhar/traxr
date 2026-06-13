@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>traxr — what does corrupted data do to your agent?</title>
-<meta name="description" content="Run paired clean/perturbed experiments on your own agent and your own files. Measure how the execution trace diverges — how much, where, and what it cost.">
+<title>traxr — evaluate multi-agent systems beyond the final answer</title>
+<meta name="description" content="Final-answer accuracy hides how multi-agent systems actually behave. traxr traces what your agent did — run paired experiments and measure how its execution diverged: how much, where, and what it cost.">
 <meta property="og:title" content="traxr">
-<meta property="og:description" content="Controlled-perturbation experiments for your own agent and your own data.">
+<meta property="og:description" content="Evaluate multi-agent systems beyond final-answer accuracy — at the level of the execution trace.">
 <link rel="icon" type="image/svg+xml" href="assets/mark.svg">
 <link rel="stylesheet" href="style.css">
 </head>
@@ -18,68 +18,74 @@
     <span>traxr</span>
   </a>
   <div class="top-links">
+    <a href="https://www.caisconf.org/program/2026/papers/trace-level-analysis-of-information-contamination-in-multi-agent-systems/">paper</a>
     <a href="docs/">docs</a>
     <a href="https://github.com/anna-mazhar/traxr">github</a>
   </div>
 </nav>
 
 <header class="hero">
-  <h1>your agent meets<br>corrupted data.</h1>
+  <p class="eyebrow">trace-level evaluation for multi-agent systems</p>
+  <h1>look past the<br>final answer.</h1>
   <p class="lede">
-    traxr runs paired clean/perturbed experiments on <em>your own agent</em>
-    and <em>your own files</em>, then measures how the execution trace
-    diverged — how much, where it started, and what it cost.
+    A multi-agent system can reach the right answer through the wrong
+    process — and final-answer accuracy never sees it. traxr evaluates the
+    <em>execution trace itself</em>: run paired experiments on your own
+    agent and measure how its behavior diverged — how much, where it
+    started, and what it cost.
   </p>
 
-  <!-- the divergence strip: events appear one at a time, split at t* -->
+  <!-- the divergence strip: events appear one at a time, split at t*,
+       and persist as two solid traces -->
   <figure class="strip" role="img"
-          aria-label="Two execution traces share a prefix, then split at the first divergence point: the clean trace continues, the corrupted trace drifts away.">
-    <svg viewBox="0 0 520 96" xmlns="http://www.w3.org/2000/svg">
+          aria-label="Two execution traces share a prefix, then split at the first divergence point: one trace continues unchanged, the other follows a different path.">
+    <svg viewBox="0 0 520 100" xmlns="http://www.w3.org/2000/svg">
       <g class="cells">
         <!-- shared prefix -->
-        <rect style="--i:0"  x="0"   y="24" width="12" height="12" fill="#0f172a"/>
-        <rect style="--i:1"  x="16"  y="24" width="12" height="12" fill="#0f172a"/>
-        <rect style="--i:2"  x="32"  y="24" width="12" height="12" fill="#0f172a"/>
-        <rect style="--i:3"  x="48"  y="24" width="12" height="12" fill="#0f172a"/>
-        <rect style="--i:4"  x="64"  y="24" width="12" height="12" fill="#0f172a"/>
-        <rect style="--i:5"  x="80"  y="24" width="12" height="12" fill="#0f172a"/>
-        <rect style="--i:6"  x="96"  y="24" width="12" height="12" fill="#0f172a"/>
-        <rect style="--i:7"  x="112" y="24" width="12" height="12" fill="#0f172a"/>
-        <rect style="--i:8"  x="128" y="24" width="12" height="12" fill="#0f172a"/>
+        <rect style="--i:0"  x="0"   y="30" width="12" height="12" fill="#334155"/>
+        <rect style="--i:1"  x="16"  y="30" width="12" height="12" fill="#334155"/>
+        <rect style="--i:2"  x="32"  y="30" width="12" height="12" fill="#334155"/>
+        <rect style="--i:3"  x="48"  y="30" width="12" height="12" fill="#334155"/>
+        <rect style="--i:4"  x="64"  y="30" width="12" height="12" fill="#334155"/>
+        <rect style="--i:5"  x="80"  y="30" width="12" height="12" fill="#334155"/>
+        <rect style="--i:6"  x="96"  y="30" width="12" height="12" fill="#334155"/>
+        <rect style="--i:7"  x="112" y="30" width="12" height="12" fill="#334155"/>
+        <rect style="--i:8"  x="128" y="30" width="12" height="12" fill="#334155"/>
         <!-- t*: first divergence -->
-        <rect style="--i:9"  x="144" y="24" width="12" height="12" fill="#f59e0b"/>
-        <!-- clean trace continues -->
-        <rect style="--i:10" x="160" y="24" width="12" height="12" fill="#3b82f6"/>
-        <rect style="--i:11" x="176" y="24" width="12" height="12" fill="#3b82f6"/>
-        <rect style="--i:12" x="192" y="24" width="12" height="12" fill="#3b82f6"/>
-        <rect style="--i:13" x="208" y="24" width="12" height="12" fill="#3b82f6"/>
-        <rect style="--i:14" x="224" y="24" width="12" height="12" fill="#3b82f6"/>
-        <rect style="--i:15" x="240" y="24" width="12" height="12" fill="#3b82f6"/>
-        <rect style="--i:16" x="256" y="24" width="12" height="12" fill="#3b82f6"/>
-        <rect style="--i:17" x="272" y="24" width="12" height="12" fill="#3b82f6"/>
-        <rect style="--i:18" x="288" y="24" width="12" height="12" fill="#3b82f6"/>
-        <rect style="--i:19" x="304" y="24" width="12" height="12" fill="#3b82f6"/>
-        <rect style="--i:20" x="320" y="24" width="12" height="12" fill="#3b82f6"/>
-        <rect style="--i:21" x="336" y="24" width="12" height="12" fill="#3b82f6"/>
-        <rect style="--i:22" x="352" y="24" width="12" height="12" fill="#3b82f6"/>
-        <!-- corrupted trace drifts -->
-        <rect style="--i:10" x="160" y="40" width="12" height="12" fill="#f43f5e"/>
-        <rect style="--i:11" x="176" y="44" width="12" height="12" fill="#f43f5e"/>
-        <rect style="--i:12" x="192" y="48" width="12" height="12" fill="#f43f5e"/>
-        <rect style="--i:13" x="208" y="48" width="12" height="12" fill="#f43f5e"/>
-        <rect style="--i:14" x="224" y="56" width="12" height="12" fill="#f43f5e"/>
-        <rect style="--i:15" x="240" y="56" width="12" height="12" fill="#f43f5e"/>
-        <rect style="--i:16" x="256" y="64" width="12" height="12" fill="#f43f5e"/>
-        <rect style="--i:17; --o:0.85" x="276" y="64" width="12" height="12" fill="#f43f5e"/>
-        <rect style="--i:18; --o:0.85" x="292" y="72" width="12" height="12" fill="#f43f5e"/>
-        <rect style="--i:19; --o:0.6" x="312" y="72" width="8"  height="8"  fill="#f43f5e"/>
-        <rect style="--i:20; --o:0.6" x="330" y="80" width="8"  height="8"  fill="#f43f5e"/>
-        <rect style="--i:21; --o:0.4" x="348" y="82" width="6"  height="6"  fill="#f43f5e"/>
+        <rect style="--i:9"  x="144" y="30" width="12" height="12" fill="#f59e0b"/>
+        <!-- baseline trace continues -->
+        <rect style="--i:10" x="160" y="30" width="12" height="12" fill="#3b82f6"/>
+        <rect style="--i:11" x="176" y="30" width="12" height="12" fill="#3b82f6"/>
+        <rect style="--i:12" x="192" y="30" width="12" height="12" fill="#3b82f6"/>
+        <rect style="--i:13" x="208" y="30" width="12" height="12" fill="#3b82f6"/>
+        <rect style="--i:14" x="224" y="30" width="12" height="12" fill="#3b82f6"/>
+        <rect style="--i:15" x="240" y="30" width="12" height="12" fill="#3b82f6"/>
+        <rect style="--i:16" x="256" y="30" width="12" height="12" fill="#3b82f6"/>
+        <rect style="--i:17" x="272" y="30" width="12" height="12" fill="#3b82f6"/>
+        <rect style="--i:18" x="288" y="30" width="12" height="12" fill="#3b82f6"/>
+        <rect style="--i:19" x="304" y="30" width="12" height="12" fill="#3b82f6"/>
+        <rect style="--i:20" x="320" y="30" width="12" height="12" fill="#3b82f6"/>
+        <rect style="--i:21" x="336" y="30" width="12" height="12" fill="#3b82f6"/>
+        <rect style="--i:22" x="352" y="30" width="12" height="12" fill="#3b82f6"/>
+        <!-- diverged trace: a different but equally solid path -->
+        <rect style="--i:10" x="160" y="46" width="12" height="12" fill="#f43f5e"/>
+        <rect style="--i:11" x="176" y="50" width="12" height="12" fill="#f43f5e"/>
+        <rect style="--i:12" x="192" y="54" width="12" height="12" fill="#f43f5e"/>
+        <rect style="--i:13" x="208" y="54" width="12" height="12" fill="#f43f5e"/>
+        <rect style="--i:14" x="224" y="58" width="12" height="12" fill="#f43f5e"/>
+        <rect style="--i:15" x="240" y="62" width="12" height="12" fill="#f43f5e"/>
+        <rect style="--i:16" x="256" y="62" width="12" height="12" fill="#f43f5e"/>
+        <rect style="--i:17" x="272" y="66" width="12" height="12" fill="#f43f5e"/>
+        <rect style="--i:18" x="288" y="66" width="12" height="12" fill="#f43f5e"/>
+        <rect style="--i:19" x="304" y="70" width="12" height="12" fill="#f43f5e"/>
+        <rect style="--i:20" x="320" y="70" width="12" height="12" fill="#f43f5e"/>
+        <rect style="--i:21" x="336" y="74" width="12" height="12" fill="#f43f5e"/>
+        <rect style="--i:22" x="352" y="74" width="12" height="12" fill="#f43f5e"/>
       </g>
       <g class="strip-labels" font-size="11" fill="#64748b">
-        <text x="144" y="14">t*</text>
-        <text x="368" y="34" fill="#3b82f6">clean run</text>
-        <text x="518" y="90" text-anchor="end" fill="#f43f5e">same agent, corrupted file</text>
+        <text x="144" y="20">t*</text>
+        <text x="372" y="40" fill="#2563eb">baseline run</text>
+        <text x="372" y="84" fill="#e11d48">same agent, divergent path</text>
       </g>
     </svg>
   </figure>
@@ -91,7 +97,7 @@
 
 <main>
 
-<section>
+<section class="box">
   <p class="eyebrow">quickstart</p>
   <h2>Bring your agent. traxr does the rest.</h2>
   <p>
@@ -128,21 +134,21 @@ print(results.summary())</code></pre>
   </p>
 </section>
 
-<section>
+<section class="box">
   <p class="eyebrow">how it works</p>
   <h2>One variable at a time.</h2>
   <ol class="steps">
     <li>
       <h3>Perturb</h3>
-      <p>One operator corrupts a copy of one file — seeded, deterministic,
-      single-variable. Swapped columns, OCR noise, a redacted section,
-      a missing page.</p>
+      <p>One operator changes a copy of one input — seeded, deterministic,
+      single-variable. A swapped column, OCR noise, a redacted section, a
+      missing page. The means, not the point.</p>
     </li>
     <li>
       <h3>Run paired</h3>
-      <p>Your agent runs on the clean file, then on each corrupted copy —
-      identical seeds, fresh temp dirs, original filenames. It cannot tell
-      which condition it is in.</p>
+      <p>Your agent runs on the original, then on each variant — identical
+      seeds, fresh temp dirs, original filenames. It cannot tell which
+      condition it is in.</p>
     </li>
     <li>
       <h3>Compare traces</h3>
@@ -153,21 +159,22 @@ print(results.summary())</code></pre>
   </ol>
 </section>
 
-<section>
+<section class="box">
   <p class="eyebrow">the metrics</p>
-  <h2>How much, where, and what it cost.</h2>
+  <h2>What the final answer hides.</h2>
   <dl class="metrics">
     <div><dt>d_norm</dt><dd>Normalized edit distance between paired traces. 0 — the process was identical. 1 — a completely different execution.</dd></div>
     <div><dt>t*</dt><dd>The step where divergence first appears, and how early in the run that is (t*/T).</dd></div>
-    <div><dt>manifestation</dt><dd>How the damage showed up: silent semantic corruption, a strategy reroute, early termination, catastrophic failure — or a recovery.</dd></div>
-    <div><dt>token overhead</dt><dd>Perturbed-run tokens over baseline. Corruption you pay for.</dd></div>
+    <div><dt>manifestation</dt><dd>How divergence showed up: silent semantic corruption, a strategy reroute, early termination, catastrophic failure — or a recovery that lands the same answer anyway.</dd></div>
+    <div><dt>token overhead</dt><dd>Perturbed-run tokens over baseline. The cost of a wobble you would never see in the output.</dd></div>
     <div><dt>noise floor</dt><dd>Baseline-vs-itself divergence from clean re-runs. Anything at or below it is indistinguishable from sampling noise — measured by default for external agents.</dd></div>
   </dl>
 </section>
 
-<section>
+<section class="box">
   <p class="eyebrow">operators</p>
   <h2>The v1 catalog.</h2>
+  <div class="table-wrap">
   <table>
     <thead><tr><th>input</th><th>operators</th><th>delivery</th></tr></thead>
     <tbody>
@@ -177,9 +184,10 @@ print(results.summary())</code></pre>
       <tr><td>pdf — built-in agent</td><td>ocr_noise · paragraph_shuffle · encoding_error</td><td>content injection</td></tr>
     </tbody>
   </table>
+  </div>
 </section>
 
-<section class="callout">
+<section class="box callout">
   <p class="eyebrow">is my agent traceable?</p>
   <p>
     Tier 0 capture sees <strong>OpenAI-SDK <code>chat.completions</code>
@@ -192,14 +200,14 @@ print(results.summary())</code></pre>
   </p>
 </section>
 
-<section class="callout security">
+<section class="box callout security">
   <p class="eyebrow">before you run it</p>
   <p>
-    Perturbed data is an injection-adjacent vector into your agent, and traxr
-    cannot sandbox your agent. Disable side-effectful tools or run inside a
-    container. <code>dry_run=True</code> enumerates every run before any
-    agent executes; <code>max_llm_calls_per_run</code> is enforced inside the
-    capture wrapper. <a href="docs/security/">Security notes →</a>
+    Perturbed inputs are an injection-adjacent vector into your agent, and
+    traxr cannot sandbox your agent. Disable side-effectful tools or run
+    inside a container. <code>dry_run=True</code> enumerates every run before
+    any agent executes; <code>max_llm_calls_per_run</code> is enforced inside
+    the capture wrapper. <a href="docs/security/">Security notes →</a>
   </p>
 </section>
 
@@ -209,6 +217,7 @@ print(results.summary())</code></pre>
     <span>traxr</span>
   </div>
   <p>
+    <a href="https://www.caisconf.org/program/2026/papers/trace-level-analysis-of-information-contamination-in-multi-agent-systems/">paper</a> ·
     <a href="docs/">documentation</a> ·
     <a href="https://github.com/anna-mazhar/traxr">github</a> ·
     <a href="https://github.com/anna-mazhar/traxr/blob/main/SECURITY.md">security</a> ·

@@ -12,13 +12,13 @@ theme:
   # System fonts, matching the landing page (zero external requests).
   font: false
   palette:
-    - media: "(prefers-color-scheme: light)"
-      scheme: default
+    # Light is the default regardless of OS preference; the toggle opts in
+    # to dark.
+    - scheme: default
       primary: custom
       accent: custom
       toggle: { icon: material/brightness-7, name: Switch to dark mode }
-    - media: "(prefers-color-scheme: dark)"
-      scheme: slate
+    - scheme: slate
       primary: custom
       accent: custom
       toggle: { icon: material/brightness-4, name: Switch to light mode }
