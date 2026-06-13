@@ -284,6 +284,16 @@ print(results.summary())</code></pre>
       }
     });
   });
+
+  // Open external / content links in a new tab; leave in-page anchors
+  // (#section jumps, the logo) as same-tab navigation.
+  document.querySelectorAll("a[href]").forEach(function (a) {
+    var href = a.getAttribute("href");
+    if (href && href.charAt(0) !== "#") {
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+    }
+  });
 </script>
 
 </body>
