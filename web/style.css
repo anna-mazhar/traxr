@@ -225,13 +225,24 @@ p { margin: 0 0 14px; }
 section p:last-child { margin-bottom: 0; }
 .aside { color: var(--muted); font-size: 14.5px; }
 
+/* section title + action button on one row (title left, button right) */
+.head-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px 20px;
+  margin: 0 0 14px;
+}
+.head-row h2 { margin: 0; }
+
 /* "Try in Colab" — a flat pixel button that presses on hover (8-bit feel);
    Colab orange ties into the amber t* already in the palette */
 .colab-btn {
   display: inline-flex;
   align-items: center;
   gap: 9px;
-  margin: 20px 0 6px;
+  flex: none;
   padding: 9px 15px;
   font-family: var(--mono);
   font-size: 13.5px;
