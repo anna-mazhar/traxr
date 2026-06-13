@@ -5,7 +5,7 @@
 PYTHON ?= python
 
 .PHONY: install lint typecheck test cov property mutation analyzer-goldens standalone-check golden \
-	external-golden selfcheck notebook build site verify-all verify-deep
+	external-golden selfcheck notebook build assets site verify-all verify-deep
 
 install:
 	$(PYTHON) -m pip install -e ".[dev,document,openai,langgraph,viz]"
@@ -69,7 +69,15 @@ build:
 	.build-venv/bin/python -c "import traxr; print('traxr', traxr.__version__); traxr.selfcheck()"
 
 # Assemble the Pages artifact: landing at the root, docs under /docs/.
-site:
+# Brand SVGs have one source of truth: assets/. The landing (web/assets/)
+# and the docs theme logo/favicon (docs/assets/) are generated copies —
+# both gitignored. Run this after editing anything in assets/.
+assets:
+	mkdir -p web/assets docs/assets
+	cp assets/mark.svg web/assets/mark.svg
+	cp assets/mark.svg assets/mark-dark.svg docs/assets/
+
+site: assets
 	rm -rf staging
 	mkdir -p staging
 	cp -R web/. staging/

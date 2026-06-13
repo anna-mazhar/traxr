@@ -223,3 +223,7 @@ __marimo__/
 mutants/
 .nbbuild/
 staging/
+
+# Generated brand SVG copies — source of truth is assets/ (see `make assets`)
+web/assets/
+docs/assets/
