@@ -1,24 +1,23 @@
-/* traxr landing — light, pastel, boxed.
-   Warm off-white page; content in bordered cards; code on light gray;
-   the only saturated colors live inside the trace visual. */
+/* traxr landing — light, pastel, flat spec-sheet frames.
+   Warm off-white page; content in one continuous hairline-bordered frame
+   with internal dividers; sharp corners; no shadows. The only saturated
+   colors live inside the trace visual. */
 
 :root {
   --paper: #f7f6f3;        /* warm off-white page */
-  --box: #ffffff;          /* card surface */
-  --ink: #1e293b;          /* body ink (softer than pure slate) */
+  --box: #ffffff;          /* frame surface */
+  --ink: #1e293b;          /* body ink */
   --ink-strong: #0f172a;   /* headings */
   --muted: #64748b;
   --accent: #3b82f6;
   --accent-deep: #2563eb;
-  --line: #e7e4dd;         /* warm hairline */
-  --line-soft: #eef2f7;
+  --line: #e5e7eb;         /* hairline */
 
   /* pastels */
   --blue-50: #eff5ff;
   --blue-100: #dbe8fe;
-  --amber-50: #fff8eb;
-  --rose-50: #fff1f3;
-  --rose-200: #fecdd6;
+  --rose-50: #fff5f6;
+  --amber: #f59e0b;
 
   /* code */
   --code-bg: #f4f5f7;
@@ -28,7 +27,6 @@
     "Liberation Mono", monospace;
   --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
     Arial, sans-serif;
-  --radius: 12px;
 }
 
 * { box-sizing: border-box; }
@@ -43,7 +41,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-main, .hero, .top { max-width: 780px; margin: 0 auto; padding: 0 24px; }
+main, .hero, .top { max-width: 800px; margin: 0 auto; padding: 0 24px; }
 
 a { color: var(--accent-deep); text-decoration: none; }
 a:hover, a:focus-visible { text-decoration: underline; }
@@ -78,6 +76,9 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 .hero { padding-top: 40px; padding-bottom: 8px; }
 
+.hero .eyebrow { color: var(--muted); margin-bottom: 16px; }
+.hero .eyebrow::before { background: var(--amber); }
+
 .hero h1 {
   font-family: var(--mono);
   font-size: clamp(36px, 6.4vw, 58px);
@@ -85,7 +86,7 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   line-height: 1.08;
   letter-spacing: -0.02em;
   color: var(--ink-strong);
-  margin: 4px 0 22px;
+  margin: 0 0 22px;
 }
 
 .lede {
@@ -96,14 +97,12 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 }
 .lede em { font-style: normal; color: var(--ink-strong); font-weight: 500; }
 
-/* the divergence strip — boxed, the page's one chromatic moment */
+/* the divergence strip — flat hairline frame, the one chromatic moment */
 .strip {
-  margin: 40px 0 28px;
+  margin: 36px 0 24px;
   background: var(--box);
   border: 1px solid var(--line);
-  border-radius: var(--radius);
   padding: 22px 26px;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
 }
 .strip svg { width: 100%; height: auto; display: block; }
 .strip .strip-labels text { font-family: var(--mono); }
@@ -133,29 +132,31 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   overflow-x: auto;
   white-space: pre;
   border: 1px solid var(--ink-strong);
-  border-radius: var(--radius);
-  box-shadow: 4px 4px 0 var(--blue-100); /* the pixel-shadow motif */
 }
 
-/* ---- boxed sections -------------------------------------------------- */
+/* ---- the frame: one continuous bordered spec sheet ------------------- */
 
-section { margin: 28px 0; }
+main { margin-top: 8px; margin-bottom: 0; }
 
-.box {
+.frame {
   background: var(--box);
   border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 30px 32px;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
 }
+
+.frame > section {
+  margin: 0;
+  padding: 32px 36px;
+  border-top: 1px solid var(--line);
+}
+.frame > section:first-child { border-top: none; }
 
 .eyebrow {
   font-family: var(--mono);
-  font-size: 12.5px;
-  letter-spacing: 0.08em;
-  text-transform: lowercase;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
   color: var(--accent-deep);
-  margin: 0 0 10px;
+  margin: 0 0 12px;
 }
 .eyebrow::before {
   content: "";
@@ -166,8 +167,6 @@ section { margin: 28px 0; }
   margin-right: 10px;
   vertical-align: 1px;
 }
-.hero .eyebrow { color: var(--muted); }
-.hero .eyebrow::before { background: var(--amber-50); box-shadow: inset 0 0 0 2px #f59e0b; }
 
 h2 {
   font-size: 26px;
@@ -178,7 +177,7 @@ h2 {
 }
 
 p { margin: 0 0 14px; }
-.box p:last-child { margin-bottom: 0; }
+section p:last-child { margin-bottom: 0; }
 .aside { color: var(--muted); font-size: 15px; }
 
 code {
@@ -187,10 +186,9 @@ code {
   background: var(--blue-50);
   color: var(--accent-deep);
   padding: 1px 6px;
-  border-radius: 4px;
 }
 
-/* light code blocks */
+/* light, flat code blocks */
 pre {
   background: var(--code-bg);
   color: var(--code-ink);
@@ -200,8 +198,7 @@ pre {
   padding: 20px 22px;
   overflow-x: auto;
   margin: 20px 0;
-  border: 1px solid var(--line-soft);
-  border-radius: 10px;
+  border: 1px solid var(--line);
 }
 pre code { background: none; padding: 0; font-size: inherit; color: inherit; }
 pre .c { color: #94a3b8; }              /* comment */
@@ -209,23 +206,23 @@ pre .k { color: #2563eb; }              /* keyword */
 pre .s { color: #15803d; }              /* string  */
 pre .f { color: #9333ea; }              /* def name */
 
-/* how it works — a real sequence, so the numbers carry meaning */
+/* how it works — three cells divided by hairlines (a sub-grid in the row) */
 .steps {
   list-style: none;
   counter-reset: step;
-  margin: 26px 0 0;
+  margin: 24px 0 0;
   padding: 0;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+  border-top: 1px solid var(--line);
 }
 .steps li {
   counter-increment: step;
-  background: var(--paper);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 18px 18px 20px;
+  padding: 22px 22px 4px;
+  border-left: 1px solid var(--line);
 }
+.steps li:first-child { border-left: none; padding-left: 4px; }
+.steps li:last-child { padding-right: 4px; }
 .steps h3 { font-size: 16px; margin: 0 0 8px; color: var(--ink-strong); }
 .steps h3::before {
   content: counter(step);
@@ -238,23 +235,21 @@ pre .f { color: #9333ea; }              /* def name */
   height: 22px;
   line-height: 22px;
   text-align: center;
-  border-radius: 5px;
   margin-right: 10px;
 }
 .steps p { font-size: 14.5px; color: var(--muted); margin: 0; }
 
-/* metrics — mono terms, quiet definitions, each in its own row card */
-.metrics { margin: 22px 0 0; display: grid; gap: 10px; }
+/* metrics — mono terms, hairline-divided rows, no fills */
+.metrics { margin: 22px 0 0; }
 .metrics div {
   display: grid;
-  grid-template-columns: 160px 1fr;
-  gap: 18px;
+  grid-template-columns: 168px 1fr;
+  gap: 20px;
   align-items: baseline;
-  padding: 14px 16px;
-  background: var(--paper);
-  border: 1px solid var(--line);
-  border-radius: 9px;
+  padding: 15px 0;
+  border-top: 1px solid var(--line);
 }
+.metrics div:first-child { border-top: none; }
 .metrics dt {
   font-family: var(--mono);
   font-weight: 600;
@@ -281,19 +276,20 @@ td {
   border-bottom: 1px solid var(--line);
   vertical-align: top;
 }
+tr:last-child td { border-bottom: none; }
 td:nth-child(2) { font-family: var(--mono); font-size: 12.5px; color: var(--muted); }
 td:first-child, td:last-child { white-space: nowrap; }
 
-/* callout cards — accent edge */
-.callout { border-left: 4px solid var(--accent); }
-.callout.security { border-left-color: var(--ink-strong); }
-.callout .eyebrow { margin-bottom: 8px; }
+/* callout rows — a subtle pastel wash to set them apart, still flat */
+.callout { background: var(--blue-50); }
+.callout.security { background: var(--rose-50); }
+.callout.security .eyebrow { color: #be123c; }
+.callout.security .eyebrow::before { background: #e11d48; }
 
 /* footer */
 footer {
-  border-top: 1px solid var(--line);
-  margin-top: 56px;
-  padding: 34px 0 64px;
+  margin-top: 28px;
+  padding: 28px 0 64px;
   font-size: 15px;
   color: var(--muted);
 }
@@ -314,8 +310,14 @@ footer a:hover { color: var(--ink-strong); }
 
 @media (max-width: 640px) {
   body { font-size: 16px; }
-  .box { padding: 24px 20px; }
-  .steps { grid-template-columns: 1fr; }
+  .frame > section { padding: 24px 20px; }
+  .steps { grid-template-columns: 1fr; border-top: none; }
+  .steps li, .steps li:first-child {
+    border-left: none;
+    border-top: 1px solid var(--line);
+    padding: 18px 0 4px;
+  }
+  .steps li:first-child { border-top: none; }
   .metrics div { grid-template-columns: 1fr; gap: 3px; }
   td:first-child, td:last-child { white-space: normal; }
 }
