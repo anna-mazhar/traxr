@@ -14,104 +14,94 @@
 
 <div class="sheet">
 
-  <!-- dateline / utility bar -->
-  <div class="dateline">
-    <span>Trace-Level Evaluation · Multi-Agent Systems</span>
-    <span>v1.0 — CAIS 2026 Edition</span>
-  </div>
-
-  <!-- masthead -->
-  <header class="masthead">
-    <a class="wordmark" href="#" aria-label="traxr">
-      <img src="assets/mark.svg" alt="" width="44" height="44">
+  <!-- top bar: small logo left, links right -->
+  <nav class="topbar">
+    <a class="brand" href="#" aria-label="traxr">
+      <img src="assets/mark.svg" alt="" width="26" height="26">
       <span>traxr</span>
     </a>
-    <p class="masthead-tag">Controlled-perturbation experiments for your own agent and your own data</p>
-  </header>
-
-  <!-- section / navigation bar -->
-  <nav class="sectionbar">
-    <div class="sectionbar-in">
-      <a href="#quickstart">Quickstart</a>
-      <a href="#how">How it works</a>
-      <a href="#metrics">Metrics</a>
-      <a href="#operators">Operators</a>
-      <span class="sb-spacer"></span>
-      <a href="https://www.caisconf.org/program/2026/papers/trace-level-analysis-of-information-contamination-in-multi-agent-systems/">Paper</a>
-      <a href="docs/">Docs</a>
-      <a href="https://github.com/anna-mazhar/traxr">GitHub</a>
+    <div class="topbar-links">
+      <a href="https://www.caisconf.org/program/2026/papers/trace-level-analysis-of-information-contamination-in-multi-agent-systems/">paper</a>
+      <a href="docs/">docs</a>
+      <a href="https://github.com/anna-mazhar/traxr">github</a>
     </div>
   </nav>
 
-  <!-- hero / lead story -->
+  <!-- hero -->
   <header class="hero">
-    <div class="hero-lead">
-      <p class="kicker">The thesis</p>
-      <h1>Look past the final answer.</h1>
-      <p class="lede">
-        A multi-agent system can reach the right answer through the wrong
-        process — and final-answer accuracy never sees it. traxr evaluates the
-        <em>execution trace itself</em>: run paired experiments on your own
-        agent and measure how its behavior diverged — how much, where it
-        started, and what it cost.
-      </p>
-    </div>
+    <p class="eyebrow">trace-level evaluation for multi-agent systems</p>
+    <h1>Look past the final answer.</h1>
+    <p class="lede">
+      A multi-agent system can reach the right answer through the wrong
+      process — and final-answer accuracy never sees it. traxr evaluates the
+      <em>execution trace itself</em>: run paired experiments on your own
+      agent and measure how its behavior diverged — how much, where it
+      started, and what it cost.
+    </p>
 
-    <aside class="hero-aside">
-      <figure class="strip" role="img"
-              aria-label="Two execution traces of one agent share a prefix, then split at the first divergence point: one continues unchanged, the other follows a different path.">
-        <svg viewBox="0 0 520 100" xmlns="http://www.w3.org/2000/svg">
-          <g class="cells">
-            <rect style="--i:0"  x="0"   y="30" width="12" height="12" fill="#334155"/>
-            <rect style="--i:1"  x="16"  y="30" width="12" height="12" fill="#334155"/>
-            <rect style="--i:2"  x="32"  y="30" width="12" height="12" fill="#334155"/>
-            <rect style="--i:3"  x="48"  y="30" width="12" height="12" fill="#334155"/>
-            <rect style="--i:4"  x="64"  y="30" width="12" height="12" fill="#334155"/>
-            <rect style="--i:5"  x="80"  y="30" width="12" height="12" fill="#334155"/>
-            <rect style="--i:6"  x="96"  y="30" width="12" height="12" fill="#334155"/>
-            <rect style="--i:7"  x="112" y="30" width="12" height="12" fill="#334155"/>
-            <rect style="--i:8"  x="128" y="30" width="12" height="12" fill="#334155"/>
-            <rect style="--i:9"  x="144" y="30" width="12" height="12" fill="#f59e0b"/>
-            <rect style="--i:10" x="160" y="30" width="12" height="12" fill="#3b82f6"/>
-            <rect style="--i:11" x="176" y="30" width="12" height="12" fill="#3b82f6"/>
-            <rect style="--i:12" x="192" y="30" width="12" height="12" fill="#3b82f6"/>
-            <rect style="--i:13" x="208" y="30" width="12" height="12" fill="#3b82f6"/>
-            <rect style="--i:14" x="224" y="30" width="12" height="12" fill="#3b82f6"/>
-            <rect style="--i:15" x="240" y="30" width="12" height="12" fill="#3b82f6"/>
-            <rect style="--i:16" x="256" y="30" width="12" height="12" fill="#3b82f6"/>
-            <rect style="--i:17" x="272" y="30" width="12" height="12" fill="#3b82f6"/>
-            <rect style="--i:18" x="288" y="30" width="12" height="12" fill="#3b82f6"/>
-            <rect style="--i:19" x="304" y="30" width="12" height="12" fill="#3b82f6"/>
-            <rect style="--i:20" x="320" y="30" width="12" height="12" fill="#3b82f6"/>
-            <rect style="--i:21" x="336" y="30" width="12" height="12" fill="#3b82f6"/>
-            <rect style="--i:22" x="352" y="30" width="12" height="12" fill="#3b82f6"/>
-            <rect style="--i:10" x="160" y="46" width="12" height="12" fill="#f43f5e"/>
-            <rect style="--i:11" x="176" y="50" width="12" height="12" fill="#f43f5e"/>
-            <rect style="--i:12" x="192" y="54" width="12" height="12" fill="#f43f5e"/>
-            <rect style="--i:13" x="208" y="54" width="12" height="12" fill="#f43f5e"/>
-            <rect style="--i:14" x="224" y="58" width="12" height="12" fill="#f43f5e"/>
-            <rect style="--i:15" x="240" y="62" width="12" height="12" fill="#f43f5e"/>
-            <rect style="--i:16" x="256" y="62" width="12" height="12" fill="#f43f5e"/>
-            <rect style="--i:17" x="272" y="66" width="12" height="12" fill="#f43f5e"/>
-            <rect style="--i:18" x="288" y="66" width="12" height="12" fill="#f43f5e"/>
-            <rect style="--i:19" x="304" y="70" width="12" height="12" fill="#f43f5e"/>
-            <rect style="--i:20" x="320" y="70" width="12" height="12" fill="#f43f5e"/>
-            <rect style="--i:21" x="336" y="74" width="12" height="12" fill="#f43f5e"/>
-            <rect style="--i:22" x="352" y="74" width="12" height="12" fill="#f43f5e"/>
-          </g>
-          <g class="strip-labels" font-size="11" fill="#64748b">
-            <text x="144" y="20">t*</text>
-            <text x="372" y="40" fill="#2563eb">baseline run</text>
-            <text x="372" y="84" fill="#e11d48">same agent, divergent path</text>
-          </g>
-        </svg>
-        <figcaption>Fig. 1 — Two runs of one agent share a prefix, then split at the first divergence point t*.</figcaption>
-      </figure>
-      <div class="install">
-        <code>pip install "traxr[document,openai,pandas] @ git+https://github.com/anna-mazhar/traxr.git@v1.0.0"</code>
-      </div>
-    </aside>
+    <figure class="strip" role="img"
+            aria-label="Two execution traces of one agent share a prefix, then split at the first divergence point: one continues unchanged, the other follows a different path.">
+      <svg viewBox="0 0 520 100" xmlns="http://www.w3.org/2000/svg">
+        <g class="cells">
+          <rect style="--i:0"  x="0"   y="30" width="12" height="12" fill="#334155"/>
+          <rect style="--i:1"  x="16"  y="30" width="12" height="12" fill="#334155"/>
+          <rect style="--i:2"  x="32"  y="30" width="12" height="12" fill="#334155"/>
+          <rect style="--i:3"  x="48"  y="30" width="12" height="12" fill="#334155"/>
+          <rect style="--i:4"  x="64"  y="30" width="12" height="12" fill="#334155"/>
+          <rect style="--i:5"  x="80"  y="30" width="12" height="12" fill="#334155"/>
+          <rect style="--i:6"  x="96"  y="30" width="12" height="12" fill="#334155"/>
+          <rect style="--i:7"  x="112" y="30" width="12" height="12" fill="#334155"/>
+          <rect style="--i:8"  x="128" y="30" width="12" height="12" fill="#334155"/>
+          <rect style="--i:9"  x="144" y="30" width="12" height="12" fill="#f59e0b"/>
+          <rect style="--i:10" x="160" y="30" width="12" height="12" fill="#3b82f6"/>
+          <rect style="--i:11" x="176" y="30" width="12" height="12" fill="#3b82f6"/>
+          <rect style="--i:12" x="192" y="30" width="12" height="12" fill="#3b82f6"/>
+          <rect style="--i:13" x="208" y="30" width="12" height="12" fill="#3b82f6"/>
+          <rect style="--i:14" x="224" y="30" width="12" height="12" fill="#3b82f6"/>
+          <rect style="--i:15" x="240" y="30" width="12" height="12" fill="#3b82f6"/>
+          <rect style="--i:16" x="256" y="30" width="12" height="12" fill="#3b82f6"/>
+          <rect style="--i:17" x="272" y="30" width="12" height="12" fill="#3b82f6"/>
+          <rect style="--i:18" x="288" y="30" width="12" height="12" fill="#3b82f6"/>
+          <rect style="--i:19" x="304" y="30" width="12" height="12" fill="#3b82f6"/>
+          <rect style="--i:20" x="320" y="30" width="12" height="12" fill="#3b82f6"/>
+          <rect style="--i:21" x="336" y="30" width="12" height="12" fill="#3b82f6"/>
+          <rect style="--i:22" x="352" y="30" width="12" height="12" fill="#3b82f6"/>
+          <rect style="--i:10" x="160" y="46" width="12" height="12" fill="#f43f5e"/>
+          <rect style="--i:11" x="176" y="50" width="12" height="12" fill="#f43f5e"/>
+          <rect style="--i:12" x="192" y="54" width="12" height="12" fill="#f43f5e"/>
+          <rect style="--i:13" x="208" y="54" width="12" height="12" fill="#f43f5e"/>
+          <rect style="--i:14" x="224" y="58" width="12" height="12" fill="#f43f5e"/>
+          <rect style="--i:15" x="240" y="62" width="12" height="12" fill="#f43f5e"/>
+          <rect style="--i:16" x="256" y="62" width="12" height="12" fill="#f43f5e"/>
+          <rect style="--i:17" x="272" y="66" width="12" height="12" fill="#f43f5e"/>
+          <rect style="--i:18" x="288" y="66" width="12" height="12" fill="#f43f5e"/>
+          <rect style="--i:19" x="304" y="70" width="12" height="12" fill="#f43f5e"/>
+          <rect style="--i:20" x="320" y="70" width="12" height="12" fill="#f43f5e"/>
+          <rect style="--i:21" x="336" y="74" width="12" height="12" fill="#f43f5e"/>
+          <rect style="--i:22" x="352" y="74" width="12" height="12" fill="#f43f5e"/>
+        </g>
+        <g class="strip-labels" font-size="11" fill="#64748b">
+          <text x="144" y="20">t*</text>
+          <text x="372" y="40" fill="#2563eb">baseline run</text>
+          <text x="372" y="84" fill="#e11d48">same agent, divergent path</text>
+        </g>
+      </svg>
+      <figcaption>Fig. 1 — two runs of one agent share a prefix, then split at the first divergence point t*.</figcaption>
+    </figure>
+
+    <div class="install">
+      <code>pip install "traxr[document,openai,pandas] @ git+https://github.com/anna-mazhar/traxr.git@v1.0.0"</code>
+    </div>
   </header>
+
+  <!-- section index -->
+  <nav class="jump">
+    <span class="jump-label">Sections</span>
+    <a href="#quickstart">Quickstart</a>
+    <a href="#how">How it works</a>
+    <a href="#metrics">Metrics</a>
+    <a href="#operators">Operators</a>
+  </nav>
 
   <main>
 
@@ -239,11 +229,11 @@ print(results.summary())</code></pre>
       Multi-Agent Systems” (Mazhar, Suri, Galhotra).
     </p>
     <p class="colophon">
-      <a href="https://www.caisconf.org/program/2026/papers/trace-level-analysis-of-information-contamination-in-multi-agent-systems/">Paper</a> ·
-      <a href="docs/">Documentation</a> ·
-      <a href="https://github.com/anna-mazhar/traxr">GitHub</a> ·
-      <a href="https://github.com/anna-mazhar/traxr/blob/main/SECURITY.md">Security</a> ·
-      MIT License
+      <a href="https://www.caisconf.org/program/2026/papers/trace-level-analysis-of-information-contamination-in-multi-agent-systems/">paper</a> ·
+      <a href="docs/">documentation</a> ·
+      <a href="https://github.com/anna-mazhar/traxr">github</a> ·
+      <a href="https://github.com/anna-mazhar/traxr/blob/main/SECURITY.md">security</a> ·
+      MIT
     </p>
   </footer>
 
