@@ -404,9 +404,10 @@ _HTML_HEAD = """<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Traxr report</title>
 <style>
-:root { color-scheme: light dark; }
+:root { color-scheme: light; }
 body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
-  max-width: 960px; margin: 2rem auto; padding: 0 1rem; color: #1a1a1a; }
+  max-width: 960px; margin: 2rem auto; padding: 0 1rem;
+  color: #1a1a1a; background: #fff; }
 h1 { font-size: 1.5rem; margin-bottom: 1.5rem; }
 h2 { font-size: 1.1rem; margin: 2rem 0 0.75rem;
   border-bottom: 1px solid #ddd; padding-bottom: 0.25rem; }
