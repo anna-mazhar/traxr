@@ -16,7 +16,6 @@ Key metrics:
 - Trace Statistics: Step counts, routing turns, tool calls for pattern comparison.
 """
 
-from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import Any, cast
 
@@ -161,7 +160,7 @@ class DivergenceReport:
     # Where structural divergence first occurs
     first_divergence_step: int | None = None
     first_divergence_type: str | None = None
-    divergence_normalized_position: float | None = None  # step / total_steps
+    divergence_normalized_position: float | None = None  # aligned index / num pairs, in [0,1)
 
     # === CONTROL FLOW CHANGES (discrete counts) ===
     # Specific structural changes: reroutes, tool failures, termination changes
@@ -252,23 +251,19 @@ class TraceDivergenceAnalyzer:
         Returns:
             DivergenceReport with edit distance and other metrics.
         """
-        # Compute structural signatures for each trace
-        baseline_signatures = [self._event_to_signature(e) for e in clean_trace.events]
-        perturbed_signatures = [self._event_to_signature(e) for e in perturbed_trace.events]
+        # Compute edit distance (primary metric) and the alignment in one pass.
+        # Both derive from the same Wagner-Fischer DP over event signatures, so
+        # t* and the control-flow counts inherit d_norm's shift-robustness.
+        edit_result, aligned = self._align_and_score(clean_trace.events, perturbed_trace.events)
 
-        # Compute edit distance (primary metric)
-        edit_result = self._compute_edit_distance(baseline_signatures, perturbed_signatures)
-
-        # Find first divergence point using alignment
-        aligned = self._align_traces(clean_trace.events, perturbed_trace.events)
-        first_div_step, first_div_type = self._find_first_divergence(aligned)
+        # Find first divergence point in the aligned sequence
+        first_div_step, first_div_type, first_div_index = self._find_first_divergence(aligned)
 
         # Trace statistics
         clean_steps = {e.step_num for e in clean_trace.events}
         perturbed_steps_set = {e.step_num for e in perturbed_trace.events}
         baseline_steps = len(clean_steps)
         perturbed_steps_count = len(perturbed_steps_set)
-        total_steps = max(baseline_steps, perturbed_steps_count, 1)
 
         baseline_routing_turns = len(clean_trace.get_events_by_type("routing_decision"))
         perturbed_routing_turns = len(perturbed_trace.get_events_by_type("routing_decision"))
@@ -286,10 +281,12 @@ class TraceDivergenceAnalyzer:
             perturbed_tool_calls,
         )
 
-        # Normalized position of first divergence
+        # Normalized position of first divergence within the aligned sequence,
+        # in [0, 1). Uses the alignment index rather than raw step_num / step
+        # count (which is not a true position and can reach or exceed 1.0).
         normalized_position: float | None = None
-        if first_div_step is not None:
-            normalized_position = first_div_step / total_steps
+        if first_div_index is not None and aligned:
+            normalized_position = first_div_index / len(aligned)
 
         # Outcome comparison
         baseline_answer = self._extract_final_answer(clean_trace)
@@ -328,54 +325,20 @@ class TraceDivergenceAnalyzer:
         """
         return registry.signature_for(event.event_type, event.payload)
 
-    def _compute_edit_distance(self, seq1: list[str], seq2: list[str]) -> EditDistanceResult:
-        """Compute edit distance with backtracking to identify edit types.
+    @staticmethod
+    def _edit_dp(seq1: list[str], seq2: list[str]) -> list[list[int]]:
+        """Wagner-Fischer DP table for two signature sequences.
 
-        Uses Wagner-Fischer algorithm with backtracking to count
-        substitutions, insertions, and deletions.
+        Shared by :meth:`_compute_edit_distance` (counts) and
+        :meth:`_align_and_score` (aligned pairs) so the two can never disagree.
+        Empty sequences are handled naturally: ``dp[i][0] = i``, ``dp[0][j] = j``.
         """
         m, n = len(seq1), len(seq2)
-
-        # Handle empty sequences
-        if m == 0 and n == 0:
-            return EditDistanceResult(
-                distance=0,
-                normalized=0.0,
-                substitutions=0,
-                insertions=0,
-                deletions=0,
-                baseline_length=0,
-                perturbed_length=0,
-            )
-        if m == 0:
-            return EditDistanceResult(
-                distance=n,
-                normalized=1.0,
-                substitutions=0,
-                insertions=n,
-                deletions=0,
-                baseline_length=0,
-                perturbed_length=n,
-            )
-        if n == 0:
-            return EditDistanceResult(
-                distance=m,
-                normalized=1.0,
-                substitutions=0,
-                insertions=0,
-                deletions=m,
-                baseline_length=m,
-                perturbed_length=0,
-            )
-
-        # DP table
         dp = [[0] * (n + 1) for _ in range(m + 1)]
-
         for i in range(m + 1):
             dp[i][0] = i
         for j in range(n + 1):
             dp[0][j] = j
-
         for i in range(1, m + 1):
             for j in range(1, n + 1):
                 if seq1[i - 1] == seq2[j - 1]:
@@ -386,40 +349,145 @@ class TraceDivergenceAnalyzer:
                         dp[i][j - 1],  # insertion
                         dp[i - 1][j - 1],  # substitution
                     )
+        return dp
 
-        # Backtrack to count edit types
-        substitutions = 0
-        insertions = 0
-        deletions = 0
+    def _compute_edit_distance(self, seq1: list[str], seq2: list[str]) -> EditDistanceResult:
+        """Normalized edit distance over signature sequences, with edit types.
+
+        Backtracks the shared DP (tie-break order match → substitution →
+        insertion → deletion) to decompose the distance into substitutions,
+        insertions, and deletions.
+        """
+        dp = self._edit_dp(seq1, seq2)
+        m, n = len(seq1), len(seq2)
+        substitutions = insertions = deletions = 0
         i, j = m, n
-
         while i > 0 or j > 0:
             if i > 0 and j > 0 and seq1[i - 1] == seq2[j - 1]:
-                # Match - no edit
                 i -= 1
                 j -= 1
             elif i > 0 and j > 0 and dp[i][j] == dp[i - 1][j - 1] + 1:
-                # Substitution
                 substitutions += 1
                 i -= 1
                 j -= 1
             elif j > 0 and dp[i][j] == dp[i][j - 1] + 1:
-                # Insertion (element in perturbed but not baseline)
                 insertions += 1
                 j -= 1
             elif i > 0 and dp[i][j] == dp[i - 1][j] + 1:
-                # Deletion (element in baseline but not perturbed)
                 deletions += 1
+                i -= 1
+            else:
+                break
+        distance = dp[m][n]
+        max_len = max(m, n)
+        return EditDistanceResult(
+            distance=distance,
+            normalized=distance / max_len if max_len > 0 else 0.0,
+            substitutions=substitutions,
+            insertions=insertions,
+            deletions=deletions,
+            baseline_length=m,
+            perturbed_length=n,
+        )
+
+    def _align_and_score(
+        self,
+        clean_events: list[TraceEvent],
+        perturbed_events: list[TraceEvent],
+    ) -> tuple[EditDistanceResult, list[AlignedEventPair]]:
+        """Align two traces and score their edit distance from one DP.
+
+        Backtracks the shared Wagner-Fischer DP over the event *signatures* to
+        produce BOTH the normalized edit distance (the primary metric) and the
+        aligned event pairs. Because the alignment is the optimal global
+        sequence alignment, it is robust to cascading mismatches: one extra
+        early event shifts nothing downstream (it becomes a single insertion),
+        so t* and the control-flow counts derived from these pairs are
+        shift-robust too — not just d_norm.
+
+        Backtrack tie-break order (match → substitution → insertion → deletion)
+        matches :meth:`_compute_edit_distance` exactly.
+        """
+        seq1 = [self._event_to_signature(e) for e in clean_events]
+        seq2 = [self._event_to_signature(e) for e in perturbed_events]
+        m, n = len(seq1), len(seq2)
+        dp = self._edit_dp(seq1, seq2)
+
+        # Backtrack once: count edit types AND emit aligned pairs.
+        substitutions = insertions = deletions = 0
+        pairs_rev: list[AlignedEventPair] = []
+        i, j = m, n
+        while i > 0 or j > 0:
+            if i > 0 and j > 0 and seq1[i - 1] == seq2[j - 1]:
+                # Match - structurally identical signature (lexical-only diffs).
+                c_evt, p_evt = clean_events[i - 1], perturbed_events[j - 1]
+                pairs_rev.append(
+                    AlignedEventPair(
+                        index=0,
+                        clean_event=c_evt,
+                        perturbed_event=p_evt,
+                        is_match=True,
+                        divergence_type=None,
+                    )
+                )
+                i -= 1
+                j -= 1
+            elif i > 0 and j > 0 and dp[i][j] == dp[i - 1][j - 1] + 1:
+                # Substitution - same position, differing structure.
+                substitutions += 1
+                c_evt, p_evt = clean_events[i - 1], perturbed_events[j - 1]
+                div_type = self._classify_divergence(c_evt, p_evt)
+                pairs_rev.append(
+                    AlignedEventPair(
+                        index=0,
+                        clean_event=c_evt,
+                        perturbed_event=p_evt,
+                        is_match=div_type is None,
+                        divergence_type=div_type,
+                    )
+                )
+                i -= 1
+                j -= 1
+            elif j > 0 and dp[i][j] == dp[i][j - 1] + 1:
+                # Insertion (event in perturbed but not baseline).
+                insertions += 1
+                p_evt = perturbed_events[j - 1]
+                pairs_rev.append(
+                    AlignedEventPair(
+                        index=0,
+                        clean_event=None,
+                        perturbed_event=p_evt,
+                        is_match=False,
+                        divergence_type=registry.missing_in_clean_type(p_evt.event_type),
+                    )
+                )
+                j -= 1
+            elif i > 0 and dp[i][j] == dp[i - 1][j] + 1:
+                # Deletion (event in baseline but not perturbed).
+                deletions += 1
+                c_evt = clean_events[i - 1]
+                pairs_rev.append(
+                    AlignedEventPair(
+                        index=0,
+                        clean_event=c_evt,
+                        perturbed_event=None,
+                        is_match=False,
+                        divergence_type=registry.EVENT_MISSING_IN_PERTURBED,
+                    )
+                )
                 i -= 1
             else:
                 # Should not happen, but handle gracefully
                 break
 
+        aligned = list(reversed(pairs_rev))
+        for idx, pair in enumerate(aligned):
+            pair.index = idx
+
         distance = dp[m][n]
         max_len = max(m, n)
         normalized = distance / max_len if max_len > 0 else 0.0
-
-        return EditDistanceResult(
+        edit_result = EditDistanceResult(
             distance=distance,
             normalized=normalized,
             substitutions=substitutions,
@@ -428,11 +496,17 @@ class TraceDivergenceAnalyzer:
             baseline_length=m,
             perturbed_length=n,
         )
+        return edit_result, aligned
 
     def _find_first_divergence(
         self, aligned: list[AlignedEventPair]
-    ) -> tuple[int | None, str | None]:
-        """Find the first structural divergence in aligned pairs."""
+    ) -> tuple[int | None, str | None, int | None]:
+        """Find the first structural divergence in aligned pairs.
+
+        Returns ``(step_num, divergence_type, aligned_index)``. The aligned
+        index is the position within the alignment, used for the normalized
+        divergence position in [0, 1).
+        """
         for pair in aligned:
             div_type = pair.divergence_type
             if div_type and div_type in STRUCTURAL_DIVERGENCE_TYPES:
@@ -441,104 +515,8 @@ class TraceDivergenceAnalyzer:
                     step = pair.clean_event.step_num
                 elif pair.perturbed_event:
                     step = pair.perturbed_event.step_num
-                return step, div_type
-        return None, None
-
-    def _align_traces(
-        self,
-        clean_events: list[TraceEvent],
-        perturbed_events: list[TraceEvent],
-    ) -> list[AlignedEventPair]:
-        """Align events across two traces.
-
-        Strategy: Match by (step_num, event_type) in occurrence order.
-        This handles cases where traces diverge in routing (different agents
-        called at different steps) while still aligning comparable events.
-        """
-        # Group events by step_num
-        clean_by_step = self._group_by_step(clean_events)
-        perturbed_by_step = self._group_by_step(perturbed_events)
-
-        all_steps = sorted(set(clean_by_step.keys()) | set(perturbed_by_step.keys()))
-        aligned: list[AlignedEventPair] = []
-        pair_index = 0
-
-        for step in all_steps:
-            clean_step_events = clean_by_step.get(step, [])
-            perturbed_step_events = perturbed_by_step.get(step, [])
-
-            step_pairs = self._align_step_events(
-                clean_step_events, perturbed_step_events, pair_index
-            )
-            aligned.extend(step_pairs)
-            pair_index += len(step_pairs)
-
-        return aligned
-
-    def _align_step_events(
-        self,
-        clean_events: list[TraceEvent],
-        perturbed_events: list[TraceEvent],
-        start_index: int,
-    ) -> list[AlignedEventPair]:
-        """Align events within a single step by event_type matching.
-
-        Within a step, match events by type in order. E.g., if both
-        traces have 2 tool_invocations at step 3, pair them 1-to-1.
-
-        Uses STRUCTURAL comparison only - lexical differences are ignored.
-        """
-        pairs: list[AlignedEventPair] = []
-        idx = start_index
-
-        # Group by event_type within step
-        clean_by_type: dict[str, list[TraceEvent]] = defaultdict(list)
-        perturbed_by_type: dict[str, list[TraceEvent]] = defaultdict(list)
-
-        for e in clean_events:
-            clean_by_type[e.event_type].append(e)
-        for e in perturbed_events:
-            perturbed_by_type[e.event_type].append(e)
-
-        all_types = sorted(set(clean_by_type.keys()) | set(perturbed_by_type.keys()))
-
-        for etype in all_types:
-            c_list = clean_by_type.get(etype, [])
-            p_list = perturbed_by_type.get(etype, [])
-
-            # Pair up in order
-            max_len = max(len(c_list), len(p_list))
-            for i in range(max_len):
-                c_evt = c_list[i] if i < len(c_list) else None
-                p_evt = p_list[i] if i < len(p_list) else None
-
-                div_type: str | None
-                if c_evt and p_evt:
-                    # Check for structural divergence only
-                    div_type = self._classify_divergence(c_evt, p_evt)
-                    # is_match = True if no structural divergence (div_type is None)
-                    is_match = div_type is None
-                elif c_evt:
-                    is_match = False
-                    div_type = registry.EVENT_MISSING_IN_PERTURBED
-                else:
-                    is_match = False
-                    # Registry-driven: agent_error appearing only in the
-                    # perturbed trace reports "agent_error_introduced".
-                    div_type = registry.missing_in_clean_type(etype)
-
-                pairs.append(
-                    AlignedEventPair(
-                        index=idx,
-                        clean_event=c_evt,
-                        perturbed_event=p_evt,
-                        is_match=is_match,
-                        divergence_type=div_type,
-                    )
-                )
-                idx += 1
-
-        return pairs
+                return step, div_type, pair.index
+        return None, None, None
 
     def _classify_divergence(self, clean: TraceEvent, perturbed: TraceEvent) -> str | None:
         """Classify the type of divergence between two events (registry-driven).
@@ -549,18 +527,20 @@ class TraceDivergenceAnalyzer:
             return registry.EVENT_TYPE_DIFFERS
         return registry.classify_divergence(clean.event_type, clean.payload, perturbed.payload)
 
-    def _group_by_step(self, events: list[TraceEvent]) -> dict[int, list[TraceEvent]]:
-        """Group events by step_num."""
-        groups: dict[int, list[TraceEvent]] = defaultdict(list)
-        for e in events:
-            groups[e.step_num].append(e)
-        return groups
-
     def _extract_final_answer(self, trace: TraceCollector) -> str | None:
-        """Extract the final answer from a trace, if present."""
+        """Extract the final answer from a trace, if present.
+
+        Prefers the literal ``answer`` (present only when the harness ran with
+        ``store_llm_content=True``); otherwise falls back to the always-present
+        ``answer_hash`` so the report's answer fields and ``answer_changed`` are
+        still meaningful for external agents that don't store raw content.
+        """
         final_events = trace.get_events_by_type("final_answer")
         if final_events:
-            return cast(str | None, final_events[-1].payload.get("answer"))
+            payload = final_events[-1].payload
+            if "answer" in payload:
+                return cast(str | None, payload.get("answer"))
+            return cast(str | None, payload.get("answer_hash"))
         return None
 
     def _compute_control_flow_changes(
@@ -574,6 +554,16 @@ class TraceDivergenceAnalyzer:
         perturbed_tool_calls: int,
     ) -> ControlFlowChanges:
         """Compute discrete control flow changes between traces.
+
+        ``reroutes`` and tool success/failure flips are *same-position
+        substitutions* read off the (now shift-robust) alignment; the cycle and
+        tool-call counters are aggregate count deltas. These are disjoint by
+        construction: a reroute is a substitution that preserves the routing
+        count, while an added/removed turn is an insertion/deletion that the
+        alignment does NOT classify as ``different_agent_routed``. So a single
+        disturbance is no longer counted twice in ``total_changes`` — the
+        historical double-count was a side effect of the step-bucketed
+        alignment manufacturing spurious reroutes around count changes.
 
         Args:
             aligned: Aligned event pairs.
@@ -589,7 +579,7 @@ class TraceDivergenceAnalyzer:
         """
         changes = ControlFlowChanges()
 
-        # === Reroutes (different agent chosen at same step) ===
+        # === Reroutes (different agent chosen at the same aligned position) ===
         for pair in aligned:
             if pair.divergence_type == "different_agent_routed":
                 changes.reroutes += 1

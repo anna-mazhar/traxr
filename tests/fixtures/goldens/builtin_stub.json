@@ -3,7 +3,7 @@
     "divergence_summary": {
       "max_d_norm": 0.8095238095238095,
       "mean_d_norm": 0.40476190476190477,
-      "mean_t_star_norm": 0.08333333333333333,
+      "mean_t_star_norm": 0.0,
       "pairs_measured": 2
     },
     "manifestation_prevalence": {
@@ -86,17 +86,17 @@
         "extended_execution": true,
         "extra_routing_cycles": 9,
         "missing_routing_cycles": 0,
-        "reroutes": 1,
+        "reroutes": 0,
         "tool_calls_added": 0,
         "tool_calls_removed": 1,
         "tool_failures_avoided": 0,
         "tool_failures_introduced": 0,
         "tool_state_changes": 0,
-        "total_changes": 12
+        "total_changes": 11
       },
       "d_norm": 0.8095238095238095,
       "delivery": "round_trip",
-      "divergence_type": "different_action",
+      "divergence_type": "event_missing_in_clean",
       "item_id": "sample.csv",
       "manifestation": "loop_or_extended_execution",
       "order_nondeterministic": false,
@@ -105,8 +105,8 @@
       "recovery": true,
       "status_baseline": "ok",
       "status_perturbed": "ok",
-      "t_star": 1,
-      "t_star_norm": 0.08333333333333333,
+      "t_star": 0,
+      "t_star_norm": 0.0,
       "task_success": true,
       "token_overhead": 3.0,
       "warnings": [],

@@ -176,3 +176,41 @@ def test_xlsx_round_trip_through_engine(fixtures_dir: Path, tmp_path: Path) -> N
     # The swapped headers landed in the file.
     assert rows[0][change["col1_idx"]] == change["col2_name"]
     assert rows[0][change["col2_idx"]] == change["col1_name"]
+
+
+class TestLosslessNumericCoercion:
+    """M4: output serialization must not silently re-type string cells."""
+
+    def test_lossless_number_preserves_ambiguous_strings(self) -> None:
+        from traxr.perturb.tabular import lossless_number
+
+        for raw in ("007", "1_000", "+5", "1e3", "NaN", "inf", "-inf", "hello"):
+            assert lossless_number(raw) == raw  # kept as text
+        # Genuine canonical numbers still convert.
+        assert lossless_number("42") == 42
+        assert lossless_number("3.14") == 3.14
+        assert lossless_number("-7") == -7
+
+    def test_to_json_keeps_ambiguous_cells_as_strings_and_is_valid(self) -> None:
+        import json
+
+        from traxr.perturb.tabular import TabularPerturbator
+
+        rows = [["id", "amt", "flag"], ["007", "3.14", "NaN"], ["42", "1_000", "x"]]
+        out = TabularPerturbator(seed=1)._to_json(rows)
+        parsed = json.loads(out)  # must be valid JSON (no bare NaN literal)
+        assert parsed[0] == {"id": "007", "amt": 3.14, "flag": "NaN"}
+        assert parsed[1] == {"id": 42, "amt": "1_000", "flag": "x"}
+
+    def test_write_excel_keeps_leading_zero_string(self, tmp_path: Path) -> None:
+        import openpyxl
+
+        engine = PerturbationEngine(seed=1)
+        out = tmp_path / "nums.xlsx"
+        engine.write_excel("id\tamt\n007\t42\n", str(out))
+        wb = openpyxl.load_workbook(out)
+        ws = wb.active
+        rows = [[cell.value for cell in row] for row in ws.iter_rows()]
+        wb.close()
+        assert rows[1][0] == "007"  # preserved as text, not 7
+        assert rows[1][1] == 42  # genuine integer still numeric

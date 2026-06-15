@@ -61,6 +61,28 @@ def test_invoke_agent_store_llm_content_includes_answer():
     assert collector.events[-1].payload["answer"] == "plain answer"
 
 
+def test_external_agent_report_answer_fields_use_hash():
+    """M1: with hash-only payloads (store_llm_content=False, the default), the
+    DivergenceReport answer fields are still populated and answer_changed is
+    correct — the analyzer falls back to answer_hash."""
+    baseline = TraceCollector(run_label="baseline")
+    perturbed = TraceCollector(run_label="perturbed")
+    invoke_agent(lambda task: "forty two", TASK, baseline)
+    invoke_agent(lambda task: "thirteen", TASK, perturbed)
+
+    report = TraceDivergenceAnalyzer().analyze(baseline, perturbed, task_id="t")
+    assert report.baseline_answer is not None
+    assert report.perturbed_answer is not None
+    assert report.baseline_answer != report.perturbed_answer  # differing hashes
+    assert report.answer_changed is True
+
+    # Identical answers -> identical hashes -> no change reported.
+    same = TraceCollector(run_label="perturbed")
+    invoke_agent(lambda task: "forty two", TASK, same)
+    report_same = TraceDivergenceAnalyzer().analyze(baseline, same, task_id="t")
+    assert report_same.answer_changed is False
+
+
 def test_non_str_return_raises_agent_contract_error():
     collector = TraceCollector(run_label="baseline")
     with pytest.raises(AgentContractError, match="got 'dict'"):

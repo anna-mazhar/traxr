@@ -666,5 +666,8 @@ def _deliver_perturbation(
         if dst_path.suffix.lower() in (".xlsx", ".xls"):
             engine.write_excel(result.corrupted_content, str(dst_path))
         else:
-            dst_path.write_text(result.corrupted_content)
+            # Match the UTF-8 read path (perturb/engine.py); some perturbations
+            # inject non-ASCII (e.g. ENCODING_ERROR's U+FFFD), which would raise
+            # UnicodeEncodeError or write mojibake under a non-UTF-8 locale.
+            dst_path.write_text(result.corrupted_content, encoding="utf-8")
     return result, {}

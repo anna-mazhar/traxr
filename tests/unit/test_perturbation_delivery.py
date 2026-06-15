@@ -42,6 +42,23 @@ def test_round_trip_writes_perturbed_csv(fixtures_dir, tmp_path):
     assert dst.read_text() != source.read_text()
 
 
+def test_round_trip_non_ascii_is_written_utf8(fixtures_dir, tmp_path):
+    """H2: a perturbation that injects non-ASCII (ENCODING_ERROR -> U+FFFD) must
+    write the perturbed file as UTF-8, not the platform-default encoding (which
+    raises UnicodeEncodeError or writes mojibake under e.g. cp1252 / LANG=C)."""
+    source = fixtures_dir / "sample.txt"
+    dst = tmp_path / "sample.txt"
+    spec = spec_for(PerturbationType.ENCODING_ERROR, DeliveryPath.ROUND_TRIP, "sample.txt", seed=7)
+    result, _ = _deliver_perturbation(spec, source, dst)
+    assert result.applied
+    raw = dst.read_bytes()
+    assert any(b > 127 for b in raw)  # non-ASCII really was injected
+    # Bytes are the UTF-8 encoding of the content (locale-independent), and the
+    # file round-trips through UTF-8 exactly.
+    assert raw == result.corrupted_content.encode("utf-8")
+    assert dst.read_text(encoding="utf-8") == result.corrupted_content
+
+
 def test_round_trip_null_content_writes_empty_file(fixtures_dir, tmp_path):
     source = fixtures_dir / "sample.csv"
     dst = tmp_path / "sample.csv"

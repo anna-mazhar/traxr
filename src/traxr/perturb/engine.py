@@ -11,7 +11,7 @@ from traxr.errors import OptionalDependencyError
 from .audio import AudioPerturbator
 from .image import ImagePerturbator
 from .pdf import PDFPerturbator
-from .tabular import TabularPerturbator
+from .tabular import TabularPerturbator, lossless_number
 from .types import PerturbationResult, PerturbationType
 
 
@@ -488,14 +488,9 @@ class PerturbationEngine:
 
         for row_idx, row in enumerate(rows, start=1):
             for col_idx, value in enumerate(row, start=1):
-                # Try to convert to number if possible
-                try:
-                    if "." in value:
-                        ws.cell(row=row_idx, column=col_idx, value=float(value))
-                    else:
-                        ws.cell(row=row_idx, column=col_idx, value=int(value))
-                except (ValueError, TypeError):
-                    ws.cell(row=row_idx, column=col_idx, value=value)
+                # Convert to a number only when the coercion is lossless, so the
+                # perturbed file does not silently re-type cells (e.g. "007").
+                ws.cell(row=row_idx, column=col_idx, value=lossless_number(value))
 
         wb.save(output_path)
         wb.close()

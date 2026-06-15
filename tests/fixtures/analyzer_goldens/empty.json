@@ -132,26 +132,6 @@
       "aligned_pairs": [
         {
           "clean_event": {
-            "agent_name": "researcher",
-            "content_hash": "a2f05797a11a6333",
-            "event_type": "memory_write",
-            "payload": {
-              "confidence": 0.9,
-              "content_hash": "c1",
-              "entry_id": "m1",
-              "entry_type": "note"
-            },
-            "sequence_index": 2,
-            "step_num": 1,
-            "timestamp": "2026-06-10T00:00:00+00:00"
-          },
-          "divergence_type": "event_missing_in_perturbed",
-          "index": 0,
-          "is_match": false,
-          "perturbed_event": null
-        },
-        {
-          "clean_event": {
             "agent_name": "router",
             "content_hash": "5afd3c2a9fe73a91",
             "event_type": "routing_decision",
@@ -164,7 +144,7 @@
             "timestamp": "2026-06-10T00:00:00+00:00"
           },
           "divergence_type": "event_missing_in_perturbed",
-          "index": 1,
+          "index": 0,
           "is_match": false,
           "perturbed_event": null
         },
@@ -188,24 +168,40 @@
             "timestamp": "2026-06-10T00:00:00+00:00"
           },
           "divergence_type": "event_missing_in_perturbed",
+          "index": 1,
+          "is_match": false,
+          "perturbed_event": null
+        },
+        {
+          "clean_event": {
+            "agent_name": "researcher",
+            "content_hash": "a2f05797a11a6333",
+            "event_type": "memory_write",
+            "payload": {
+              "confidence": 0.9,
+              "content_hash": "c1",
+              "entry_id": "m1",
+              "entry_type": "note"
+            },
+            "sequence_index": 2,
+            "step_num": 1,
+            "timestamp": "2026-06-10T00:00:00+00:00"
+          },
+          "divergence_type": "event_missing_in_perturbed",
           "index": 2,
           "is_match": false,
           "perturbed_event": null
         },
         {
           "clean_event": {
-            "agent_name": "critic",
-            "content_hash": "44e5d45a5a376392",
-            "event_type": "agent_output",
+            "agent_name": "router",
+            "content_hash": "e0b0e6c9ca086f6f",
+            "event_type": "routing_decision",
             "payload": {
-              "action": "critique",
-              "citation_ids": [
-                "m1"
-              ],
-              "content_hash": "c2",
-              "is_final_answer": false
+              "chosen_agent": "critic",
+              "reasoning_hash": "r2"
             },
-            "sequence_index": 5,
+            "sequence_index": 3,
             "step_num": 2,
             "timestamp": "2026-06-10T00:00:00+00:00"
           },
@@ -238,37 +234,23 @@
         },
         {
           "clean_event": {
-            "agent_name": "router",
-            "content_hash": "e0b0e6c9ca086f6f",
-            "event_type": "routing_decision",
+            "agent_name": "critic",
+            "content_hash": "44e5d45a5a376392",
+            "event_type": "agent_output",
             "payload": {
-              "chosen_agent": "critic",
-              "reasoning_hash": "r2"
+              "action": "critique",
+              "citation_ids": [
+                "m1"
+              ],
+              "content_hash": "c2",
+              "is_final_answer": false
             },
-            "sequence_index": 3,
+            "sequence_index": 5,
             "step_num": 2,
             "timestamp": "2026-06-10T00:00:00+00:00"
           },
           "divergence_type": "event_missing_in_perturbed",
           "index": 5,
-          "is_match": false,
-          "perturbed_event": null
-        },
-        {
-          "clean_event": {
-            "agent_name": "synthesizer",
-            "content_hash": "22f97ec4063918dd",
-            "event_type": "final_answer",
-            "payload": {
-              "answer": "$4.2M",
-              "answer_hash": "a1"
-            },
-            "sequence_index": 7,
-            "step_num": 3,
-            "timestamp": "2026-06-10T00:00:00+00:00"
-          },
-          "divergence_type": "event_missing_in_perturbed",
-          "index": 6,
           "is_match": false,
           "perturbed_event": null
         },
@@ -282,6 +264,24 @@
               "reasoning_hash": "r3"
             },
             "sequence_index": 6,
+            "step_num": 3,
+            "timestamp": "2026-06-10T00:00:00+00:00"
+          },
+          "divergence_type": "event_missing_in_perturbed",
+          "index": 6,
+          "is_match": false,
+          "perturbed_event": null
+        },
+        {
+          "clean_event": {
+            "agent_name": "synthesizer",
+            "content_hash": "22f97ec4063918dd",
+            "event_type": "final_answer",
+            "payload": {
+              "answer": "$4.2M",
+              "answer_hash": "a1"
+            },
+            "sequence_index": 7,
             "step_num": 3,
             "timestamp": "2026-06-10T00:00:00+00:00"
           },
@@ -310,7 +310,7 @@
         "tool_state_changes": 0,
         "total_changes": 5
       },
-      "divergence_normalized_position": 0.3333333333333333,
+      "divergence_normalized_position": 0.0,
       "edit_distance": {
         "baseline_length": 8,
         "deletions": 8,
@@ -350,7 +350,7 @@
         "tool_state_changes": 0,
         "total_changes": 5
       },
-      "divergence_normalized_position": 0.3333333333333333,
+      "divergence_normalized_position": 0.0,
       "edit_distance": {
         "baseline_length": 8,
         "deletions": 8,
