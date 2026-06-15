@@ -155,7 +155,9 @@ def test_tstar_in_bounds(pair):
     }
     assert report.first_divergence_step in all_steps
     assert report.divergence_normalized_position is not None
-    assert 0.0 < report.divergence_normalized_position <= 1.0
+    # Position is aligned_index / num_pairs, so it lives in [0, 1): a
+    # divergence at the first pair is 0.0, and it can never reach 1.0 (H1).
+    assert 0.0 <= report.divergence_normalized_position < 1.0
 
 
 @given(trace_pairs)

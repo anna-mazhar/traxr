@@ -58,13 +58,14 @@ class TraceEvent:
     def semantic_equals(self, other: "TraceEvent") -> bool:
         """Check if two events are semantically equivalent.
 
-        Uses content_hash for fast path, then falls back to
-        key-field comparison per event type (registry-driven).
+        Compares key fields per event type (registry-driven). ``content_hash``
+        is deliberately NOT used as a definitive-equality fast path: it is a
+        16-hex (64-bit) digest of a ``default=str`` rendering, so a hash match
+        does not guarantee structural equality — relying on it could declare
+        differing payloads equal.
         """
         if self.event_type != other.event_type:
             return False
-        if self.content_hash == other.content_hash:
-            return True
         return self._key_field_compare(other)
 
     def _key_field_compare(self, other: "TraceEvent") -> bool:
