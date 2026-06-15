@@ -65,10 +65,22 @@ class TestSemanticEquals:
         b = make_event("agent_output", {"action": "critique"})
         assert not a.semantic_equals(b)
 
-    def test_identical_hash_fast_path(self):
+    def test_identical_events_are_equal(self):
         a = make_event()
         b = make_event()
         assert a.semantic_equals(b)
+
+    def test_hash_collision_does_not_force_equality(self):
+        """M2: equal content_hash must NOT short-circuit to equal.
+
+        ``content_hash`` is a truncated 64-bit digest, so a collision is
+        possible; equality must still be decided by the registry key fields.
+        Here we force the collision and assert the differing key fields win.
+        """
+        a = make_event(payload={"chosen_agent": "researcher"})
+        b = make_event(payload={"chosen_agent": "critic"}, content_hash=a.content_hash)
+        assert a.content_hash == b.content_hash  # forced collision
+        assert not a.semantic_equals(b)  # key fields differ → not equal
 
     def test_routing_decision_key_fields(self):
         a = make_event(payload={"chosen_agent": "researcher", "reasoning_hash": "r1"})
