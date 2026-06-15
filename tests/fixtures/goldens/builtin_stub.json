@@ -10,7 +10,7 @@
       "loop_or_extended_execution": 0.5,
       "no_observable_effect": 0.5
     },
-    "recovery_rate": 0.5,
+    "recovery_rate": 1.0,
     "token_overhead_summary": {
       "max": 3.0,
       "mean": 2.0
@@ -69,7 +69,7 @@
       "order_nondeterministic": false,
       "paper_group": "no_observable_effect",
       "perturbation": "column_swap",
-      "recovery": false,
+      "recovery": null,
       "status_baseline": "ok",
       "status_perturbed": "ok",
       "t_star": null,

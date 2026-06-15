@@ -73,6 +73,28 @@ def test_empty_aggregates_are_none_or_empty():
     assert results.token_overhead_summary() == {"mean": None, "max": None}
 
 
+def test_recovery_rate_counts_only_diverged_pairs():
+    """N-M1: non-diverged pairs carry recovery=None and must not dilute the rate
+    (the denominator is diverged pairs, per the docstring)."""
+    pairs = [
+        pair(d_norm=0.4, recovery=True),  # diverged, answer survived
+        pair(perturbation="null_content", recovery=None),  # not diverged → excluded
+        pair(perturbation="unit_change", recovery=None),  # not diverged → excluded
+    ]
+    results = make_results(pairs)
+    assert results.recovery_rate() == pytest.approx(1.0)  # 1 survived / 1 diverged, not /3
+
+
+def test_to_json_path_is_written_utf8(tmp_path):
+    """N-M2: the CLI-facing results export must be UTF-8, not platform-default."""
+    results = make_results([pair(d_norm=0.3, recovery=True)])
+    results.answers = {"baseline": "4�2"}  # non-ASCII (U+FFFD) in the payload
+    out = tmp_path / "results.json"
+    text = results.to_json(path=out)
+    assert out.read_bytes() == text.encode("utf-8")
+    assert json.loads(out.read_text(encoding="utf-8"))["answers"]["baseline"] == "4�2"
+
+
 def test_to_json_shape_and_timestamp_stripping(tmp_path):
     results = make_results(SAMPLE_PAIRS)
     results.traces["baseline"]["events"] = [

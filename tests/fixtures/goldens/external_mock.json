@@ -9,7 +9,7 @@
     "manifestation_prevalence": {
       "no_observable_effect": 1.0
     },
-    "recovery_rate": 0.0,
+    "recovery_rate": null,
     "token_overhead_summary": {
       "max": 1.0,
       "mean": 1.0
@@ -71,7 +71,7 @@
       "order_nondeterministic": false,
       "paper_group": "no_observable_effect",
       "perturbation": "column_swap",
-      "recovery": false,
+      "recovery": null,
       "status_baseline": "ok",
       "status_perturbed": "ok",
       "t_star": null,
@@ -104,7 +104,7 @@
       "order_nondeterministic": false,
       "paper_group": "no_observable_effect",
       "perturbation": "null_content",
-      "recovery": false,
+      "recovery": null,
       "status_baseline": "ok",
       "status_perturbed": "ok",
       "t_star": null,
