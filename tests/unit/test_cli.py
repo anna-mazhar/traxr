@@ -51,6 +51,22 @@ def test_run_stub_writes_results_json(csv_file, tmp_path, capsys):
     assert data["pairs"][0]["perturbation"] == "column_swap"
 
 
+def test_run_stub_writes_report(csv_file, tmp_path, capsys):
+    common = (
+        "run", "--stub", "--file", csv_file, "--question", "q",
+        "--perturbations", "column_swap",
+    )  # fmt: skip
+    html = tmp_path / "report.html"
+    assert run_cli(*common, "--report", str(html)) == 0
+    assert "report written to" in capsys.readouterr().out
+    assert html.read_text().startswith("<!DOCTYPE html>")
+
+    md = tmp_path / "report.md"
+    assert run_cli(*common, "--report", str(md)) == 0
+    capsys.readouterr()
+    assert md.read_text().startswith("# Traxr experiment report")
+
+
 def test_run_stub_env_var(csv_file, capsys, monkeypatch):
     monkeypatch.setenv("TRAXR_STUB", "1")
     assert run_cli("run", "--file", csv_file, "--question", "q", "--dry-run") == 0
