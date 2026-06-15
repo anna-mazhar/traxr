@@ -80,6 +80,21 @@ _PAPER_GROUP_BY_CATEGORY: dict[str, str] = {
     NO_OBSERVABLE_EFFECT: NO_OBSERVABLE_EFFECT_GROUP,
 }
 
+#: One-line, neutral descriptions of each fine category — the single source for
+#: the report legend (:meth:`traxr.results.ExperimentResults.to_report`). These
+#: describe what the category *means*, not whether it is good or bad.
+MANIFESTATION_DESCRIPTIONS: dict[str, str] = {
+    CATASTROPHIC_FAILURE: "Null answer alongside an early stop or large trace divergence.",
+    EARLY_TERMINATION: "The perturbed run finished before the baseline did.",
+    LOOP_OR_EXTENDED_EXECUTION: "The perturbed run ran longer, with extra control-flow changes.",
+    SILENT_SEMANTIC_CORRUPTION: "The answer changed while the trace looked unchanged.",
+    STRATEGY_REROUTE: "The agent routed to a different agent at some aligned step.",
+    STRUCTURAL_DIVERGENCE_WITH_OUTCOME_CHANGE: "The trace diverged and the answer changed.",
+    STRUCTURAL_DIVERGENCE_RECOVERED: "The trace diverged but the answer was unchanged.",
+    NO_OBSERVABLE_EFFECT: "No change in either the trace or the answer.",
+    OUTCOME_CHANGE_UNCATEGORIZED: "The answer changed with no structural signal to explain it.",
+}
+
 
 @dataclass(frozen=True)
 class PairMetrics:

@@ -69,6 +69,11 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     run.add_argument("--seed", type=int, default=42)
     run.add_argument("--out", help="Write results JSON here.")
+    run.add_argument(
+        "--report",
+        help="Write a human-readable report here (format inferred from the "
+        "extension: .html or .md).",
+    )
     run.add_argument("--dry-run", action="store_true", help="Print the plan; run nothing.")
     run.add_argument("--keep-artifacts", action="store_true", help="Keep perturbed file copies.")
 
@@ -108,6 +113,12 @@ def _cmd_run(args: argparse.Namespace) -> int:
     if args.out:
         outcome.to_json(args.out)
         print(f"results written to {args.out}")
+    if args.report:
+        fmt = "html" if args.report.lower().endswith((".html", ".htm")) else "md"
+        from pathlib import Path
+
+        Path(args.report).write_text(outcome.to_report(fmt), encoding="utf-8")
+        print(f"report written to {args.report}")
     return 0
 
 

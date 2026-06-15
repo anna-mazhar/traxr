@@ -4,7 +4,14 @@ import json
 
 import pytest
 
-from traxr.results import STATUS_SKIPPED, ExperimentResults, PairResult
+from traxr.results import (
+    STATUS_SKIPPED,
+    ExperimentResults,
+    PairResult,
+    _control_flow_summary,
+    _noise_floor_mark,
+    _tristate,
+)
 
 
 def make_results(pairs, *, agent_kind="external", noise_floor=None, noise_floor_runs=0):
@@ -144,6 +151,62 @@ def test_to_report_md_and_html():
     assert html.startswith("<!DOCTYPE html>") and "column_swap" in html
     with pytest.raises(ValueError, match="md.*html"):
         results.to_report("pdf")
+
+
+def test_summary_promotes_manifestations_and_floor_count():
+    """#2/#4: manifestations read up top; a measured floor reports how many
+    pairs fall within it."""
+    pairs = [
+        pair(d_norm=0.03, manifestation="structural_divergence_recovered", within_noise_floor=True),
+        pair(
+            perturbation="null_content",
+            d_norm=0.6,
+            manifestation="catastrophic_failure",
+            within_noise_floor=False,
+        ),
+    ]
+    summary = make_results(pairs, noise_floor=0.05, noise_floor_runs=2).summary()
+    assert "manifestations:" in summary
+    assert "1 of 2 measured pair(s) within floor" in summary
+
+
+def test_report_has_extended_columns_legend_and_floor_marks():
+    """#1/#2/#3: the table surfaces recovery + control flow + the noise-floor
+    marker, and a legend defines the categories that occurred."""
+    results = make_results(SAMPLE_PAIRS, noise_floor=0.05, noise_floor_runs=2)
+    results.pairs[0].within_noise_floor = True
+    md = results.to_report("md")
+    assert "recovery" in md and "control flow" in md and "<=floor" in md
+    assert "## Manifestations" in md and "strategy_reroute" in md
+    assert "✓" in md  # within-floor marker rendered
+    html = results.to_report("html")
+    assert "Per-pair results" in html and "Manifestations" in html
+
+
+def test_t_star_anchored_to_perturbed_trace_event():
+    """#3: t* renders as ``step N · event_type`` using the perturbed trace."""
+    results = make_results([pair(perturbation="column_swap", d_norm=0.2, t_star=2)])
+    results.traces["f.csv::column_swap"] = {
+        "run_label": "f.csv::column_swap",
+        "event_count": 1,
+        "events": [{"event_type": "routing_decision", "step_num": 2}],
+    }
+    assert "step 2 · routing_decision" in results.to_report("md")
+
+
+def test_report_helpers_render_neutral_cells():
+    assert _tristate(None) == "—" and _tristate(True) == "yes" and _tristate(False) == "no"
+    assert _noise_floor_mark(pair(within_noise_floor=True)) == "✓"
+    assert _noise_floor_mark(pair(within_noise_floor=False)) == "·"
+    assert _noise_floor_mark(pair(within_noise_floor=None)) == "—"
+    assert _control_flow_summary(None) == "—"
+    assert _control_flow_summary({}) == "—"
+    assert (
+        _control_flow_summary(
+            {"reroutes": 2, "tool_failures_introduced": 1, "early_termination": True}
+        )
+        == "2× reroute, tool ok→fail, early stop"
+    )
 
 
 def test_to_dataframe_shape():
