@@ -12,6 +12,7 @@ from ..retrieval.items import RetrievalItem
 @dataclass
 class TaintState:
     """Tracks tainted retrieval IDs, memory IDs, and decision steps."""
+
     tainted_retrieval_ids: Set[RetrievalID] = field(default_factory=set)
     tainted_memory_ids: Set[str] = field(default_factory=set)
     tainted_decision_steps: Set[int] = field(default_factory=set)
@@ -66,6 +67,9 @@ class TaintTracker:
         self._state = TaintState()
         self._step_retrieval_shown: Dict[int, Set[RetrievalID]] = {}
         self._step_memory_read: Dict[int, Set[str]] = {}
+        # Every memory entry written (tainted or not) — the denominator
+        # population for get_taint_in_notes_rate.
+        self._written_memory_ids: Set[str] = set()
 
     @property
     def state(self) -> TaintState:
@@ -138,6 +142,11 @@ class TaintTracker:
             for rid in self._step_retrieval_shown.get(step, set())
         )
 
+        # Record every memory entry written, regardless of taint, so the
+        # taint-in-notes rate has a well-defined denominator.
+        if memory_entry:
+            self._written_memory_ids.add(memory_entry.id)
+
         is_tainted = cited_tainted or read_tainted or shown_tainted
 
         if is_tainted:
@@ -161,21 +170,17 @@ class TaintTracker:
                 )
 
     def get_taint_in_notes_rate(self) -> float:
-        """Calculate rate of tainted memory entries."""
-        total_memory = len(self._state.taint_sources)
-        if total_memory == 0:
+        """Fraction of written memory entries (notes) that are tainted, in [0, 1].
+
+        Numerator and denominator are drawn from the same population — memory
+        entries *written* — so the rate is well-defined (it can no longer
+        exceed 1.0, nor read 0.0 when sources exist but nothing was read).
+        """
+        if not self._written_memory_ids:
             return 0.0
 
-        tainted_memory = len(self._state.tainted_memory_ids)
-        # Get total unique memory IDs we've seen
-        all_memory_ids = set()
-        for ids in self._step_memory_read.values():
-            all_memory_ids.update(ids)
-
-        if not all_memory_ids:
-            return 0.0
-
-        return tainted_memory / len(all_memory_ids)
+        tainted_written = len(self._state.tainted_memory_ids & self._written_memory_ids)
+        return tainted_written / len(self._written_memory_ids)
 
     def get_tainted_decision_rate(self) -> float:
         """Calculate rate of tainted decision steps."""
