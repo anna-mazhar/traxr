@@ -310,6 +310,9 @@ class TabularPerturbator:
             col2 = self._rng.randint(0, len(rows[0]) - 1)
             attempts += 1
 
+        if col2 == col1:  # degenerate RNG never picked a distinct column
+            return rows, "No swap (degenerate RNG: identical columns)", []
+
         col1_name = rows[0][col1] if col1 < len(rows[0]) else f"col{col1}"
         col2_name = rows[0][col2] if col2 < len(rows[0]) else f"col{col2}"
 

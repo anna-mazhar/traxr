@@ -90,6 +90,20 @@ def test_column_swap_preserves_cell_multiset(csv_content: str) -> None:
     assert change["col1_idx"] != change["col2_idx"]
 
 
+def test_column_swap_degenerate_rng_records_no_swap() -> None:
+    """L3: a degenerate RNG that never picks a distinct second column must not
+    record a no-op self-swap as an applied change."""
+    from traxr.perturb.tabular import TabularPerturbator
+
+    pert = TabularPerturbator(seed=1)
+    pert._rng.randint = lambda a, b: 0  # type: ignore[method-assign]  # always col 0
+    rows = [["a", "b", "c"], ["1", "2", "3"]]
+    result_rows, desc, changes = pert._swap_columns(rows)
+    assert changes == []  # no false column_swap entry
+    assert result_rows == rows  # rows untouched
+    assert "No swap" in desc
+
+
 def test_label_corrupt_only_touches_header(csv_content: str) -> None:
     result = PerturbationEngine(seed=42).apply(csv_content, "csv", PerturbationType.LABEL_CORRUPT)
     original = parse_csv(csv_content)
