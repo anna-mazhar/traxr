@@ -157,7 +157,7 @@ class ExperimentResults:
         if path is not None:
             from pathlib import Path
 
-            Path(path).write_text(text)
+            Path(path).write_text(text, encoding="utf-8")
         return text
 
     def to_dataframe(self) -> Any:
