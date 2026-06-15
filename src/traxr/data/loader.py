@@ -268,7 +268,8 @@ def _read_excel(path: Path, max_chars: int) -> LoadedArtifact:
 
     try:
         lines = []
-        for sheet_name in wb.sheetnames:
+        sheet_names = list(wb.sheetnames)  # read before close() in the finally
+        for sheet_name in sheet_names:
             sheet = wb[sheet_name]
             lines.append(f"=== Sheet: {sheet_name} ===")
             for row in sheet.iter_rows():
@@ -285,7 +286,7 @@ def _read_excel(path: Path, max_chars: int) -> LoadedArtifact:
         content=content[:max_chars],
         file_type="xlsx",
         metadata={
-            "sheet_names": list(wb.sheetnames),
+            "sheet_names": sheet_names,
             "truncated": len(content) > max_chars,
             "file_name": path.name,
         },
