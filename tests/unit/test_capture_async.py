@@ -58,6 +58,30 @@ def test_async_streaming_reassembly():
     assert server.requests[0]["stream_options"] == {"include_usage": True}
 
 
+def test_async_stream_aclose_prefers_async_closer():
+    """N-L2: for an async stream exposing only aclose() (no sync close), the
+    wrapper awaits aclose() instead of reaching for a missing close and leaking
+    the underlying HTTP response."""
+    import warnings
+
+    from traxr.capture.openai_wrap import _AsyncStreamCapture
+    from traxr.errors import TokenUnavailableWarning
+
+    closed = {"aclose": False}
+
+    class AsyncOnlyStream:
+        async def aclose(self):  # deliberately no sync close()
+            closed["aclose"] = True
+
+    session, _ = make_session()
+    with bind_session(session), warnings.catch_warnings():
+        warnings.simplefilter("ignore", TokenUnavailableWarning)
+        capture = _AsyncStreamCapture(AsyncOnlyStream(), session, step=1, kwargs={})
+        asyncio.run(capture.aclose())
+
+    assert closed["aclose"] is True
+
+
 def test_contextvar_binding_propagates_into_asyncio_tasks():
     server = MockOpenAIServer([completion("from task")])
     client = instrument(server.async_client())

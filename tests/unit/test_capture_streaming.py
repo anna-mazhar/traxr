@@ -1,10 +1,12 @@
 """Tier 0 streaming capture — delta reassembly, usage injection, abandonment."""
 
+import warnings
+
 import pytest
 from _openai_mock import USAGE, MockOpenAIServer, chunk
 
 from traxr.capture import CaptureSession, bind_session, instrument
-from traxr.errors import TokenUnavailableWarning
+from traxr.errors import ConcurrentTraceWarning, TokenUnavailableWarning
 from traxr.trace.collector import TraceCollector
 
 
@@ -39,6 +41,26 @@ def test_streaming_reassembles_content_and_usage():
     assert payload["usage"] == USAGE
     # include_usage was injected into the outgoing request.
     assert server.requests[0]["stream_options"] == {"include_usage": True}
+
+
+def test_held_unconsumed_stream_does_not_flag_concurrency():
+    """N-L3: a held, unconsumed stream must not keep the call 'in flight' — a
+    second create() on the same thread is sequential, not concurrent."""
+    server = MockOpenAIServer([content_chunks(), content_chunks()])
+    client = instrument(server.client())
+    session, collector = make_session()
+    with bind_session(session), warnings.catch_warnings():
+        warnings.simplefilter("error", ConcurrentTraceWarning)
+        s1 = client.chat.completions.create(model="mock-model", messages=[], stream=True)
+        # s1 is intentionally held un-consumed across the next create().
+        s2 = client.chat.completions.create(model="mock-model", messages=[], stream=True)
+        for _ in s1:
+            pass
+        for _ in s2:
+            pass
+
+    assert session.concurrent_detected is False
+    assert len(collector.get_events_by_type("llm_call")) == 2
 
 
 def test_streaming_tool_call_argument_delta_reassembly():

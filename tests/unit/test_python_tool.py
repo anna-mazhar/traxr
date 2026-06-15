@@ -40,6 +40,14 @@ class TestExecution:
         assert not result.success
         assert "Unknown operation" in result.error
 
+    def test_non_ascii_code_and_output_round_trip(self, tool):
+        """N-L1: non-ASCII source and output survive the code/result file
+        roundtrip (written and read as UTF-8, not the platform default)."""
+        result = tool.execute("run", code='msg = "héllo — naïve ✓"\nprint(msg)')
+        assert result.success
+        assert result.output["stdout"] == "héllo — naïve ✓\n"
+        assert result.output["variables"]["msg"] == "héllo — naïve ✓"
+
     def test_unpicklable_context_is_skipped_and_reported(self):
         tool = PythonTool(timeout=15.0)
         tool.set_context({"ok": 41, "bad": lambda: None})
