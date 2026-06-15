@@ -65,7 +65,11 @@ def test_emission_from_two_threads_flags_concurrency_once():
         thread.join()
 
     assert session.concurrent_detected is True
-    assert len([w for w in record if w.category is ConcurrentTraceWarning]) == 1
+    concurrency_warnings = [w for w in record if w.category is ConcurrentTraceWarning]
+    assert len(concurrency_warnings) == 1
+    # H3: stacklevel=2 lands deterministically at the detecting call site in
+    # the capture module, regardless of the (varying) caller depth.
+    assert concurrency_warnings[0].filename.endswith("capture/context.py")
 
 
 def test_overlapping_in_flight_calls_flag_concurrency():

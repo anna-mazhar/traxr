@@ -21,7 +21,11 @@ from langgraph.prebuilt import ToolNode, tools_condition  # noqa: E402
 from traxr.agents import Task, from_langgraph, invoke_agent  # noqa: E402
 from traxr.agents.langgraph import _get_handler_cls  # noqa: E402
 from traxr.capture import CaptureSession, bind_session, instrument  # noqa: E402
-from traxr.errors import AgentContractError, TokenUnavailableWarning  # noqa: E402
+from traxr.errors import (  # noqa: E402
+    AgentContractError,
+    ConcurrentTraceWarning,
+    TokenUnavailableWarning,
+)
 from traxr.metrics.analyzer import TraceDivergenceAnalyzer  # noqa: E402
 from traxr.trace.collector import TraceCollector  # noqa: E402
 
@@ -184,6 +188,25 @@ def routing_graph():
     graph.add_edge("table_agent", END)
     graph.add_edge("text_agent", END)
     return graph.compile()
+
+
+def test_overlapping_llm_runs_flag_concurrency_once():
+    """H3: a second LLM run starting before the first ends (LangGraph runs
+    callbacks on executor threads even when sequential) flags the run as
+    concurrent exactly once, via the Tier 1 note_concurrency path."""
+    collector = TraceCollector(run_label="run")
+    session = CaptureSession(collector)
+    handler = _get_handler_cls()(session)
+
+    with bind_session(session), pytest.warns(ConcurrentTraceWarning) as record:
+        handler.on_llm_start({}, ["p1"], run_id="run-a")
+        handler.on_llm_start({}, ["p2"], run_id="run-b")  # overlaps run-a
+        handler.on_llm_start({}, ["p3"], run_id="run-c")  # must not warn again
+
+    assert session.concurrent_detected is True
+    concurrency = [w for w in record if w.category is ConcurrentTraceWarning]
+    assert len(concurrency) == 1
+    assert concurrency[0].filename.endswith("capture/context.py")
 
 
 def test_reroute_detected_across_perturbed_pair():

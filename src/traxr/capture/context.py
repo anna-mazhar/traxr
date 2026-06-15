@@ -148,7 +148,16 @@ class CaptureSession:
             self._note_concurrency_locked()
 
     def _note_concurrency_locked(self) -> None:
-        """Record concurrent tracing (caller holds the lock); warn once per run."""
+        """Record concurrent tracing (caller holds the lock); warn once per run.
+
+        The once-per-run dedup is the lock-guarded ``concurrent_detected`` flag,
+        not the (non-thread-safe) ``warnings`` registry. ``stacklevel`` is
+        best-effort: this warns about a run-level condition, not a fixable line
+        of user code, and the call depth varies (sync ``emit`` vs. the Tier 1
+        ``note_concurrency`` wrapper fired from a callback dispatcher), so no
+        fixed deep level is correct. ``stacklevel=2`` points just past this
+        private helper at the detecting call site.
+        """
         if self.concurrent_detected:
             return
         self.concurrent_detected = True
@@ -158,7 +167,7 @@ class CaptureSession:
             "the pair will be flagged order_nondeterministic. Use the noise "
             "floor to calibrate, or set require_sequential=True to fail fast.",
             ConcurrentTraceWarning,
-            stacklevel=3,
+            stacklevel=2,
         )
 
 
