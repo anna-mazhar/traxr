@@ -86,6 +86,9 @@ class _SpanRec:
     size: float
     color: int  # sRGB int as reported by get_text("dict")
     new_text: str = ""
+    #: change entries this span produced (same dict objects as in plan.changes),
+    #: so a skip can be flagged by span identity rather than bbox equality.
+    changes: list[dict[str, Any]] = field(default_factory=list)
 
     def __post_init__(self) -> None:
         if not self.new_text:
@@ -267,15 +270,15 @@ class PDFInPlaceEditor:
                 prefix, suffix = rng.choice(_NUMBER_NOISE_PATTERNS)
                 corrupted = f"{prefix}{original}{suffix}"
                 budget -= 1
-                plan.changes.append(
-                    {
-                        "type": "number_corruption",
-                        "page": rec.page_no,
-                        "rect": list(rec.bbox),
-                        "original": original,
-                        "corrupted": corrupted,
-                    }
-                )
+                change = {
+                    "type": "number_corruption",
+                    "page": rec.page_no,
+                    "rect": list(rec.bbox),
+                    "original": original,
+                    "corrupted": corrupted,
+                }
+                plan.changes.append(change)
+                rec.changes.append(change)
                 return corrupted
 
             rec.new_text = _NUMBER_PATTERN.sub(corrupt, rec.text)
@@ -308,15 +311,15 @@ class PDFInPlaceEditor:
                         return match.group(0)
                     if rng.random() < probability:
                         budget -= 1
-                        plan.changes.append(
-                            {
-                                "type": kind,
-                                "page": rec.page_no,
-                                "rect": list(rec.bbox),
-                                "original": match.group(0),
-                                "corrupted": marker,
-                            }
-                        )
+                        change = {
+                            "type": kind,
+                            "page": rec.page_no,
+                            "rect": list(rec.bbox),
+                            "original": match.group(0),
+                            "corrupted": marker,
+                        }
+                        plan.changes.append(change)
+                        rec.changes.append(change)
                         return marker
                     return match.group(0)
 
@@ -347,9 +350,8 @@ class PDFInPlaceEditor:
             fontsize = self._fit_fontsize(fitz, rec.new_text, width, rec.size)
             if fontsize is None:
                 rec.new_text = rec.text  # never redact a span we cannot reinsert
-                for change in plan.changes:
-                    if change["rect"] == list(rec.bbox):
-                        change["skipped"] = "replacement does not fit at >=60% fontsize"
+                for change in rec.changes:  # span identity, not bbox equality
+                    change["skipped"] = "replacement does not fit at >=60% fontsize"
                 continue
             rec.size = fontsize
             plan.edits.append(rec)
