@@ -137,7 +137,10 @@ class TestFirstDivergence:
         report = analyze(clean, perturbed)
         assert report.first_divergence_step == 3
         assert report.first_divergence_type == "different_agent_routed"
-        assert report.divergence_normalized_position == pytest.approx(3 / 4)
+        # Normalized position is the divergence's index within the 4-pair
+        # alignment (3rd pair, index 2), not raw step_num / step count.
+        assert report.divergence_normalized_position == pytest.approx(2 / 4)
+        assert 0.0 <= report.divergence_normalized_position <= 1.0
 
     def test_lexical_difference_is_not_divergence(self):
         clean = [(1, "routing_decision", {"chosen_agent": "planner", "reasoning_hash": "r1"})]
@@ -358,3 +361,100 @@ class TestOutcomeAndReport:
         assert report.perturbed_events == 0
         assert report.baseline_routing_turns == 1
         assert report.baseline_tool_calls == 1
+
+
+class TestShiftRobustAlignment:
+    """Regressions for the code-review findings C2 (shift-robust alignment),
+    C1 (reroute double-count), and H1 (normalized position bound)."""
+
+    def test_extra_early_event_does_not_cascade(self):
+        """C2: an extra early event must not shift every later pairing.
+
+        The perturbed trace inserts one extra ``llm_call`` at the front; every
+        subsequent event is structurally identical to the baseline. A global
+        alignment pairs them 1-to-1 (one insertion, no cascade), so t* is the
+        injected event and the later events are NOT reported as missing.
+        """
+        tail = [
+            (1, "routing_decision", {"chosen_agent": "planner"}),
+            (2, "tool_invocation", {"tool_name": "csv", "operation": "read", "success": True}),
+            (3, "routing_decision", {"chosen_agent": "analyst"}),
+            (4, "final_answer", {"answer": "42", "answer_hash": "h"}),
+        ]
+        clean = tail
+        # One extra early event, then the SAME tail shifted to later steps.
+        perturbed = [(1, "llm_call", {"model": "m", "tool_name": None})] + [
+            (s + 1, etype, payload) for (s, etype, payload) in tail
+        ]
+        report = analyze(clean, perturbed)
+        # Exactly one structural divergence: the inserted event.
+        assert report.edit_distance is not None
+        assert report.edit_distance.distance == 1
+        assert report.edit_distance.insertions == 1
+        # No spurious missing_in_* cascade: only one non-match pair.
+        non_matches = [p for p in report.aligned_pairs if not p.is_match]
+        assert len(non_matches) == 1
+        assert non_matches[0].divergence_type == "event_missing_in_clean"
+        # The four shared tail events all still pair structurally.
+        assert sum(1 for p in report.aligned_pairs if p.is_match) == 4
+
+    def test_pure_reroute_is_not_double_counted(self):
+        """C1: a same-position reroute counts once, not as reroute + cycle.
+
+        Both traces have the SAME number of routing turns; only the agent at
+        step 2 differs. That is a substitution (reroute), so the routing-cycle
+        counters must stay zero — the disturbance is counted exactly once.
+        """
+        clean = [
+            (1, "routing_decision", {"chosen_agent": "planner"}),
+            (2, "routing_decision", {"chosen_agent": "analyst"}),
+        ]
+        perturbed = [
+            (1, "routing_decision", {"chosen_agent": "planner"}),
+            (2, "routing_decision", {"chosen_agent": "critic"}),
+        ]
+        cf = analyze(clean, perturbed).control_flow_changes
+        assert cf is not None
+        assert cf.reroutes == 1
+        assert cf.extra_routing_cycles == 0
+        assert cf.missing_routing_cycles == 0
+        assert cf.total_changes == 1
+
+    def test_inserted_routing_turn_is_not_a_phantom_reroute(self):
+        """C1: an inserted routing turn is a cycle change, not a reroute.
+
+        ``critic`` is inserted between ``planner`` and ``analyst``. The old
+        step-bucketed alignment would have paired step-2 ``analyst`` with the
+        shifted step-2 ``critic`` and reported a phantom reroute *and* an extra
+        cycle for the same disturbance — the double-count. The shift-robust
+        alignment records only the insertion (one extra cycle, no reroute).
+        """
+        clean = [
+            (1, "routing_decision", {"chosen_agent": "planner"}),
+            (2, "routing_decision", {"chosen_agent": "analyst"}),
+        ]
+        perturbed = [
+            (1, "routing_decision", {"chosen_agent": "planner"}),
+            (2, "routing_decision", {"chosen_agent": "critic"}),  # inserted turn
+            (3, "routing_decision", {"chosen_agent": "analyst"}),
+        ]
+        cf = analyze(clean, perturbed).control_flow_changes
+        assert cf is not None
+        assert cf.reroutes == 0
+        assert cf.extra_routing_cycles == 1
+
+    def test_normalized_position_stays_within_unit_interval(self):
+        """H1: normalized position is in [0, 1] even with sparse step numbers."""
+        clean = [
+            (10, "routing_decision", {"chosen_agent": "planner"}),
+            (20, "tool_invocation", {"tool_name": "csv", "operation": "read", "success": True}),
+            (30, "routing_decision", {"chosen_agent": "analyst"}),
+        ]
+        perturbed = [
+            (10, "routing_decision", {"chosen_agent": "planner"}),
+            (20, "tool_invocation", {"tool_name": "csv", "operation": "read", "success": True}),
+            (30, "routing_decision", {"chosen_agent": "critic"}),  # late divergence
+        ]
+        report = analyze(clean, perturbed)
+        assert report.divergence_normalized_position is not None
+        assert 0.0 <= report.divergence_normalized_position <= 1.0

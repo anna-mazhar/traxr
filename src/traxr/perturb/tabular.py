@@ -7,11 +7,39 @@ top of every :meth:`TabularPerturbator.apply`.
 import csv
 import io
 import json
+import math
 import random
 from collections.abc import Callable
 from typing import Any
 
 from .types import PerturbationResult, PerturbationType
+
+
+def lossless_number(value: str) -> int | float | str:
+    """Coerce a cell to ``int``/``float`` only if the conversion round-trips exactly.
+
+    The clean file is copied verbatim, so the perturbed artifact must not
+    silently re-type cells. Strings like ``"007"``, ``"1_000"``, ``"+5"``,
+    ``"1e3"``, ``"NaN"``, and ``"inf"`` are preserved as text: re-typing them
+    would confound divergence attribution, and ``float("NaN")`` would also emit
+    invalid JSON. Genuine canonical numbers (``"42"``, ``"3.14"``) still convert.
+    """
+    s = value.strip()
+    if not s:
+        return value
+    try:
+        i = int(s)
+        if str(i) == s:  # rejects "007", "+5", "1_000"
+            return i
+    except (ValueError, TypeError):
+        pass
+    try:
+        f = float(s)
+        if math.isfinite(f) and repr(f) == s:  # rejects NaN/inf and non-canonical forms
+            return f
+    except (ValueError, TypeError):
+        pass
+    return value
 
 
 class TabularPerturbator:
@@ -258,14 +286,8 @@ class TabularPerturbator:
             obj: dict[str, Any] = {}
             for i, key in enumerate(header):
                 value = row[i] if i < len(row) else ""
-                # Try to preserve numeric types
-                try:
-                    if "." in value:
-                        obj[key] = float(value)
-                    else:
-                        obj[key] = int(value)
-                except (ValueError, TypeError):
-                    obj[key] = value
+                # Preserve numeric types only when the coercion is lossless.
+                obj[key] = lossless_number(value)
             data.append(obj)
 
         return json.dumps(data, indent=2, ensure_ascii=False)
