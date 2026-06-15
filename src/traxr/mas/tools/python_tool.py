@@ -37,7 +37,7 @@ ctx_path, code_path, out_path = sys.argv[1:4]
 
 with open(ctx_path, "rb") as f:
     context = pickle.load(f)
-with open(code_path) as f:
+with open(code_path, encoding="utf-8") as f:
     code = f.read()
 
 import pandas as pd
@@ -77,7 +77,7 @@ else:
         "variables": variables,
     }
 
-with open(out_path, "w") as f:
+with open(out_path, "w", encoding="utf-8") as f:
     json.dump(result, f)
 """
 
@@ -181,8 +181,8 @@ class PythonTool(BaseTool):
 
             with open(ctx_path, "wb") as f:
                 pickle.dump(context, f)
-            code_path.write_text(code)
-            driver_path.write_text(_DRIVER)
+            code_path.write_text(code, encoding="utf-8")
+            driver_path.write_text(_DRIVER, encoding="utf-8")
 
             try:
                 proc = subprocess.run(
@@ -215,7 +215,7 @@ class PythonTool(BaseTool):
                     metadata={"code_length": len(code)},
                 )
 
-            with open(out_path) as f:
+            with open(out_path, encoding="utf-8") as f:
                 result = json.load(f)
 
         if not result.get("success"):

@@ -51,7 +51,15 @@ class CaptureSession:
         *,
         max_llm_calls_per_run: int | None = None,
         store_llm_content: bool = False,
+        detect_thread_concurrency: bool = True,
     ):
+        #: When False, emission from more than one thread is not treated as a
+        #: concurrency signal. The thread heuristic is deliberately conservative
+        #: (it cannot prove non-overlap), so it false-positives for strictly
+        #: sequential agents that hop threads; opt out here when the run is known
+        #: to be sequential. Overlapping in-flight ``create`` calls are still
+        #: detected regardless of this flag.
+        self.detect_thread_concurrency = detect_thread_concurrency
         self.collector = collector
         self.max_llm_calls_per_run = max_llm_calls_per_run
         self.store_llm_content = store_llm_content
@@ -117,9 +125,10 @@ class CaptureSession:
     ) -> TraceEvent:
         """Emit an event to this run's collector at the given (or current) step."""
         with self._lock:
-            self._emit_threads.add(threading.get_ident())
-            if len(self._emit_threads) > 1:
-                self._note_concurrency_locked()
+            if self.detect_thread_concurrency:
+                self._emit_threads.add(threading.get_ident())
+                if len(self._emit_threads) > 1:
+                    self._note_concurrency_locked()
             step = self._step if step_num is None else step_num
         return self.collector.emit(
             event_type=event_type,
