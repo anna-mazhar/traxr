@@ -364,6 +364,7 @@ class EpisodeRunner:
                     )
 
         # Track provenance and taint for output
+        entry = None  # the memory entry this output wrote, if any
         if output.memory_entry_id:
             # Get the memory entry that was written
             entries = state.read_memory()
@@ -400,7 +401,7 @@ class EpisodeRunner:
                 )
 
         taint_tracker.on_agent_output(
-            step_num, output, None, read_memory_ids
+            step_num, output, entry, read_memory_ids
         )
 
         # Emit agent_output trace event

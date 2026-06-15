@@ -553,9 +553,19 @@ class Experiment:
                 pair_warnings.append(f"scorer raised {type(exc).__name__}: {exc}")
 
         diverged = bool(d_norm) or control_flow.total_changes > 0
+        # Recovery answers "did the answer survive the perturbation?" and is only
+        # defined when the perturbation had an observable effect — a structural
+        # divergence OR an answer change (the latter covers silent semantic
+        # corruption: same trace, different answer). A pure no-op (not diverged
+        # and answer unchanged) is left None so it is excluded from
+        # recovery_rate()'s denominator, which the prior code wrongly diluted.
         recovery: bool | None = None
-        if baseline.status == STATUS_OK and perturbed.status == STATUS_OK:
-            recovery = diverged and not answer_changed
+        if (
+            baseline.status == STATUS_OK
+            and perturbed.status == STATUS_OK
+            and (diverged or answer_changed)
+        ):
+            recovery = not answer_changed
 
         token_overhead: float | None = None
         if baseline.cost.total_tokens > 0 and perturbed.cost.total_tokens > 0:
