@@ -6,7 +6,12 @@ matplotlib = pytest.importorskip("matplotlib")
 matplotlib.use("Agg")
 
 from traxr.results import ExperimentResults, PairResult  # noqa: E402
-from traxr.viz import plot_d_norm, plot_manifestations, plot_t_star  # noqa: E402
+from traxr.viz import (  # noqa: E402
+    plot_d_norm,
+    plot_manifestations,
+    plot_t_star,
+    render_svgs,
+)
 
 
 @pytest.fixture()
@@ -66,6 +71,21 @@ def test_compose_on_existing_axes(results):
     assert plot_t_star(results, ax=axes[1]) is axes[1]
     assert plot_manifestations(results, ax=axes[2]) is axes[2]
     matplotlib.pyplot.close("all")
+
+
+def test_render_svgs_returns_three_inline_svgs(results):
+    svgs = render_svgs(results)
+    assert len(svgs) == 3
+    assert all(s.startswith("<svg") for s in svgs)  # XML/DOCTYPE preamble stripped
+
+
+def test_render_svgs_without_matplotlib_returns_empty(monkeypatch):
+    import sys
+
+    # Simulate the [viz] extra being absent: Figure import fails -> [].
+    monkeypatch.setitem(sys.modules, "matplotlib.figure", None)
+    empty = ExperimentResults(pairs=[], traces={}, answers={}, fingerprint={})
+    assert render_svgs(empty) == []
 
 
 def test_missing_matplotlib_raises(monkeypatch):

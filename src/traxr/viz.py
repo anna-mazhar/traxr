@@ -11,7 +11,7 @@ from typing import Any
 from traxr.errors import OptionalDependencyError
 from traxr.results import ExperimentResults
 
-__all__ = ["plot_d_norm", "plot_manifestations", "plot_t_star"]
+__all__ = ["plot_d_norm", "plot_manifestations", "plot_t_star", "render_svgs"]
 
 _NOISE_FLOOR_STYLE = {"color": "#d62728", "linestyle": "--", "linewidth": 1.0}
 
@@ -79,3 +79,36 @@ def plot_manifestations(results: ExperimentResults, ax: Any = None) -> Any:
     ax.set_title("How perturbations manifested")
     ax.invert_yaxis()
     return ax
+
+
+def render_svgs(
+    results: ExperimentResults, *, figsize: tuple[float, float] = (5.0, 3.2)
+) -> list[str]:
+    """Inline-SVG strings for the three plots, for embedding in HTML reports.
+
+    Returns an empty list when matplotlib (the ``[viz]`` extra) is unavailable,
+    so :meth:`~traxr.results.ExperimentResults.to_report` can degrade
+    gracefully. Builds figures via the pyplot-free ``Figure`` API, so it needs
+    no display/backend and mutates no global state.
+    """
+    try:
+        from matplotlib.figure import Figure
+    except ImportError:
+        return []
+    import io
+
+    svgs: list[str] = []
+    for plot in (plot_d_norm, plot_t_star, plot_manifestations):
+        fig = Figure(figsize=figsize)
+        plot(results, ax=fig.subplots())
+        fig.tight_layout()
+        buf = io.StringIO()
+        fig.savefig(buf, format="svg")
+        svgs.append(_svg_body(buf.getvalue()))
+    return svgs
+
+
+def _svg_body(svg_text: str) -> str:
+    """Drop the XML/DOCTYPE preamble so the ``<svg>`` embeds inline in HTML5."""
+    idx = svg_text.find("<svg")
+    return svg_text[idx:] if idx != -1 else svg_text
