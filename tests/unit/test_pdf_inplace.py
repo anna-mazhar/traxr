@@ -336,3 +336,37 @@ def test_overflow_skip_is_recorded(fixtures_dir: Path, tmp_path: Path) -> None:
     assert result.changes  # ...but the skips are recorded
     assert all(c.get("skipped") for c in result.changes)
     assert extracted(src) == extracted(dst)  # nothing redacted
+
+
+def test_skip_flag_uses_span_identity_not_bbox() -> None:
+    """L1: with two spans sharing identical geometry, only the span that truly
+    overflows is flagged skipped — the skip is joined by span identity, not by
+    bbox equality (which would mis-flag the duplicate-geometry sibling)."""
+    from traxr.perturb import pdf_inplace as mod
+
+    bbox = (10.0, 10.0, 60.0, 22.0)
+    fits = mod._SpanRec(page_no=0, bbox=bbox, text="100", size=11.0, color=0, new_text="X1")
+    overflows = mod._SpanRec(page_no=0, bbox=bbox, text="200", size=11.0, color=0, new_text="X2")
+    plan = mod._Plan()
+    for rec in (fits, overflows):
+        change = {
+            "type": "number_corruption",
+            "page": 0,
+            "rect": list(bbox),
+            "original": rec.text,
+            "corrupted": rec.new_text,
+        }
+        plan.changes.append(change)
+        rec.changes.append(change)
+
+    editor = PDFInPlaceEditor(seed=42)
+    # Only the "overflows" span (new_text "X2") cannot be reinserted.
+    editor._fit_fontsize = (  # type: ignore[method-assign]
+        lambda fitz, text, width, original_size: None if text == "X2" else original_size
+    )
+    editor._finalize_span_plan(fitz, plan, [fits, overflows])
+
+    by_original = {c["original"]: c for c in plan.changes}
+    assert "skipped" not in by_original["100"]  # the span that fit is untouched
+    assert by_original["200"].get("skipped")  # only the overflowing span flagged
+    assert fits in plan.edits and overflows not in plan.edits
