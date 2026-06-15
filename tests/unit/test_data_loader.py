@@ -37,7 +37,11 @@ def test_read_xlsx_fixture(fixtures_dir: Path) -> None:
     assert artifact.file_type == "xlsx"
     assert "=== Sheet:" in artifact.content
     assert "\t" in artifact.content
+    # N-L4: sheet_names is captured before the workbook is closed, so it stays in
+    # step with the per-sheet sections written into the content.
     assert artifact.metadata["sheet_names"]
+    for name in artifact.metadata["sheet_names"]:
+        assert f"=== Sheet: {name} ===" in artifact.content
 
 
 def test_read_pdf_fixture(fixtures_dir: Path) -> None:

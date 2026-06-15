@@ -72,6 +72,24 @@ def test_emission_from_two_threads_flags_concurrency_once():
     assert concurrency_warnings[0].filename.endswith("capture/context.py")
 
 
+def test_detect_thread_concurrency_false_silences_thread_heuristic():
+    """L2: the thread-based heuristic is opt-out-able for known-sequential
+    (thread-hopping) runs, while overlapping in-flight detection is unaffected."""
+    session, _ = make_session(detect_thread_concurrency=False)
+    with bind_session(session), warnings.catch_warnings():
+        warnings.simplefilter("error", ConcurrentTraceWarning)
+        session.emit("llm_call", {})
+
+        def worker():
+            session.emit("llm_call", {})
+
+        thread = threading.Thread(target=worker)
+        thread.start()
+        thread.join()
+
+    assert session.concurrent_detected is False
+
+
 def test_overlapping_in_flight_calls_flag_concurrency():
     barrier = threading.Barrier(2, timeout=5)
     session, collector = make_session()

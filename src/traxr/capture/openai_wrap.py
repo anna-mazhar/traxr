@@ -94,6 +94,11 @@ def make_create_wrapper(original: Callable[..., Any]) -> Callable[..., Any]:
         if inspect.isawaitable(result):
             return _finish_async(result, session, step, kwargs, streaming)
         if streaming:
+            # The create() call has returned; balance begin_llm_call now so a
+            # held, unconsumed stream is not counted as an in-flight call and
+            # does not trip a false ConcurrentTraceWarning (N-L3). The llm_call
+            # event is still emitted when the stream is consumed/closed/GC'd.
+            session.end_llm_call()
             return _SyncStreamCapture(result, session, step, kwargs)
         session.end_llm_call()
         _emit_completion(session, step, kwargs, result)
@@ -117,6 +122,9 @@ async def _finish_async(
         session.end_llm_call()
         raise
     if streaming:
+        # Balance begin_llm_call at create-return time, not at stream finalize —
+        # see the N-L3 note in create().
+        session.end_llm_call()
         return _AsyncStreamCapture(response, session, step, kwargs)
     session.end_llm_call()
     _emit_completion(session, step, kwargs, response)
@@ -317,7 +325,8 @@ class _StreamState:
                 for _, entry in sorted(self._tool_calls.items())
             ],
         )
-        self._session.end_llm_call()
+        # NB: end_llm_call() is balanced at create-return time (see the wrapper),
+        # not here — finalize only emits the reassembled llm_call event.
 
 
 class _SyncStreamCapture:
@@ -389,9 +398,11 @@ class _AsyncStreamCapture:
 
     async def aclose(self) -> None:
         self._state.finalize(exhausted=False)
-        aclose = getattr(self._stream, "close", None)
-        if aclose is not None:
-            result = aclose()
+        # Prefer the async stream's aclose(); some SDK async streams expose only
+        # aclose (no sync close), so reaching for "close" leaks the HTTP response.
+        closer = getattr(self._stream, "aclose", None) or getattr(self._stream, "close", None)
+        if closer is not None:
+            result = closer()
             if inspect.isawaitable(result):
                 await result
 
