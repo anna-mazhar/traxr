@@ -273,10 +273,19 @@ register(
     ),
 )
 
+# The signature is count-agnostic on purpose: a change in *how many* entries
+# an agent read / items it was shown is treated as lexical, not structural, so
+# it does not move d_norm while leaving t*/control-flow/is_match blind to it
+# (the three would otherwise disagree — d_norm rising while the typed metrics
+# report a match). The *number of read/retrieval events* still registers
+# structurally via insertion/deletion. FUTURE: a later version may treat
+# read/retrieval cardinality as structural by registering a classifier that
+# returns "different_memory_read_count" / "different_item_count" (and the count
+# back in the signature) so all four metrics agree it diverged.
 register(
     "memory_read",
     EventTypeSpec(
-        signature=lambda p: f"mem_read:{len(p.get('entry_ids', []))}",
+        signature=lambda p: "mem_read",
         key_fields_equal=lambda p1, p2: (
             set(p1.get("entry_ids", [])) == set(p2.get("entry_ids", []))
         ),
@@ -286,7 +295,7 @@ register(
 register(
     "retrieval_shown",
     EventTypeSpec(
-        signature=lambda p: f"retrieval:{p.get('item_count', 0)}",
+        signature=lambda p: "retrieval",
         key_fields_equal=lambda p1, p2: (
             p1.get("query") == p2.get("query")
             and set(p1.get("item_hashes", [])) == set(p2.get("item_hashes", []))
