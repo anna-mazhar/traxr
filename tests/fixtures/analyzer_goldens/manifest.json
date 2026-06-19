@@ -24,6 +24,12 @@
       "first_divergence_type": "event_missing_in_perturbed",
       "normalized_edit_distance": 0.2
     },
+    "memory_read_count": {
+      "answer_changed": false,
+      "first_divergence_step": null,
+      "first_divergence_type": null,
+      "normalized_edit_distance": 0.0
+    },
     "single_edit": {
       "answer_changed": false,
       "first_divergence_step": 1,

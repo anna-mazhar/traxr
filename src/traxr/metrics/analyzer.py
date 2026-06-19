@@ -177,6 +177,10 @@ class DivergenceReport:
     perturbed_tool_calls: int = 0
 
     # === OUTCOME ===
+    # answer_changed here is the exact / hash-based signal (raw answers when
+    # both traces stored them, else answer_hash). The experiment runner's
+    # PairResult.answer_changed — normalized string comparison — is the
+    # authoritative per-pair outcome signal; this one is for the report.
     baseline_answer: str | None = None
     perturbed_answer: str | None = None
     answer_changed: bool = False
@@ -288,10 +292,12 @@ class TraceDivergenceAnalyzer:
         if first_div_index is not None and aligned:
             normalized_position = first_div_index / len(aligned)
 
-        # Outcome comparison
+        # Outcome comparison. The display fields keep the raw-else-hash form,
+        # but answer_changed compares like-with-like (see _answer_changed) so a
+        # raw answer is never diffed against a 16-hex hash.
         baseline_answer = self._extract_final_answer(clean_trace)
         perturbed_answer = self._extract_final_answer(perturbed_trace)
-        answer_changed = baseline_answer != perturbed_answer
+        answer_changed = self._answer_changed(clean_trace, perturbed_trace)
 
         return DivergenceReport(
             task_id=task_id,
@@ -527,21 +533,42 @@ class TraceDivergenceAnalyzer:
             return registry.EVENT_TYPE_DIFFERS
         return registry.classify_divergence(clean.event_type, clean.payload, perturbed.payload)
 
-    def _extract_final_answer(self, trace: TraceCollector) -> str | None:
-        """Extract the final answer from a trace, if present.
+    def _answer_fields(self, trace: TraceCollector) -> tuple[str | None, str | None]:
+        """Return ``(raw_answer, answer_hash)`` from the last ``final_answer``.
 
-        Prefers the literal ``answer`` (present only when the harness ran with
-        ``store_llm_content=True``); otherwise falls back to the always-present
-        ``answer_hash`` so the report's answer fields and ``answer_changed`` are
-        still meaningful for external agents that don't store raw content.
+        ``raw_answer`` is present only when the harness ran with
+        ``store_llm_content=True``; ``answer_hash`` is always present on a
+        ``final_answer`` event. Both are ``None`` when the trace has no
+        ``final_answer`` event.
         """
         final_events = trace.get_events_by_type("final_answer")
-        if final_events:
-            payload = final_events[-1].payload
-            if "answer" in payload:
-                return cast(str | None, payload.get("answer"))
-            return cast(str | None, payload.get("answer_hash"))
-        return None
+        if not final_events:
+            return None, None
+        payload = final_events[-1].payload
+        raw = cast(str | None, payload.get("answer")) if "answer" in payload else None
+        return raw, cast(str | None, payload.get("answer_hash"))
+
+    def _extract_final_answer(self, trace: TraceCollector) -> str | None:
+        """The final answer for display: the raw ``answer`` if stored, else the
+        always-present ``answer_hash`` (so report answer fields stay meaningful
+        for external agents that don't store raw content)."""
+        raw, answer_hash = self._answer_fields(trace)
+        return raw if raw is not None else answer_hash
+
+    def _answer_changed(self, clean: TraceCollector, perturbed: TraceCollector) -> bool:
+        """Whether the two traces' final answers differ, compared like-with-like.
+
+        Diffs the raw answers only when *both* sides stored them; otherwise
+        diffs the always-present ``answer_hash``. This avoids the spurious
+        "changed" that a raw-answer-vs-hash comparison would produce when the
+        two traces stored content differently (the analyzer is a public API
+        usable on arbitrary saved traces, where that can happen).
+        """
+        c_raw, c_hash = self._answer_fields(clean)
+        p_raw, p_hash = self._answer_fields(perturbed)
+        if c_raw is not None and p_raw is not None:
+            return c_raw != p_raw
+        return c_hash != p_hash
 
     def _compute_control_flow_changes(
         self,
