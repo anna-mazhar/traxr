@@ -330,7 +330,9 @@ class PerturbationEngine:
                 perturbation_type=perturbation,
                 description="",
                 applied=False,
-                skip_reason="multi-sheet workbooks are not supported for tabular perturbation in v1",
+                skip_reason=(
+                    "multi-sheet workbooks are not supported for tabular perturbation in v1"
+                ),
                 file_type=file_type,
                 file_name=file_name,
             )
