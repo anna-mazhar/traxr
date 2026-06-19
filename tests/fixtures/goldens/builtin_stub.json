@@ -1,8 +1,8 @@
 {
   "aggregates": {
     "divergence_summary": {
-      "max_d_norm": 0.8095238095238095,
-      "mean_d_norm": 0.40476190476190477,
+      "max_d_norm": 0.7857142857142857,
+      "mean_d_norm": 0.39285714285714285,
       "mean_t_star_norm": 0.0,
       "pairs_measured": 2
     },
@@ -94,7 +94,7 @@
         "tool_state_changes": 0,
         "total_changes": 11
       },
-      "d_norm": 0.8095238095238095,
+      "d_norm": 0.7857142857142857,
       "delivery": "round_trip",
       "divergence_type": "event_missing_in_clean",
       "item_id": "sample.csv",
