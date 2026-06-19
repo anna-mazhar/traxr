@@ -47,6 +47,17 @@ def test_no_files_fails_fast():
         Experiment(files=[], question="q", agent=dummy_agent)
 
 
+def test_duplicate_basenames_rejected(tmp_path):
+    # Two inputs sharing a basename would collide in staging/labels/traces;
+    # fail fast (before the existence check) with a clear error.
+    with pytest.raises(ExperimentConfigError, match="unique basenames"):
+        Experiment(
+            files=[tmp_path / "a" / "report.csv", tmp_path / "b" / "report.csv"],
+            question="q",
+            agent=dummy_agent,
+        )
+
+
 def test_invalid_on_run_error():
     with pytest.raises(ExperimentConfigError, match="on_run_error"):
         ExperimentConfig(on_run_error="ignore")

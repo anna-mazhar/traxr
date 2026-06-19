@@ -38,10 +38,12 @@ class TestBuiltinSignatures:
             ),
             ("tool_invocation", {}, "tool:?:?:ok"),  # success defaults to True
             ("memory_write", {"entry_type": "note"}, "mem_write:note"),
-            ("memory_read", {"entry_ids": ["m1", "m2"]}, "mem_read:2"),
-            ("memory_read", {}, "mem_read:0"),
-            ("retrieval_shown", {"item_count": 3}, "retrieval:3"),
-            ("retrieval_shown", {}, "retrieval:0"),
+            # Count-agnostic by design (entry/item cardinality is lexical, not
+            # structural): the signature is constant regardless of count.
+            ("memory_read", {"entry_ids": ["m1", "m2"]}, "mem_read"),
+            ("memory_read", {}, "mem_read"),
+            ("retrieval_shown", {"item_count": 3}, "retrieval"),
+            ("retrieval_shown", {}, "retrieval"),
             (
                 "agent_output",
                 {"action": "critique", "is_final_answer": False},
