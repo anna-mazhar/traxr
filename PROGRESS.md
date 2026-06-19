@@ -227,3 +227,26 @@ None.
 - 2026-06-12: analyzer golden fixtures renamed from `tests/fixtures/parity/`
   to `tests/fixtures/analyzer_goldens/` (`make analyzer-goldens`); new
   `make standalone-check` gate added to the Makefile and CI.
+- 2026-06-18: deep-review fixes F1–F5 landed at their introducing branches and
+  cascaded to m6. F1 — `memory_read`/`retrieval_shown` signatures made
+  count-agnostic so read/retrieval cardinality is lexical (d_norm, t*,
+  control-flow, and is_match now agree); new `memory_read_count` golden.
+  F2 — `Experiment` rejects duplicate input basenames. F3 — analyzer
+  `answer_changed` compares like-with-like (raw-vs-raw or hash-vs-hash).
+  F4 — multi-sheet `.xlsx` skipped for tabular perturbation. F5 — Tier-1
+  `total_steps` counted from `llm_call` events.
+
+### Deferred enhancements (from the 2026-06 deep review)
+Considered and intentionally left for a future version (recorded next to the
+relevant code as well):
+- **Read/retrieval cardinality as structural (F1).** Today a change in *how
+  many* memory entries / retrieval items an agent consumed is lexical. A later
+  version may make it structural by registering a classifier returning
+  `different_memory_read_count` / `different_item_count` (and putting the count
+  back in the signature) so the change shows in t* and control-flow too.
+- **Path-aware `source_id` (F2).** Support duplicate input basenames end-to-end
+  (`sources.py`, matrix labels, staging dirs, trace keys) instead of rejecting
+  them.
+- **Multi-sheet workbook support (F4).** Preserve per-sheet structure on the
+  perturbation round-trip (split on the `=== Sheet: … ===` markers and write
+  each block back to its own named sheet) instead of skipping.
