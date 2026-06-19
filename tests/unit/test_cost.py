@@ -2,7 +2,33 @@
 
 import json
 
+from traxr.experiment import _cost_from_trace
 from traxr.metrics.cost import BaselineStore, CostComparison, CostProxy
+from traxr.trace.collector import TraceCollector
+
+
+class TestCostFromTrace:
+    def test_total_steps_counts_llm_call_events(self):
+        collector = TraceCollector("run")
+        collector.emit(
+            "llm_call", 1, "ext", {"usage": {"prompt_tokens": 10, "completion_tokens": 5}}
+        )
+        collector.emit("tool_request", 1, "ext", {"tool_name": "x"})
+        collector.emit(
+            "llm_call", 2, "ext", {"usage": {"prompt_tokens": 20, "completion_tokens": 7}}
+        )
+        cost = _cost_from_trace(collector)
+        assert cost.total_steps == 2  # two llm_call events; tool_request is not a step
+        assert cost.total_tokens == 42
+
+    def test_total_steps_independent_of_session_counter(self):
+        # Tier 1 (LangGraph) emits llm_call events without ever calling
+        # begin_llm_call, so step count must come from the events themselves.
+        collector = TraceCollector("run")
+        collector.emit("llm_call", 1, "langgraph", {"usage": None})
+        cost = _cost_from_trace(collector)
+        assert cost.total_steps == 1
+        assert cost.total_tokens == 0
 
 
 class TestCostProxy:

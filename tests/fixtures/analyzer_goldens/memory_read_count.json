@@ -1,0 +1,430 @@
+{
+  "case": "memory_read_count",
+  "description": "Identical traces except the perturbed run reads more memory entries (2->5) and is shown more retrieval items (2->4). Cardinality is lexical, not structural: d_norm stays 0 and t*/control-flow/is_match all agree nothing structural diverged (regression lock for the F1 fix).",
+  "input": {
+    "clean_trace": {
+      "event_count": 5,
+      "events": [
+        {
+          "agent_name": "router",
+          "content_hash": "h_route1",
+          "event_type": "routing_decision",
+          "payload": {
+            "chosen_agent": "data_analyst",
+            "reasoning_hash": "r1"
+          },
+          "sequence_index": 0,
+          "step_num": 1,
+          "timestamp": "2026-06-10T00:00:00+00:00"
+        },
+        {
+          "agent_name": "data_analyst",
+          "content_hash": "h_memread",
+          "event_type": "memory_read",
+          "payload": {
+            "entry_ids": [
+              "m1",
+              "m2"
+            ],
+            "entry_types": [
+              "note"
+            ]
+          },
+          "sequence_index": 1,
+          "step_num": 1,
+          "timestamp": "2026-06-10T00:00:00+00:00"
+        },
+        {
+          "agent_name": "data_analyst",
+          "content_hash": "h_retr",
+          "event_type": "retrieval_shown",
+          "payload": {
+            "item_count": 2,
+            "item_hashes": [
+              "i1",
+              "i2"
+            ],
+            "query": "revenue"
+          },
+          "sequence_index": 2,
+          "step_num": 1,
+          "timestamp": "2026-06-10T00:00:00+00:00"
+        },
+        {
+          "agent_name": "synthesizer",
+          "content_hash": "h_out",
+          "event_type": "agent_output",
+          "payload": {
+            "action": "answer",
+            "citation_ids": [
+              "m1"
+            ],
+            "content_hash": "c2",
+            "is_final_answer": true
+          },
+          "sequence_index": 3,
+          "step_num": 2,
+          "timestamp": "2026-06-10T00:00:00+00:00"
+        },
+        {
+          "agent_name": "synthesizer",
+          "content_hash": "h_final",
+          "event_type": "final_answer",
+          "payload": {
+            "answer": "$4.2M",
+            "answer_hash": "a1"
+          },
+          "sequence_index": 4,
+          "step_num": 2,
+          "timestamp": "2026-06-10T00:00:00+00:00"
+        }
+      ],
+      "run_label": "baseline"
+    },
+    "perturbed_trace": {
+      "event_count": 5,
+      "events": [
+        {
+          "agent_name": "router",
+          "content_hash": "h_route1",
+          "event_type": "routing_decision",
+          "payload": {
+            "chosen_agent": "data_analyst",
+            "reasoning_hash": "r1"
+          },
+          "sequence_index": 0,
+          "step_num": 1,
+          "timestamp": "2026-06-10T00:00:00+00:00"
+        },
+        {
+          "agent_name": "data_analyst",
+          "content_hash": "h_memread",
+          "event_type": "memory_read",
+          "payload": {
+            "entry_ids": [
+              "m1",
+              "m2",
+              "m3",
+              "m4",
+              "m5"
+            ],
+            "entry_types": [
+              "note"
+            ]
+          },
+          "sequence_index": 1,
+          "step_num": 1,
+          "timestamp": "2026-06-10T00:00:00+00:00"
+        },
+        {
+          "agent_name": "data_analyst",
+          "content_hash": "h_retr",
+          "event_type": "retrieval_shown",
+          "payload": {
+            "item_count": 4,
+            "item_hashes": [
+              "i1",
+              "i2",
+              "i3",
+              "i4"
+            ],
+            "query": "revenue"
+          },
+          "sequence_index": 2,
+          "step_num": 1,
+          "timestamp": "2026-06-10T00:00:00+00:00"
+        },
+        {
+          "agent_name": "synthesizer",
+          "content_hash": "h_out",
+          "event_type": "agent_output",
+          "payload": {
+            "action": "answer",
+            "citation_ids": [
+              "m1"
+            ],
+            "content_hash": "c2",
+            "is_final_answer": true
+          },
+          "sequence_index": 3,
+          "step_num": 2,
+          "timestamp": "2026-06-10T00:00:00+00:00"
+        },
+        {
+          "agent_name": "synthesizer",
+          "content_hash": "h_final",
+          "event_type": "final_answer",
+          "payload": {
+            "answer": "$4.2M",
+            "answer_hash": "a1"
+          },
+          "sequence_index": 4,
+          "step_num": 2,
+          "timestamp": "2026-06-10T00:00:00+00:00"
+        }
+      ],
+      "run_label": "memory_read_count"
+    },
+    "task_id": "parity_memory_read_count"
+  },
+  "output": {
+    "detail": {
+      "aligned_pairs": [
+        {
+          "clean_event": {
+            "agent_name": "router",
+            "content_hash": "h_route1",
+            "event_type": "routing_decision",
+            "payload": {
+              "chosen_agent": "data_analyst",
+              "reasoning_hash": "r1"
+            },
+            "sequence_index": 0,
+            "step_num": 1,
+            "timestamp": "2026-06-10T00:00:00+00:00"
+          },
+          "divergence_type": null,
+          "index": 0,
+          "is_match": true,
+          "perturbed_event": {
+            "agent_name": "router",
+            "content_hash": "h_route1",
+            "event_type": "routing_decision",
+            "payload": {
+              "chosen_agent": "data_analyst",
+              "reasoning_hash": "r1"
+            },
+            "sequence_index": 0,
+            "step_num": 1,
+            "timestamp": "2026-06-10T00:00:00+00:00"
+          }
+        },
+        {
+          "clean_event": {
+            "agent_name": "data_analyst",
+            "content_hash": "h_memread",
+            "event_type": "memory_read",
+            "payload": {
+              "entry_ids": [
+                "m1",
+                "m2"
+              ],
+              "entry_types": [
+                "note"
+              ]
+            },
+            "sequence_index": 1,
+            "step_num": 1,
+            "timestamp": "2026-06-10T00:00:00+00:00"
+          },
+          "divergence_type": null,
+          "index": 1,
+          "is_match": true,
+          "perturbed_event": {
+            "agent_name": "data_analyst",
+            "content_hash": "h_memread",
+            "event_type": "memory_read",
+            "payload": {
+              "entry_ids": [
+                "m1",
+                "m2",
+                "m3",
+                "m4",
+                "m5"
+              ],
+              "entry_types": [
+                "note"
+              ]
+            },
+            "sequence_index": 1,
+            "step_num": 1,
+            "timestamp": "2026-06-10T00:00:00+00:00"
+          }
+        },
+        {
+          "clean_event": {
+            "agent_name": "data_analyst",
+            "content_hash": "h_retr",
+            "event_type": "retrieval_shown",
+            "payload": {
+              "item_count": 2,
+              "item_hashes": [
+                "i1",
+                "i2"
+              ],
+              "query": "revenue"
+            },
+            "sequence_index": 2,
+            "step_num": 1,
+            "timestamp": "2026-06-10T00:00:00+00:00"
+          },
+          "divergence_type": null,
+          "index": 2,
+          "is_match": true,
+          "perturbed_event": {
+            "agent_name": "data_analyst",
+            "content_hash": "h_retr",
+            "event_type": "retrieval_shown",
+            "payload": {
+              "item_count": 4,
+              "item_hashes": [
+                "i1",
+                "i2",
+                "i3",
+                "i4"
+              ],
+              "query": "revenue"
+            },
+            "sequence_index": 2,
+            "step_num": 1,
+            "timestamp": "2026-06-10T00:00:00+00:00"
+          }
+        },
+        {
+          "clean_event": {
+            "agent_name": "synthesizer",
+            "content_hash": "h_out",
+            "event_type": "agent_output",
+            "payload": {
+              "action": "answer",
+              "citation_ids": [
+                "m1"
+              ],
+              "content_hash": "c2",
+              "is_final_answer": true
+            },
+            "sequence_index": 3,
+            "step_num": 2,
+            "timestamp": "2026-06-10T00:00:00+00:00"
+          },
+          "divergence_type": null,
+          "index": 3,
+          "is_match": true,
+          "perturbed_event": {
+            "agent_name": "synthesizer",
+            "content_hash": "h_out",
+            "event_type": "agent_output",
+            "payload": {
+              "action": "answer",
+              "citation_ids": [
+                "m1"
+              ],
+              "content_hash": "c2",
+              "is_final_answer": true
+            },
+            "sequence_index": 3,
+            "step_num": 2,
+            "timestamp": "2026-06-10T00:00:00+00:00"
+          }
+        },
+        {
+          "clean_event": {
+            "agent_name": "synthesizer",
+            "content_hash": "h_final",
+            "event_type": "final_answer",
+            "payload": {
+              "answer": "$4.2M",
+              "answer_hash": "a1"
+            },
+            "sequence_index": 4,
+            "step_num": 2,
+            "timestamp": "2026-06-10T00:00:00+00:00"
+          },
+          "divergence_type": null,
+          "index": 4,
+          "is_match": true,
+          "perturbed_event": {
+            "agent_name": "synthesizer",
+            "content_hash": "h_final",
+            "event_type": "final_answer",
+            "payload": {
+              "answer": "$4.2M",
+              "answer_hash": "a1"
+            },
+            "sequence_index": 4,
+            "step_num": 2,
+            "timestamp": "2026-06-10T00:00:00+00:00"
+          }
+        }
+      ],
+      "answer_changed": false,
+      "baseline_answer": "$4.2M",
+      "baseline_events": 5,
+      "baseline_routing_turns": 1,
+      "baseline_steps": 2,
+      "baseline_tool_calls": 0,
+      "control_flow_changes": {
+        "early_termination": false,
+        "extended_execution": false,
+        "extra_routing_cycles": 0,
+        "missing_routing_cycles": 0,
+        "reroutes": 0,
+        "tool_calls_added": 0,
+        "tool_calls_removed": 0,
+        "tool_failures_avoided": 0,
+        "tool_failures_introduced": 0,
+        "tool_state_changes": 0,
+        "total_changes": 0
+      },
+      "divergence_normalized_position": null,
+      "edit_distance": {
+        "baseline_length": 5,
+        "deletions": 0,
+        "distance": 0,
+        "insertions": 0,
+        "normalized": 0.0,
+        "perturbed_length": 5,
+        "substitutions": 0
+      },
+      "first_divergence_step": null,
+      "first_divergence_type": null,
+      "perturbation_type": "memory_read_count",
+      "perturbed_answer": "$4.2M",
+      "perturbed_events": 5,
+      "perturbed_routing_turns": 1,
+      "perturbed_steps": 2,
+      "perturbed_tool_calls": 0,
+      "task_id": "parity_memory_read_count"
+    },
+    "summary": {
+      "answer_changed": false,
+      "baseline_answer": "$4.2M",
+      "baseline_events": 5,
+      "baseline_routing_turns": 1,
+      "baseline_steps": 2,
+      "baseline_tool_calls": 0,
+      "control_flow_changes": {
+        "early_termination": false,
+        "extended_execution": false,
+        "extra_routing_cycles": 0,
+        "missing_routing_cycles": 0,
+        "reroutes": 0,
+        "tool_calls_added": 0,
+        "tool_calls_removed": 0,
+        "tool_failures_avoided": 0,
+        "tool_failures_introduced": 0,
+        "tool_state_changes": 0,
+        "total_changes": 0
+      },
+      "divergence_normalized_position": null,
+      "edit_distance": {
+        "baseline_length": 5,
+        "deletions": 0,
+        "distance": 0,
+        "insertions": 0,
+        "normalized": 0.0,
+        "perturbed_length": 5,
+        "substitutions": 0
+      },
+      "first_divergence_step": null,
+      "first_divergence_type": null,
+      "perturbation_type": "memory_read_count",
+      "perturbed_answer": "$4.2M",
+      "perturbed_events": 5,
+      "perturbed_routing_turns": 1,
+      "perturbed_steps": 2,
+      "perturbed_tool_calls": 0,
+      "task_id": "parity_memory_read_count"
+    }
+  }
+}
