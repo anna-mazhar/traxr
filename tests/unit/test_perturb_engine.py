@@ -61,6 +61,38 @@ def test_apply_from_file_xlsx_reads_as_tsv(fixtures_dir: Path) -> None:
     assert "=== Sheet:" in result.original_content
 
 
+def _write_multisheet_xlsx(path: Path) -> None:
+    openpyxl = pytest.importorskip("openpyxl")
+    wb = openpyxl.Workbook()
+    wb.active.title = "Customers"
+    wb.active.append(["id", "name"])
+    wb.active.append([1, "Acme"])
+    orders = wb.create_sheet("Orders")
+    orders.append(["order_id", "total"])
+    orders.append(["A1", 500])
+    wb.save(path)
+    wb.close()
+
+
+def test_multisheet_xlsx_skips_tabular_perturbation(tmp_path: Path) -> None:
+    # A multi-sheet workbook can't round-trip without collapsing to one sheet,
+    # which would confound the perturbation — so it is skipped, not applied.
+    xlsx = tmp_path / "multi.xlsx"
+    _write_multisheet_xlsx(xlsx)
+    result = PerturbationEngine(seed=42).apply_from_file(str(xlsx), PerturbationType.COLUMN_SWAP)
+    assert not result.applied
+    assert result.skip_reason is not None and "multi-sheet" in result.skip_reason
+
+
+def test_multisheet_xlsx_still_allows_null_content(tmp_path: Path) -> None:
+    # NULL_CONTENT just empties the file, so the collapse is moot — it applies.
+    xlsx = tmp_path / "multi.xlsx"
+    _write_multisheet_xlsx(xlsx)
+    result = PerturbationEngine(seed=42).apply_from_file(str(xlsx), PerturbationType.NULL_CONTENT)
+    assert result.applied
+    assert result.corrupted_content == ""
+
+
 def test_get_supported_perturbations_by_type() -> None:
     engine = PerturbationEngine(seed=42)
     csv_ops = engine.get_supported_perturbations("csv")
