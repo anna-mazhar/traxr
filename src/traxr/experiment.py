@@ -197,6 +197,20 @@ class Experiment:
         if not files:
             raise ExperimentConfigError("At least one input file is required.")
         self.files = tuple(Path(f) for f in files)
+        # Fail fast on duplicate basenames: the basename is each file's
+        # source_id, which keys per-run staging, perturbation labels, and the
+        # trace dict — so two inputs sharing a basename would silently overwrite
+        # each other's staged file and trace. FUTURE: support duplicate
+        # basenames by making source_id path-aware end-to-end (sources.py,
+        # matrix labels, staging dirs, trace keys).
+        basenames = [p.name for p in self.files]
+        duplicate_basenames = sorted({n for n in basenames if basenames.count(n) > 1})
+        if duplicate_basenames:
+            raise ExperimentConfigError(
+                "Input files must have unique basenames (the basename identifies "
+                "each file in staging, perturbation labels, and traces). "
+                f"Duplicates: {duplicate_basenames}."
+            )
         self.question = question
         self.expected_answer = expected_answer
         self.seed = seed
@@ -406,7 +420,7 @@ class Experiment:
             record.error = traceback.format_exc()
             record.warnings.append(f"agent crashed: {type(exc).__name__}: {exc}")
         record.concurrent = session.concurrent_detected
-        record.cost = _cost_from_trace(record.collector, session)
+        record.cost = _cost_from_trace(record.collector)
 
     def _run_builtin(
         self,
@@ -636,10 +650,17 @@ def _spec_label(spec: PermutationSpec) -> str:
     return f"{spec.source_id}::{spec.perturbation.value}"
 
 
-def _cost_from_trace(collector: TraceCollector, session: CaptureSession) -> CostProxy:
-    """Token/step cost for an external run, from the captured usage."""
-    cost = CostProxy(total_steps=session.llm_call_count)
-    for event in collector.get_events_by_type("llm_call"):
+def _cost_from_trace(collector: TraceCollector) -> CostProxy:
+    """Token/step cost for an external run, from the captured usage.
+
+    ``total_steps`` is the number of captured ``llm_call`` events, not
+    ``session.llm_call_count`` — the latter is only incremented by the Tier 0
+    wrapper's ``begin_llm_call`` and stays 0 for Tier 1 (LangGraph) runs, where
+    Tier 0 is suppressed. Counting the emitted events is correct for both tiers.
+    """
+    llm_calls = collector.get_events_by_type("llm_call")
+    cost = CostProxy(total_steps=len(llm_calls))
+    for event in llm_calls:
         usage = event.payload.get("usage")
         if usage:
             cost.add_tokens(usage.get("prompt_tokens", 0), usage.get("completion_tokens", 0))

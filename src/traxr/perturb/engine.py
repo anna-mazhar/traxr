@@ -310,6 +310,33 @@ class PerturbationEngine:
         file_type = path.suffix.lower().lstrip(".")
         file_name = path.name
 
+        # Multi-sheet workbooks cannot round-trip: write_excel flattens every
+        # sheet into a single sheet, which would confound the perturbation with
+        # a structural change traxr itself introduced (the agent would see one
+        # mashed-together sheet instead of several named ones). Skip tabular
+        # perturbation for them so no confounded artifact is produced; the
+        # experiment renders applied=False as a SKIPPED pair. NULL_CONTENT still
+        # applies — it just empties the file, so the collapse is moot.
+        # FUTURE: preserve structure by splitting on the "=== Sheet: ... ==="
+        # markers and writing each block back to its own named sheet.
+        if (
+            file_type in ("xlsx", "xls", "excel")
+            and perturbation != PerturbationType.NULL_CONTENT
+            and self._excel_sheet_count(path) > 1
+        ):
+            result = PerturbationResult(
+                original_content="",
+                corrupted_content="",
+                perturbation_type=perturbation,
+                description="",
+                applied=False,
+                skip_reason="multi-sheet workbooks are not supported for tabular perturbation in v1",
+                file_type=file_type,
+                file_name=file_name,
+            )
+            self._history.append(result)
+            return result
+
         # Read content
         content = self._read_file(file_path, file_type)
 
@@ -319,6 +346,21 @@ class PerturbationEngine:
             perturbation=perturbation,
             file_name=file_name,
         )
+
+    def _excel_sheet_count(self, path: Path) -> int:
+        """Number of worksheets in an Excel workbook (read-only, cheap)."""
+        try:
+            import openpyxl
+        except ImportError as exc:
+            raise OptionalDependencyError(
+                'openpyxl is required for Excel files. Install with: pip install "traxr[document]"'
+            ) from exc
+
+        wb = openpyxl.load_workbook(path, read_only=True)
+        try:
+            return len(wb.sheetnames)
+        finally:
+            wb.close()
 
     def get_supported_perturbations(self, file_type: str) -> list[PerturbationType]:
         """Get perturbations supported for a file type.

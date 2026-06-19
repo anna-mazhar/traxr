@@ -43,6 +43,10 @@ class PairResult:
     divergence_type: str | None = None
     control_flow_changes: dict[str, Any] | None = None
     task_success: bool | None = None
+    #: Authoritative per-pair outcome signal: normalized string comparison of
+    #: the baseline vs perturbed final answers (scoring.normalize_answer). The
+    #: analyzer's DivergenceReport.answer_changed is a separate exact/hash-based
+    #: signal for the report and may differ from this normalized one.
     answer_changed: bool | None = None
     recovery: bool | None = None
     token_overhead: float | None = None
