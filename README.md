@@ -52,7 +52,7 @@ def my_agent(task: traxr.Task) -> str:
     return response.choices[0].message.content or ""
 
 experiment = traxr.Experiment(
-    files="sales.csv",
+    files="examples/sales.csv",
     question="Which region had the highest Q3 revenue?",
     expected_answer="EMEA",
     agent=my_agent,
@@ -74,10 +74,10 @@ starts fresh.
 import traxr
 
 experiment = traxr.Experiment(
-    files="sales.csv",
-    question="What is the total revenue?",
-    expected_answer="42",
-    llm=traxr.DeterministicLLMStub(scenario="identity", final_answer="42"),
+    files="examples/sales.csv",
+    question="Which region had the highest Q3 revenue?",
+    expected_answer="EMEA",
+    llm=traxr.DeterministicLLMStub(scenario="identity", final_answer="EMEA"),
 )
 results = experiment.run()
 ```
@@ -180,7 +180,7 @@ The reference agent speaks to anything OpenAI-compatible:
 
 ```python
 llm = traxr.OpenAICompatibleClient(model="llama3.1", base_url="http://localhost:11434/v1")
-experiment = traxr.Experiment(files="sales.csv", question="...", llm=llm)
+experiment = traxr.Experiment(files="examples/sales.csv", question="...", llm=llm)
 ```
 
 For other providers, implement the two-method
@@ -191,7 +191,7 @@ their LLM and are captured at the SDK boundary.
 ## CLI
 
 ```bash
-traxr run --agent mypkg.agents:answer --file sales.csv \
+traxr run --agent mypkg.agents:answer --file examples/sales.csv \
           --question "Which region won Q3?" --expected-answer EMEA \
           --out results.json
 traxr run --model gpt-4o-mini --file report.pdf --question "..." --dry-run
