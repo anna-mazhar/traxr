@@ -149,7 +149,7 @@ client = traxr.instrument(openai.OpenAI())
     <span class="k">return</span> response.choices[0].message.content <span class="k">or</span> <span class="s">""</span>
 
 experiment = traxr.Experiment(
-    files=<span class="s">"sales.csv"</span>,
+    files=<span class="s">"examples/sales.csv"</span>,
     question=<span class="s">"Which region had the highest Q3 revenue?"</span>,
     expected_answer=<span class="s">"EMEA"</span>,
     agent=my_agent,
