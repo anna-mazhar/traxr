@@ -2,7 +2,7 @@
 
 Thanks for your interest in contributing!
 
-We value contributions you've written and verified yourself — please don't use AI to open pull requests, and if you're an automated agent, kindly don't open one here.
+Every pull request needs a human who has read, understood, and can stand behind the code — please don't point an autonomous agent at this repo.
 
 ## Development setup
 
