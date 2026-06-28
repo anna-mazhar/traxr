@@ -59,9 +59,36 @@ M3 notes:
   total 95%.
 
 ## M3b — Capture layer + AgentRunner contract
-- [ ] `capture/context.py` (contextvar binding, thread fallback, Tier-1 suppression flag), `capture/openai_wrap.py` (`instrument()`: sync + async + streaming delta-reassembly + usage injection + `max_llm_calls_per_run` budget), `capture/patch.py` (`patch_openai()`), `traxr.emit()` escape hatch.
-- [ ] `agents/task.py`: `Task`, `AgentRunner`, `AgentContractError`; concurrency detection → `ConcurrentTraceWarning`.
-- [ ] Fixture external agent on `httpx.MockTransport`. Gate: category 7 + 8 tests green, fully offline.
+- [x] `capture/context.py` (contextvar binding, thread fallback, Tier-1 suppression flag), `capture/openai_wrap.py` (`instrument()`: sync + async + streaming delta-reassembly + usage injection + `max_llm_calls_per_run` budget), `capture/patch.py` (`patch_openai()`), `traxr.emit()` escape hatch.
+- [x] `agents/task.py`: `Task`, `AgentRunner`, `AgentContractError`; concurrency detection → `ConcurrentTraceWarning`.
+- [x] Fixture external agent on `httpx.MockTransport`. Gate: category 7 + 8 tests green, fully offline.
+
+M3b notes:
+- One wrapper factory serves sync, async, and `patch_openai()`: the SDK's
+  async `create` is a plain `def` returning an awaitable (not a coroutine
+  function), so sync/async is decided per call via `inspect.isawaitable`
+  on the result.
+- Run binding lives in `CaptureSession` (`capture/context.py`): step
+  counter, `tool_call_id → (name, step)` map, budget, store-content flag,
+  and concurrency detection (multi-thread emission OR overlapping
+  in-flight calls → `ConcurrentTraceWarning` once + `concurrent_detected`
+  for M4's `order_nondeterministic`). Resolution: contextvar → process
+  global (user-thread fallback) → None (passthrough outside runs).
+- `tool_result` events are emitted at the step of the `llm_call` that
+  requested them (joined via the call-id map), keeping per-step grouping
+  faithful even though they surface one request later.
+- `agents/task.py` also ships `invoke_agent()` — the single-run primitive
+  M4's `Experiment` composes: binds the session, validates the `str`
+  return, emits `final_answer`, converts crashes to `agent_error` and
+  re-raises (record-vs-raise stays an M4 `on_run_error` concern, as does
+  `agent`/`agent_factory`/`llm` XOR validation).
+- Mock-client doubles + the fixture external agent live in
+  `tests/unit/_openai_mock.py` (real `openai` clients over
+  `httpx.MockTransport`, SSE bodies for streaming) — promote alongside the
+  M4 external golden if e2e needs them.
+- Gates: 486 tests (35 new), zero network; coverage capture+agents 94%
+  (gate 85), metrics/perturb/trace 97.55%; analyzer-goldens 5/5;
+  standalone-check PASS; mypy strict clean on `capture/` + `agents/task.py`.
 
 ## M4 — Experiment runner + results + CLI
 - [ ] `traxr/experiment.py`: `agent`/`agent_factory`/`llm` resolution; run loop (fresh temp dirs, original basenames, contextvar binding, harness-emitted `final_answer`, noise-floor with external default = 1, `dry_run`, caps); wire the built-in injection producer and the external pdf_inplace path into perturbation delivery.
