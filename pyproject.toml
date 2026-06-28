@@ -76,6 +76,11 @@ select = [
     "B",  # flake8-bugbear
 ]
 
+[tool.ruff.lint.per-file-ignores]
+# Copied research code, kept verbatim for fidelity (not exported — backlog).
+"src/traxr/perturb/image.py" = ["UP", "B", "E501", "I", "F401"]
+"src/traxr/perturb/audio.py" = ["UP", "B", "E501", "I", "F401"]
+
 [tool.mypy]
 python_version = "3.10"
 files = ["src/traxr"]
@@ -99,11 +104,43 @@ check_untyped_defs = false
 disallow_any_generics = false
 warn_return_any = false
 
+# perturb/image.py + perturb/audio.py are copied research code (not exported,
+# not documented, not tested — backlog), same rationale as traxr/mas/. Their
+# public methods are annotated so strict call sites in engine.py type-check;
+# body errors against optional-dep stubs (PIL etc.) are not gated.
+[[tool.mypy.overrides]]
+module = ["traxr.perturb.image", "traxr.perturb.audio"]
+ignore_errors = true
+
+# Optional third-party libs without type stubs.
+[[tool.mypy.overrides]]
+module = [
+    "fitz",
+    "fitz.*",
+    "pdfplumber",
+    "pdfplumber.*",
+    "openpyxl",
+    "openpyxl.*",
+    "PIL",
+    "PIL.*",
+    "numpy",
+    "pydub",
+    "scipy",
+    "scipy.*",
+]
+ignore_missing_imports = true
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
+# src-layout fallback: keeps the suite importable even where .pth processing
+# is unavailable (e.g. macOS can mark the editable-install .pth hidden under
+# synced directories, and CPython >= 3.12 skips hidden .pth files).
+pythonpath = ["src"]
 
 [tool.coverage.run]
 # mas/ (extracted research code) is exercised by integration/golden/smoke
-# tests; its coverage is informational, not gated.
-omit = ["*/mas/*"]
+# tests; its coverage is informational, not gated. perturb/image.py +
+# perturb/audio.py are copied for fidelity but not exported/tested (backlog) —
+# same rationale.
+omit = ["*/mas/*", "*/perturb/image.py", "*/perturb/audio.py"]

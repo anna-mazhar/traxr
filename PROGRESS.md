@@ -29,9 +29,9 @@ M1 notes:
   `make cov` still fails on `traxr.perturb` — that module lands in M2.
 
 ## M2 — Extract perturbation + data; build PDF in-place
-- [ ] `perturbations/` → `traxr/perturb/`; `file_handler`+`file_inspector` → `traxr/data/loader.py`; DOCUMENT = PDF/TXT/MD (update `UnsupportedModalityError` messages).
-- [ ] Build `perturb/pdf_inplace.py` (span-level selection; redact+reinsert; `PAGE_REMOVAL`/`PAGE_SHUFFLE`; overflow/skip handling; metadata scrub). Guard tests T1–T4 green per operator.
-- [ ] Build `traxr/data/sources.py` + `traxr/perturb/matrix.py` (agent-kind-aware operator enumeration). Tests: categories 1, 2.
+- [x] `perturbations/` → `traxr/perturb/`; `file_handler`+`file_inspector` → `traxr/data/loader.py`; DOCUMENT = PDF/TXT/MD (update `UnsupportedModalityError` messages).
+- [x] Build `perturb/pdf_inplace.py` (span-level selection; redact+reinsert; `PAGE_REMOVAL`/`PAGE_SHUFFLE`; overflow/skip handling; metadata scrub). Guard tests T1–T4 green per operator.
+- [x] Build `traxr/data/sources.py` + `traxr/perturb/matrix.py` (agent-kind-aware operator enumeration). Tests: categories 1, 2.
 
 ## M3 — Extract the reference agent + build the LLM boundary
 - [ ] `core/`, `agents/`, `routing/`, `retrieval/`, `tools/`, `provenance/`, `planning/` → `traxr/mas/` (three-commit discipline; prints→logging; utcnow fixed; web tools behind flag).

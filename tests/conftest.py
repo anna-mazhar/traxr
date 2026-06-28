@@ -1,8 +1,18 @@
 """Shared pytest fixtures for the Traxr test suite."""
 
+from pathlib import Path
+
 import pytest
 
 from traxr.trace import registry
+
+FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures"
+
+
+@pytest.fixture()
+def fixtures_dir() -> Path:
+    """Directory of committed tiny real artifacts."""
+    return FIXTURES_DIR
 
 
 @pytest.fixture
