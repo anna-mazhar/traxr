@@ -36,7 +36,8 @@ dependencies = []
 [project.optional-dependencies]
 document = ["PyMuPDF", "pdfplumber", "openpyxl"]
 openai = ["openai"]
-langgraph = ["langchain-core>=0.3,<2.0", "langgraph"]
+# Pinned to the CI-exercised range; widen deliberately as new majors are tested.
+langgraph = ["langchain-core>=1.0,<2.0", "langgraph>=1.0,<2.0"]
 viz = ["matplotlib"]
 pandas = ["pandas"]
 # Report exporter needs dataframes + plots. Provisional membership — refined
