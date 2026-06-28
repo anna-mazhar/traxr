@@ -6,17 +6,22 @@ token overhead).
 """
 
 from traxr import errors
+from traxr.agents import builtin_agent
+from traxr.llm import DeterministicLLMStub, LLMClient, OpenAICompatibleClient
 from traxr.perturb.types import PerturbationType
 from traxr.trace.registry import register_signature
 
 __version__ = "0.1.0.dev0"
 
 # Curated public API. Placeholder: Experiment, ExperimentResults, Task,
-# instrument, from_langgraph, builtin_agent, emit, OpenAICompatibleClient,
-# LLMClient land across M3–M4b.
+# instrument, from_langgraph, emit land across M3b–M4b.
 __all__ = [
+    "DeterministicLLMStub",
+    "LLMClient",
+    "OpenAICompatibleClient",
     "PerturbationType",
     "__version__",
+    "builtin_agent",
     "errors",
     "register_signature",
 ]

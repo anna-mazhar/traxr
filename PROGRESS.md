@@ -34,11 +34,29 @@ M1 notes:
 - [x] Build `traxr/data/sources.py` + `traxr/perturb/matrix.py` (agent-kind-aware operator enumeration). Tests: categories 1, 2.
 
 ## M3 — Extract the reference agent + build the LLM boundary
-- [ ] `core/`, `agents/`, `routing/`, `retrieval/`, `tools/`, `provenance/`, `planning/` → `traxr/mas/` (three-commit discipline; prints→logging; utcnow fixed; web tools behind flag).
-- [ ] Harden `python_tool`: subprocess + timeout; `enable_python_tool` flag; hanging-script-times-out test.
-- [ ] `traxr/llm/`: `LLMClient` protocol, types, `OpenAICompatibleClient` (+`base_url`), `DeterministicLLMStub`; validate every stub scenario produces its intended trace shape before M4.
-- [ ] `agents/builtin.py`: `builtin_agent(llm=...)` factory facade over `EpisodeRunner`. Preserve `PDFTool.inject_perturbed_content()`.
-- [ ] Smoke: reference agent answers a fixture CSV question end-to-end under the stub, well-formed trace. Tests: categories 5, 9.
+- [x] `core/`, `agents/`, `routing/`, `retrieval/`, `tools/`, `provenance/`, `planning/` → `traxr/mas/` (three-commit discipline; prints→logging; utcnow fixed; web tools behind flag).
+- [x] Harden `python_tool`: subprocess + timeout; `enable_python_tool` flag; hanging-script-times-out test.
+- [x] `traxr/llm/`: `LLMClient` protocol, types, `OpenAICompatibleClient` (+`base_url`), `DeterministicLLMStub`; validate every stub scenario produces its intended trace shape before M4.
+- [x] `agents/builtin.py`: `builtin_agent(llm=...)` factory facade over `EpisodeRunner`. Preserve `PDFTool.inject_perturbed_content()`.
+- [x] Smoke: reference agent answers a fixture CSV question end-to-end under the stub, well-formed trace. Tests: categories 5, 9.
+
+M3 notes:
+- Three-commit extraction discipline: verbatim copy → mechanical fixes
+  (imports/logging/utcnow + lint/mypy config activation) → behavioral
+  changes (python_tool subprocess sandbox, tool_failure/agent_halt
+  emission, Tinker leave-behind).
+- All five stub scenarios validated against their intended trace shapes
+  (identity / wrong_answer / reroute / halt_early / loop) in
+  `tests/integration/test_stub_scenarios.py`.
+- The runner now actually emits `tool_failure` + `agent_halt` (documented
+  in the M1 schema but never fired by the source).
+- `mas/utils/code_extraction.py` carried along (agents dependency not in
+  the reuse ledger); `llm/tinker_client.py` left behind as planned.
+- `make cov` legs use **path-based** `--cov` sources: dotted sources make
+  coverage import `traxr` inside its `sys_modules_saved` block, unloading
+  the transitively-imported numpy C extension (via fitz) and breaking
+  later pandas imports. Coverage: metrics/perturb/trace 97%, agents 94%,
+  total 95%.
 
 ## M3b — Capture layer + AgentRunner contract
 - [ ] `capture/context.py` (contextvar binding, thread fallback, Tier-1 suppression flag), `capture/openai_wrap.py` (`instrument()`: sync + async + streaming delta-reassembly + usage injection + `max_llm_calls_per_run` budget), `capture/patch.py` (`patch_openai()`), `traxr.emit()` escape hatch.
@@ -65,3 +83,8 @@ M1 notes:
 ## Open blockers
 
 None.
+
+## Maintenance
+- 2026-06-12: analyzer golden fixtures renamed from `tests/fixtures/parity/`
+  to `tests/fixtures/analyzer_goldens/` (`make analyzer-goldens`); new
+  `make standalone-check` gate added to the Makefile and CI.
