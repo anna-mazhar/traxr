@@ -7,7 +7,7 @@ token overhead).
 
 from traxr import errors
 
-__version__ = "0.1.0.dev0"
+__version__ = "1.0.0"
 
 from traxr.agents import AgentRunner, Task, builtin_agent, from_langgraph
 from traxr.capture import emit, instrument

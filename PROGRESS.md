@@ -191,8 +191,33 @@ M5 notes:
   requests (optional dep) — string-quoted.
 
 ## M6 — Website + v1.0.0 release (FINAL)
-- [ ] Landing page (`web/`) + MkDocs docs (`--strict`, mkdocstrings), shared logo/palette, deploy assembly to GitHub Pages.
-- [ ] Tag `v1.0.0`, GitHub Release with notes + wheel, CHANGELOG entry, social preview set.
+- [x] Landing page (`web/`) + MkDocs docs (`--strict`, mkdocstrings), shared logo/palette, deploy assembly to GitHub Pages.
+- [x] Tag `v1.0.0`, GitHub Release with notes + wheel, CHANGELOG entry, social preview set. *(Prepared: tag-triggered `release.yml` + RELEASE_NOTES.md + CHANGELOG 1.0.0 entry + version bump committed; the maintainer pushes the tag after merging the PR stack. Social preview is a repo-settings upload — use `assets/logo.svg`.)*
+
+M6 notes:
+- Landing (`web/index.html` + `style.css`): zero external requests, system
+  fonts; signature element is the animated pixel divergence strip (events
+  appear with `steps()` timing, split at an amber t*; static under
+  `prefers-reduced-motion`). Palette derived from the logo: ink #0f172a,
+  one UI accent #3b82f6; coral/amber only inside the trace visual.
+- Docs: MkDocs Material (`strict: true`, system fonts, custom palette) +
+  mkdocstrings API reference (28 objects); pages: quickstart, metrics,
+  operators, traceable, security, api. mkdocs-material + mkdocstrings
+  added to dev extras.
+- `make site`: web/ → staging root, `mkdocs build --strict` →
+  staging/docs/, then `scripts/check_site_links.py` (internal link check;
+  root-absolute URLs resolved through the `/traxr/` project-pages prefix).
+- Workflows: `pages.yml` (push to main → build + deploy one Pages
+  artifact; needs Pages enabled with the Actions source) and `release.yml`
+  (tag v* → build wheel + sdist, clean-venv selfcheck smoke, GitHub
+  Release with RELEASE_NOTES.md + artifacts).
+- Version bumped 0.1.0.dev0 → 1.0.0 (pyproject + `__version__`).
+- **`make verify-all` (the global Definition of Done): all 13 targets
+  green simultaneously** — install lint typecheck test cov property
+  analyzer-goldens standalone-check golden external-golden selfcheck
+  notebook build site.
+- Stack hygiene: the notebook formatting fix landed on the m5 branch (its
+  PR's lint gate would have failed) and m6 fast-forwarded over it.
 
 ## Open blockers
 
@@ -202,3 +227,26 @@ None.
 - 2026-06-12: analyzer golden fixtures renamed from `tests/fixtures/parity/`
   to `tests/fixtures/analyzer_goldens/` (`make analyzer-goldens`); new
   `make standalone-check` gate added to the Makefile and CI.
+- 2026-06-18: deep-review fixes F1–F5 landed at their introducing branches and
+  cascaded to m6. F1 — `memory_read`/`retrieval_shown` signatures made
+  count-agnostic so read/retrieval cardinality is lexical (d_norm, t*,
+  control-flow, and is_match now agree); new `memory_read_count` golden.
+  F2 — `Experiment` rejects duplicate input basenames. F3 — analyzer
+  `answer_changed` compares like-with-like (raw-vs-raw or hash-vs-hash).
+  F4 — multi-sheet `.xlsx` skipped for tabular perturbation. F5 — Tier-1
+  `total_steps` counted from `llm_call` events.
+
+### Deferred enhancements (from the 2026-06 deep review)
+Considered and intentionally left for a future version (recorded next to the
+relevant code as well):
+- **Read/retrieval cardinality as structural (F1).** Today a change in *how
+  many* memory entries / retrieval items an agent consumed is lexical. A later
+  version may make it structural by registering a classifier returning
+  `different_memory_read_count` / `different_item_count` (and putting the count
+  back in the signature) so the change shows in t* and control-flow too.
+- **Path-aware `source_id` (F2).** Support duplicate input basenames end-to-end
+  (`sources.py`, matrix labels, staging dirs, trace keys) instead of rejecting
+  them.
+- **Multi-sheet workbook support (F4).** Preserve per-sheet structure on the
+  perturbation round-trip (split on the `=== Sheet: … ===` markers and write
+  each block back to its own named sheet) instead of skipping.

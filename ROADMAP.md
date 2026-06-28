@@ -12,6 +12,10 @@ created in M0 and kept current.
 7. **Image + audio modalities** — operators exist; need tests, extras, promotion.
 8. **docx / pptx documents** — loader support exists; needs operator validation + tests.
 9. **PyPI publishing** — name reservation, trusted publishing via CI on tag.
+   Once `pip install traxr` replaces the long git-URL command, shorten the
+   landing's install box and move the "Try in Colab" button out of the
+   quickstart header to sit beside it (the box will be small enough to
+   share a row). See the FUTURE comment in `web/index.html`.
 10. **Perturbation composition** — multi-operator/multi-locus stacks; cross-modal; adaptive intensity sweeps.
 11. **Provenance as a public feature** — surface `TaintTracker`/`ProvenanceTracker` for the built-in agent; contamination-origin attribution (backtrack from `t*` — the paper's open direction).
 12. **LLM-judge scorer** extra.

@@ -1,0 +1,37 @@
+name: Release
+
+# Tag-triggered: pushing v* builds the wheel, smoke-tests it in a clean
+# venv, and attaches it to a GitHub Release. Distribution is GitHub
+# Releases only in v1 (install via git URL); PyPI is on the roadmap.
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build wheel + sdist
+        run: |
+          python -m pip install build
+          python -m build
+      - name: Smoke-test the wheel
+        run: |
+          python -m venv /tmp/smoke
+          /tmp/smoke/bin/python -m pip install dist/*.whl
+          /tmp/smoke/bin/python -c "import traxr; print('traxr', traxr.__version__); traxr.selfcheck()"
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist/* \
+            --title "traxr $GITHUB_REF_NAME" \
+            --notes-file RELEASE_NOTES.md

@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>traxr — evaluate multi-agent systems beyond the final answer</title>
+<meta name="description" content="Final-answer accuracy hides how multi-agent systems actually behave. traxr traces what your agent did — run paired experiments and measure how its execution diverged: how much, where, and what it cost.">
+<meta property="og:title" content="traxr">
+<meta property="og:description" content="Evaluate multi-agent systems beyond final-answer accuracy — at the level of the execution trace.">
+<link rel="icon" type="image/svg+xml" href="assets/mark.svg">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="sheet">
+
+  <!-- top bar: small logo left, links right -->
+  <nav class="topbar">
+    <a class="brand" href="#" aria-label="traxr">
+      <img src="assets/mark.svg" alt="" width="26" height="26">
+      <span>traxr</span>
+    </a>
+    <div class="topbar-links">
+      <a href="https://dl.acm.org/doi/10.1145/3786335.3813147">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h6"/></svg>
+        <span>paper</span>
+      </a>
+      <a href="docs/">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7v14"/><path d="M3 5a2 2 0 0 1 2-2h5a2 2 0 0 1 2 2v14a2 2 0 0 0-2-2H5a2 2 0 0 1-2-2z"/><path d="M21 5a2 2 0 0 0-2-2h-5a2 2 0 0 0-2 2v14a2 2 0 0 1 2-2h5a2 2 0 0 0 2-2z"/></svg>
+        <span>docs</span>
+      </a>
+      <a href="https://github.com/anna-mazhar/traxr">
+        <svg class="ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.5 2 2 6.6 2 12.2c0 4.5 2.9 8.3 6.8 9.6.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.4-3.4-1.4-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.6 2.4 1.1 3 .9.1-.7.3-1.1.6-1.4-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.7 1a9.3 9.3 0 0 1 5 0c1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.4 4.7-4.6 5 .4.3.7.9.7 1.9v2.8c0 .3.2.6.7.5A10 10 0 0 0 22 12.2C22 6.6 17.5 2 12 2z"/></svg>
+        <span>github</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- hero -->
+  <header class="hero">
+    <p class="eyebrow">trace-level evaluation for multi-agent systems</p>
+    <h1>Look past the final answer.</h1>
+    <p class="lede">
+      A multi-agent system can reach the right answer through the wrong
+      process — and final-answer accuracy never sees it. traxr evaluates the
+      <em>execution trace itself</em>: run paired experiments on your own
+      agent and measure how its behavior diverged — how much, where it
+      started, and what it cost.
+    </p>
+
+    <figure class="strip" role="img"
+            aria-label="Two execution traces of one agent share a prefix, then split at the first divergence point: one continues unchanged, the other follows a different path.">
+      <svg viewBox="-28 0 600 100" xmlns="http://www.w3.org/2000/svg">
+        <g class="cells">
+          <rect style="--i:0"  x="0"   y="30" width="12" height="12" fill="#334155"/>
+          <rect style="--i:1"  x="16"  y="30" width="12" height="12" fill="#334155"/>
+          <rect style="--i:2"  x="32"  y="30" width="12" height="12" fill="#334155"/>
+          <rect style="--i:3"  x="48"  y="30" width="12" height="12" fill="#334155"/>
+          <rect style="--i:4"  x="64"  y="30" width="12" height="12" fill="#334155"/>
+          <rect style="--i:5"  x="80"  y="30" width="12" height="12" fill="#334155"/>
+          <rect style="--i:6"  x="96"  y="30" width="12" height="12" fill="#334155"/>
+          <rect style="--i:7"  x="112" y="30" width="12" height="12" fill="#334155"/>
+          <rect style="--i:8"  x="128" y="30" width="12" height="12" fill="#334155"/>
+          <rect style="--i:9"  x="144" y="30" width="12" height="12" fill="#f59e0b"/>
+          <rect style="--i:10" x="160" y="30" width="12" height="12" fill="#3b82f6"/>
+          <rect style="--i:11" x="176" y="30" width="12" height="12" fill="#3b82f6"/>
+          <rect style="--i:12" x="192" y="30" width="12" height="12" fill="#3b82f6"/>
+          <rect style="--i:13" x="208" y="30" width="12" height="12" fill="#3b82f6"/>
+          <rect style="--i:14" x="224" y="30" width="12" height="12" fill="#3b82f6"/>
+          <rect style="--i:15" x="240" y="30" width="12" height="12" fill="#3b82f6"/>
+          <rect style="--i:16" x="256" y="30" width="12" height="12" fill="#3b82f6"/>
+          <rect style="--i:17" x="272" y="30" width="12" height="12" fill="#3b82f6"/>
+          <rect style="--i:18" x="288" y="30" width="12" height="12" fill="#3b82f6"/>
+          <rect style="--i:19" x="304" y="30" width="12" height="12" fill="#3b82f6"/>
+          <rect style="--i:20" x="320" y="30" width="12" height="12" fill="#3b82f6"/>
+          <rect style="--i:21" x="336" y="30" width="12" height="12" fill="#3b82f6"/>
+          <rect style="--i:22" x="352" y="30" width="12" height="12" fill="#3b82f6"/>
+          <rect style="--i:10" x="160" y="46" width="12" height="12" fill="#f43f5e"/>
+          <rect style="--i:11" x="176" y="50" width="12" height="12" fill="#f43f5e"/>
+          <rect style="--i:12" x="192" y="54" width="12" height="12" fill="#f43f5e"/>
+          <rect style="--i:13" x="208" y="54" width="12" height="12" fill="#f43f5e"/>
+          <rect style="--i:14" x="224" y="58" width="12" height="12" fill="#f43f5e"/>
+          <rect style="--i:15" x="240" y="62" width="12" height="12" fill="#f43f5e"/>
+          <rect style="--i:16" x="256" y="62" width="12" height="12" fill="#f43f5e"/>
+          <rect style="--i:17" x="272" y="66" width="12" height="12" fill="#f43f5e"/>
+          <rect style="--i:18" x="288" y="66" width="12" height="12" fill="#f43f5e"/>
+          <rect style="--i:19" x="304" y="70" width="12" height="12" fill="#f43f5e"/>
+          <rect style="--i:20" x="320" y="70" width="12" height="12" fill="#f43f5e"/>
+          <rect style="--i:21" x="336" y="74" width="12" height="12" fill="#f43f5e"/>
+          <rect style="--i:22" x="352" y="74" width="12" height="12" fill="#f43f5e"/>
+        </g>
+        <g class="strip-labels" font-size="11" fill="#64748b">
+          <text x="144" y="20">t*</text>
+          <text x="372" y="40" fill="#2563eb">baseline run</text>
+          <text x="372" y="84" fill="#e11d48">same agent, divergent path</text>
+        </g>
+      </svg>
+      <figcaption>Fig. 1 — two runs of one agent share a prefix, then split at the first divergence point t*.</figcaption>
+    </figure>
+
+    <div class="install">
+      <code id="pip-cmd">pip install "traxr[document,openai,pandas] @ git+https://github.com/anna-mazhar/traxr.git@v1.0.0"</code>
+      <button class="copy-btn" type="button" data-copy="pip-cmd" aria-label="Copy install command">
+        <svg class="ico-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        <svg class="ico-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- section index -->
+  <nav class="jump">
+    <span class="jump-label">Sections</span>
+    <a href="#quickstart">Quickstart</a>
+    <a href="#how">How it works</a>
+    <a href="#metrics">Metrics</a>
+    <a href="#operators">Operators</a>
+  </nav>
+
+  <main>
+
+  <section id="quickstart">
+    <p class="eyebrow">Quickstart</p>
+    <!-- FUTURE (post-PyPI): once `pip install traxr` is short, move this
+         Colab button out of the header and place it beside the install
+         command in the hero (the box will be small enough to share a row). -->
+    <div class="head-row">
+      <h2>Bring your agent. traxr does the rest.</h2>
+      <a class="colab-btn" href="https://colab.research.google.com/github/anna-mazhar/traxr/blob/main/notebooks/traxr_quickstart.ipynb">
+        <svg class="ico-colab" viewBox="0 0 24 24" fill="#f9ab00" aria-hidden="true"><path d="M16.94 4.98a7.03 7.03 0 0 0-4.93 2.06 7.03 7.03 0 0 0-.12 9.81l2.4-2.4a3.65 3.65 0 0 1 5.15-5.15l2.4-2.4a7.03 7.03 0 0 0-4.9-1.92zM7.07 4.99a7.03 7.03 0 0 0-4.89 1.93l2.4 2.4a3.65 3.65 0 0 1 5.15 5.15l-2.4 2.4a7.03 7.03 0 0 0 .07-9.96l-.07-.07a7.03 7.03 0 0 0-.26 0zm-.08 5.98a3.65 3.65 0 0 0 0 5.15l-2.39 2.4a7.03 7.03 0 0 0 9.75.12l.12-.12-2.4-2.4a3.65 3.65 0 0 1-5.15-.02l-.02-.03zm9.97.02l-2.4 2.4a3.65 3.65 0 0 1-5.15 5.14l2.4 2.4a7.03 7.03 0 0 0 9.96-.07l.07-.07a7.03 7.03 0 0 0 0-9.86z"/></svg>
+        <span>Try in Colab</span>
+      </a>
+    </div>
+    <p>
+      Your agent is any Python callable <code>(Task) -&gt; str</code> that talks
+      to an OpenAI-compatible endpoint. Wrap its client with
+      <code>traxr.instrument()</code> — that is the whole integration.
+    </p>
+    <pre><code><span class="c"># your agent, unchanged — except the client is instrumented</span>
+<span class="k">import</span> openai, traxr
+
+client = traxr.instrument(openai.OpenAI())
+
+<span class="k">def</span> <span class="f">my_agent</span>(task: traxr.Task) -&gt; str:
+    data = task.files[0].read_text()
+    response = client.chat.completions.create(
+        model=<span class="s">"gpt-4o-mini"</span>,
+        messages=[{<span class="s">"role"</span>: <span class="s">"user"</span>, <span class="s">"content"</span>: f<span class="s">"{task.question}\n\n{data}"</span>}],
+    )
+    <span class="k">return</span> response.choices[0].message.content <span class="k">or</span> <span class="s">""</span>
+
+experiment = traxr.Experiment(
+    files=<span class="s">"examples/sales.csv"</span>,
+    question=<span class="s">"Which region had the highest Q3 revenue?"</span>,
+    expected_answer=<span class="s">"EMEA"</span>,
+    agent=my_agent,
+)
+experiment.run(dry_run=<span class="k">True</span>)  <span class="c"># the full plan — zero LLM calls</span>
+results = experiment.run()
+print(results.summary())</code></pre>
+    <p class="aside">
+      No key? <code>llm=traxr.DeterministicLLMStub()</code> runs the bundled
+      reference agent entirely offline. LangGraph graph?
+      <code>traxr.from_langgraph(graph)</code>.
+    </p>
+  </section>
+
+  <section id="how">
+    <p class="eyebrow">How it works</p>
+    <h2>One variable at a time.</h2>
+    <ol class="steps">
+      <li>
+        <h3>Perturb</h3>
+        <p>One operator changes a copy of one input — seeded, deterministic,
+        single-variable. A swapped column, OCR noise, a redacted section, a
+        missing page. The means, not the point.</p>
+      </li>
+      <li>
+        <h3>Run paired</h3>
+        <p>Your agent runs on the original, then on each variant — identical
+        seeds, fresh temp dirs, original filenames. It cannot tell which
+        condition it is in.</p>
+      </li>
+      <li>
+        <h3>Compare traces</h3>
+        <p>Every LLM call, tool call, and routing decision becomes an event.
+        Paired traces are aligned and compared structurally — content noise
+        ignored, behavior changes counted.</p>
+      </li>
+    </ol>
+  </section>
+
+  <section id="metrics">
+    <p class="eyebrow">The metrics</p>
+    <h2>What the final answer hides.</h2>
+    <dl class="metrics">
+      <div><dt>d_norm</dt><dd>Normalized edit distance between paired traces. 0 — the process was identical. 1 — a completely different execution.</dd></div>
+      <div><dt>t*</dt><dd>The step where divergence first appears, and how early in the run that is (t*/T).</dd></div>
+      <div><dt>manifestation</dt><dd>How divergence showed up: silent semantic corruption, a strategy reroute, early termination, catastrophic failure — or a recovery that lands the same answer anyway.</dd></div>
+      <div><dt>token overhead</dt><dd>Perturbed-run tokens over baseline. The cost of a wobble you would never see in the output.</dd></div>
+      <div><dt>noise floor</dt><dd>Baseline-vs-itself divergence from clean re-runs. Anything at or below it is indistinguishable from sampling noise — measured by default for external agents.</dd></div>
+    </dl>
+  </section>
+
+  <section id="operators">
+    <p class="eyebrow">Operators</p>
+    <h2>The v1 catalog.</h2>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>input</th><th>operators</th><th>delivery</th></tr></thead>
+      <tbody>
+        <tr><td>csv / xlsx</td><td>column_swap · label_corrupt · data_type_corrupt · row_duplicate · irrelevant_columns · unit_change · null_content</td><td>file round-trip</td></tr>
+        <tr><td>txt / md</td><td>ocr_noise · number_corruption · text_redaction · paragraph_shuffle · encoding_error · section_removal · null_content</td><td>file round-trip</td></tr>
+        <tr><td>pdf — any agent</td><td>number_corruption · text_redaction · section_removal · page_removal · page_shuffle · null_content</td><td>surgical in-place edits</td></tr>
+        <tr><td>pdf — built-in agent</td><td>ocr_noise · paragraph_shuffle · encoding_error</td><td>content injection</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </section>
+
+  <div class="cols-2">
+    <section class="callout">
+      <p class="eyebrow">Is my agent traceable?</p>
+      <p>
+        Tier 0 capture sees <strong>OpenAI-SDK <code>chat.completions</code>
+        calls</strong> — sync, async, streaming, tool calls — against any
+        OpenAI-compatible endpoint. LangGraph graphs get their own adapter
+        with full tool fidelity. Other SDKs, raw HTTP, and subprocess calls
+        are invisible in v1: runs that capture nothing are <em>flagged</em>,
+        not reported as zero divergence.
+        <a href="docs/traceable/">The honest scope →</a>
+      </p>
+    </section>
+
+    <section class="callout security">
+      <p class="eyebrow">Before you run it</p>
+      <p>
+        Perturbed inputs are an injection-adjacent vector into your agent, and
+        traxr cannot sandbox your agent. Disable side-effectful tools or run
+        inside a container. <code>dry_run=True</code> enumerates every run
+        before any agent executes; <code>max_llm_calls_per_run</code> is
+        enforced inside the capture wrapper. <a href="docs/security/">Security notes →</a>
+      </p>
+    </section>
+  </div>
+
+  </main>
+
+  <footer>
+    <p class="cite">
+      Operationalizes “Trace-Level Analysis of Information Contamination in
+      Multi-Agent Systems” (Mazhar, Suri, Galhotra).
+    </p>
+    <p class="colophon">
+      <a href="https://dl.acm.org/doi/10.1145/3786335.3813147">paper</a> ·
+      <a href="docs/">documentation</a> ·
+      <a href="https://github.com/anna-mazhar/traxr">github</a> ·
+      <a href="https://github.com/anna-mazhar/traxr/blob/main/SECURITY.md">security</a> ·
+      MIT
+    </p>
+  </footer>
+
+</div>
+
+<script>
+  document.querySelectorAll(".copy-btn").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var target = document.getElementById(btn.dataset.copy);
+      if (!target) return;
+      var text = target.textContent;
+      var done = function () {
+        btn.classList.add("copied");
+        setTimeout(function () { btn.classList.remove("copied"); }, 1600);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, function () {});
+      } else {
+        var r = document.createRange();
+        r.selectNodeContents(target);
+        var sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(r);
+        try { document.execCommand("copy"); done(); } catch (e) {}
+        sel.removeAllRanges();
+      }
+    });
+  });
+
+  // Open external / content links in a new tab; leave in-page anchors
+  // (#section jumps, the logo) as same-tab navigation.
+  document.querySelectorAll("a[href]").forEach(function (a) {
+    var href = a.getAttribute("href");
+    if (href && href.charAt(0) !== "#") {
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+    }
+  });
+</script>
+
+</body>
+</html>

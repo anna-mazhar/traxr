@@ -5,7 +5,7 @@
 PYTHON ?= python
 
 .PHONY: install lint typecheck test cov property mutation analyzer-goldens standalone-check golden \
-	external-golden selfcheck notebook build site verify-all verify-deep
+	external-golden selfcheck notebook build assets site verify-all verify-deep
 
 install:
 	$(PYTHON) -m pip install -e ".[dev,document,openai,langgraph,viz]"
@@ -68,8 +68,21 @@ build:
 	# Bare install: selfcheck degrades to the metrics-only check (no pandas).
 	.build-venv/bin/python -c "import traxr; print('traxr', traxr.__version__); traxr.selfcheck()"
 
-site:
-	@echo "site: not yet built — lands in M6 (web/ + mkdocs build --strict)" >&2; exit 1
+# Assemble the Pages artifact: landing at the root, docs under /docs/.
+# Brand SVGs have one source of truth: assets/. The landing (web/assets/)
+# and the docs theme logo/favicon (docs/assets/) are generated copies —
+# both gitignored. Run this after editing anything in assets/.
+assets:
+	mkdir -p web/assets docs/assets
+	cp assets/mark.svg web/assets/mark.svg
+	cp assets/mark.svg assets/mark-dark.svg docs/assets/
+
+site: assets
+	rm -rf staging
+	mkdir -p staging
+	cp -R web/. staging/
+	$(PYTHON) -m mkdocs build --strict -d staging/docs
+	$(PYTHON) scripts/check_site_links.py staging
 
 # The global Definition of Done: everything except mutation.
 verify-all: install lint typecheck test cov property analyzer-goldens standalone-check golden external-golden selfcheck notebook build site

@@ -1,0 +1,54 @@
+site_name: traxr
+site_description: Controlled-perturbation experiments for your own agent and your own data.
+site_url: https://anna-mazhar.github.io/traxr/docs/
+repo_url: https://github.com/anna-mazhar/traxr
+repo_name: anna-mazhar/traxr
+docs_dir: docs
+
+theme:
+  name: material
+  logo: assets/mark-dark.svg
+  favicon: assets/mark.svg
+  # System fonts, matching the landing page (zero external requests).
+  font: false
+  palette:
+    # Light is the default regardless of OS preference; the toggle opts in
+    # to dark.
+    - scheme: default
+      primary: custom
+      accent: custom
+      toggle: { icon: material/brightness-7, name: Switch to dark mode }
+    - scheme: slate
+      primary: custom
+      accent: custom
+      toggle: { icon: material/brightness-4, name: Switch to light mode }
+  features:
+    - navigation.sections
+    - navigation.footer
+    - content.code.copy
+
+extra_css:
+  - stylesheets/traxr.css
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: google
+            show_source: false
+            members_order: source
+            show_root_heading: true
+            separate_signature: true
+
+nav:
+  - Overview: index.md
+  - Quickstart: quickstart.md
+  - The metrics: metrics.md
+  - Operators: operators.md
+  - Is my agent traceable?: traceable.md
+  - Security: security.md
+  - API reference: api.md
+
+strict: true
