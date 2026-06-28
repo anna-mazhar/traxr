@@ -51,6 +51,7 @@ def invoke_agent(
     *,
     max_llm_calls_per_run: int | None = None,
     store_llm_content: bool = False,
+    session: CaptureSession | None = None,
 ) -> str:
     """Run ``runner`` on ``task`` with Tier 0 capture bound to ``collector``.
 
@@ -67,6 +68,10 @@ def invoke_agent(
             wrapper (the only honest runaway bound for code we don't own).
         store_llm_content: Include raw LLM/tool content in event payloads
             instead of hashes only.
+        session: Pre-built capture session to bind instead of constructing
+            one (its collector must be ``collector``). Lets the caller read
+            per-run session state afterwards (e.g. ``concurrent_detected``);
+            the budget/content keywords are ignored when given.
 
     Returns:
         The agent's final answer.
@@ -74,11 +79,12 @@ def invoke_agent(
     Raises:
         AgentContractError: If the agent returns a non-``str`` value.
     """
-    session = CaptureSession(
-        collector,
-        max_llm_calls_per_run=max_llm_calls_per_run,
-        store_llm_content=store_llm_content,
-    )
+    if session is None:
+        session = CaptureSession(
+            collector,
+            max_llm_calls_per_run=max_llm_calls_per_run,
+            store_llm_content=store_llm_content,
+        )
     with bind_session(session):
         try:
             answer = runner(task)
@@ -96,7 +102,7 @@ def invoke_agent(
                 f"string before returning."
             )
         payload: dict[str, Any] = {"answer_hash": hashlib.sha256(answer.encode()).hexdigest()[:16]}
-        if store_llm_content:
+        if session.store_llm_content:
             payload["answer"] = answer
         session.emit("final_answer", payload, agent_name="harness")
     return answer

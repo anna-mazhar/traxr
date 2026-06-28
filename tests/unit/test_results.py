@@ -1,0 +1,217 @@
+"""ExperimentResults: aggregates, exporters, summary caveats (category 14)."""
+
+import json
+
+import pytest
+
+from traxr.results import (
+    STATUS_SKIPPED,
+    ExperimentResults,
+    PairResult,
+    _control_flow_summary,
+    _noise_floor_mark,
+    _tristate,
+)
+
+
+def make_results(pairs, *, agent_kind="external", noise_floor=None, noise_floor_runs=0):
+    return ExperimentResults(
+        pairs=pairs,
+        traces={"baseline": {"run_label": "baseline", "event_count": 0, "events": []}},
+        answers={"baseline": "42"},
+        fingerprint={"agent_kind": agent_kind, "capture_tier": "tier0", "seed": 42},
+        noise_floor=noise_floor,
+        noise_floor_runs=noise_floor_runs,
+    )
+
+
+def pair(**kwargs):
+    defaults = dict(item_id="f.csv", perturbation="column_swap", delivery="round_trip")
+    defaults.update(kwargs)
+    return PairResult(**defaults)
+
+
+SAMPLE_PAIRS = [
+    pair(
+        d_norm=0.2,
+        t_star_norm=0.5,
+        manifestation="strategy_reroute",
+        recovery=True,
+        token_overhead=1.5,
+    ),
+    pair(
+        perturbation="null_content",
+        d_norm=0.6,
+        t_star_norm=0.25,
+        manifestation="catastrophic_failure",
+        recovery=False,
+        token_overhead=2.5,
+    ),
+    pair(perturbation="unit_change", status_perturbed=STATUS_SKIPPED),
+]
+
+
+def test_manifestation_prevalence_over_scored_pairs_only():
+    prevalence = make_results(SAMPLE_PAIRS).manifestation_prevalence()
+    # 2 scored pairs -> 50/50; the skipped pair is excluded from the denominator.
+    assert prevalence == {"catastrophic_failure": 0.5, "strategy_reroute": 0.5}
+    assert sum(prevalence.values()) == pytest.approx(1.0)
+
+
+def test_divergence_recovery_token_aggregates():
+    results = make_results(SAMPLE_PAIRS)
+    div = results.divergence_summary()
+    assert div["pairs_measured"] == 2
+    assert div["mean_d_norm"] == pytest.approx(0.4)
+    assert div["max_d_norm"] == pytest.approx(0.6)
+    assert div["mean_t_star_norm"] == pytest.approx(0.375)
+    assert results.recovery_rate() == pytest.approx(0.5)
+    assert results.token_overhead_summary() == {
+        "mean": pytest.approx(2.0),
+        "max": pytest.approx(2.5),
+    }
+
+
+def test_empty_aggregates_are_none_or_empty():
+    results = make_results([pair(status_perturbed=STATUS_SKIPPED)])
+    assert results.manifestation_prevalence() == {}
+    assert results.divergence_summary()["mean_d_norm"] is None
+    assert results.recovery_rate() is None
+    assert results.token_overhead_summary() == {"mean": None, "max": None}
+
+
+def test_recovery_rate_counts_only_diverged_pairs():
+    """N-M1: non-diverged pairs carry recovery=None and must not dilute the rate
+    (the denominator is diverged pairs, per the docstring)."""
+    pairs = [
+        pair(d_norm=0.4, recovery=True),  # diverged, answer survived
+        pair(perturbation="null_content", recovery=None),  # not diverged → excluded
+        pair(perturbation="unit_change", recovery=None),  # not diverged → excluded
+    ]
+    results = make_results(pairs)
+    assert results.recovery_rate() == pytest.approx(1.0)  # 1 survived / 1 diverged, not /3
+
+
+def test_to_json_path_is_written_utf8(tmp_path):
+    """N-M2: the CLI-facing results export must be UTF-8, not platform-default."""
+    results = make_results([pair(d_norm=0.3, recovery=True)])
+    results.answers = {"baseline": "4�2"}  # non-ASCII (U+FFFD) in the payload
+    out = tmp_path / "results.json"
+    text = results.to_json(path=out)
+    assert out.read_bytes() == text.encode("utf-8")
+    assert json.loads(out.read_text(encoding="utf-8"))["answers"]["baseline"] == "4�2"
+
+
+def test_to_json_shape_and_timestamp_stripping(tmp_path):
+    results = make_results(SAMPLE_PAIRS)
+    results.traces["baseline"]["events"] = [
+        {"event_type": "llm_call", "sequence_index": 0, "timestamp": "2026-06-12T00:00:00"}
+    ]
+    out = tmp_path / "results.json"
+    text = results.to_json(out)
+    assert out.read_text() == text
+    data = json.loads(text)
+    assert set(data) == {
+        "aggregates",
+        "answers",
+        "fingerprint",
+        "noise_floor",
+        "noise_floor_runs",
+        "pairs",
+        "traces",
+    }
+    assert "timestamp" not in data["traces"]["baseline"]["events"][0]
+    assert len(data["pairs"]) == 3
+    assert json.loads(results.to_json(include_traces=False)).get("traces") is None
+
+
+def test_summary_caveats_unmeasured_external_floor():
+    summary = make_results(SAMPLE_PAIRS).summary()
+    assert "UNMEASURED" in summary
+    assert "noise_floor_runs" in summary
+
+    measured = make_results(SAMPLE_PAIRS, noise_floor=0.05, noise_floor_runs=2).summary()
+    assert "0.0500" in measured and "UNMEASURED" not in measured
+
+    builtin = make_results(SAMPLE_PAIRS, agent_kind="builtin").summary()
+    assert "deterministic built-in path" in builtin
+
+
+def test_summary_flags_order_nondeterminism():
+    results = make_results([pair(d_norm=0.0, order_nondeterministic=True)])
+    assert "concurrent LLM calls detected" in results.summary()
+
+
+def test_to_report_md_and_html():
+    results = make_results(SAMPLE_PAIRS)
+    md = results.to_report("md")
+    assert md.startswith("# Traxr experiment report")
+    assert "| f.csv | column_swap |" in md
+    html = results.to_report("html")
+    assert html.startswith("<!DOCTYPE html>") and "column_swap" in html
+    with pytest.raises(ValueError, match="md.*html"):
+        results.to_report("pdf")
+
+
+def test_summary_promotes_manifestations_and_floor_count():
+    """#2/#4: manifestations read up top; a measured floor reports how many
+    pairs fall within it."""
+    pairs = [
+        pair(d_norm=0.03, manifestation="structural_divergence_recovered", within_noise_floor=True),
+        pair(
+            perturbation="null_content",
+            d_norm=0.6,
+            manifestation="catastrophic_failure",
+            within_noise_floor=False,
+        ),
+    ]
+    summary = make_results(pairs, noise_floor=0.05, noise_floor_runs=2).summary()
+    assert "manifestations:" in summary
+    assert "1 of 2 measured pair(s) within floor" in summary
+
+
+def test_report_has_extended_columns_legend_and_floor_marks():
+    """#1/#2/#3: the table surfaces recovery + control flow + the noise-floor
+    marker, and a legend defines the categories that occurred."""
+    results = make_results(SAMPLE_PAIRS, noise_floor=0.05, noise_floor_runs=2)
+    results.pairs[0].within_noise_floor = True
+    md = results.to_report("md")
+    assert "recovery" in md and "control flow" in md and "<=floor" in md
+    assert "## Manifestations" in md and "strategy_reroute" in md
+    assert "✓" in md  # within-floor marker rendered
+    html = results.to_report("html")
+    assert "Per-pair results" in html and "Manifestations" in html
+
+
+def test_t_star_anchored_to_perturbed_trace_event():
+    """#3: t* renders as ``step N · event_type`` using the perturbed trace."""
+    results = make_results([pair(perturbation="column_swap", d_norm=0.2, t_star=2)])
+    results.traces["f.csv::column_swap"] = {
+        "run_label": "f.csv::column_swap",
+        "event_count": 1,
+        "events": [{"event_type": "routing_decision", "step_num": 2}],
+    }
+    assert "step 2 · routing_decision" in results.to_report("md")
+
+
+def test_report_helpers_render_neutral_cells():
+    assert _tristate(None) == "—" and _tristate(True) == "yes" and _tristate(False) == "no"
+    assert _noise_floor_mark(pair(within_noise_floor=True)) == "✓"
+    assert _noise_floor_mark(pair(within_noise_floor=False)) == "·"
+    assert _noise_floor_mark(pair(within_noise_floor=None)) == "—"
+    assert _control_flow_summary(None) == "—"
+    assert _control_flow_summary({}) == "—"
+    assert (
+        _control_flow_summary(
+            {"reroutes": 2, "tool_failures_introduced": 1, "early_termination": True}
+        )
+        == "2× reroute, tool ok→fail, early stop"
+    )
+
+
+def test_to_dataframe_shape():
+    pd = pytest.importorskip("pandas")
+    df = make_results(SAMPLE_PAIRS).to_dataframe()
+    assert isinstance(df, pd.DataFrame)
+    assert len(df) == 3
+    assert "d_norm" in df.columns and "manifestation" in df.columns
