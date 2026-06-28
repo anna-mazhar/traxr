@@ -220,3 +220,5 @@ __marimo__/
 # Traxr make build scratch venv
 .build-venv/
 .DS_Store
+mutants/
+.nbbuild/

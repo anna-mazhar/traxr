@@ -56,7 +56,9 @@ class WebFetchTool(BaseTool):
         )
         self._session = None
 
-    def _get_session(self) -> requests.Session:
+    # String annotation: requests is an optional import, and a live
+    # `requests.Session` annotation breaks `import traxr.mas` without it.
+    def _get_session(self) -> "requests.Session":
         """Get or create requests session."""
         if self._session is None:
             self._session = requests.Session()
