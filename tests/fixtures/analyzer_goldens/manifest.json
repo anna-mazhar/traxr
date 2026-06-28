@@ -1,0 +1,37 @@
+{
+  "cases": {
+    "empty": {
+      "answer_changed": true,
+      "first_divergence_step": 1,
+      "first_divergence_type": "event_missing_in_perturbed",
+      "normalized_edit_distance": 1.0
+    },
+    "fully_disjoint": {
+      "answer_changed": true,
+      "first_divergence_step": 1,
+      "first_divergence_type": "event_missing_in_clean",
+      "normalized_edit_distance": 1.0
+    },
+    "identical": {
+      "answer_changed": false,
+      "first_divergence_step": null,
+      "first_divergence_type": null,
+      "normalized_edit_distance": 0.0
+    },
+    "known_tstar": {
+      "answer_changed": true,
+      "first_divergence_step": 3,
+      "first_divergence_type": "event_missing_in_perturbed",
+      "normalized_edit_distance": 0.2
+    },
+    "single_edit": {
+      "answer_changed": false,
+      "first_divergence_step": 1,
+      "first_divergence_type": "tool_success_failure_change",
+      "normalized_edit_distance": 0.125
+    }
+  },
+  "empty_case_note": "'empty' = populated clean vs empty perturbed trace (EMPTY-run scenario, n==0 edit-distance branch), not both-empty.",
+  "generated_with_python": "3.12.9",
+  "timestamps_note": "Event timestamps pinned to a fixed value after emission; the analyzer ignores timestamps, this only keeps fixtures byte-stable."
+}
