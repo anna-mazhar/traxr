@@ -545,7 +545,17 @@ class Experiment:
         )
         d_norm = report.edit_distance.normalized if report.edit_distance else None
         control_flow = report.control_flow_changes or ControlFlowChanges()
-        answer_changed = normalize_answer(baseline.answer) != normalize_answer(perturbed.answer)
+
+        pair_warnings = [*baseline.warnings, *perturbed.warnings]
+        # Reuse config.scorer for baseline-vs-perturbed comparison too, so a
+        # semantic scorer (e.g. an LLM judge) treats "same answer" consistently
+        # for both answer_changed and task_success rather than only the latter.
+        try:
+            answer_changed = not bool(self.config.scorer(baseline.answer, perturbed.answer))
+        except Exception as exc:
+            answer_changed = normalize_answer(baseline.answer) != normalize_answer(perturbed.answer)
+            pair_warnings.append(f"scorer raised {type(exc).__name__} comparing baseline/perturbed: {exc}")
+
         manifestation = classify_manifestation(
             PairMetrics(
                 answer_changed=answer_changed,
@@ -558,7 +568,6 @@ class Experiment:
             )
         )
 
-        pair_warnings = [*baseline.warnings, *perturbed.warnings]
         task_success: bool | None = None
         if self.expected_answer is not None and perturbed.status == STATUS_OK:
             try:

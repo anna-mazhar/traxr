@@ -99,8 +99,10 @@ def llm_judge_match(
     prompt = (
         f"Expected answer: {expected!r}\n"
         f"Candidate answer: {actual!r}\n\n"
-        "Does the candidate answer correctly convey the expected answer? "
-        "Reply with exactly one word: yes or no."
+        "Do these two answers reach the same core conclusion/bottom-line? "
+        "Ignore differences in verbosity, formatting, or extra supporting "
+        "detail present in only one of the two — focus only on whether the "
+        "main conclusion matches. Reply with exactly one word: yes or no."
     )
     response = llm.generate(prompt, response_type="default")
     return response.content.strip().lower().startswith("yes")
