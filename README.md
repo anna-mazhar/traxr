@@ -192,39 +192,6 @@ experiment = traxr.Experiment(
 See [the quickstart](docs/quickstart.md#scoring-free-text-answers) for details
 and how to plug in your own deterministic scorer instead.
 
-## How it works
-
-1. **Perturb**: one operator is applied to a copy of your file (seeded,
-   deterministic, single-variable).
-2. **Paired runs**: your agent runs on the clean file, then on each
-   perturbed copy, with identical seeds and fresh temp dirs.
-3. **Diverging traces**: each run's LLM/tool/routing events form a trace;
-   paired traces are aligned and compared structurally.
-
-**The metrics:**
-
-| metric | meaning |
-|---|---|
-| `d_norm` | normalized edit distance between paired traces: 0 = identical process, 1 = completely different |
-| `t*` (+ `t*/T`) | the step where divergence first appears, and how early in the run that is |
-| manifestation | how the damage showed up: silent semantic corruption, strategy reroute, early termination, catastrophic failure, recovered, … |
-| `token_overhead` | perturbed-run tokens / baseline tokens |
-| noise floor | baseline-vs-itself `d_norm` from clean re-runs; divergence at or below it is indistinguishable from sampling noise (**defaults to 1 re-run for external agents; don't skip it**) |
-
-Full reference: [the metrics](docs/metrics.md).
-
-## Perturbation operators (v1)
-
-| input | operators | delivery |
-|---|---|---|
-| CSV / XLSX | `column_swap`, `label_corrupt`, `data_type_corrupt`, `row_duplicate`, `irrelevant_columns`, `unit_change`, `null_content` | file round-trip |
-| TXT / MD | `ocr_noise`, `number_corruption`, `text_redaction`, `paragraph_shuffle`, `encoding_error`, `section_removal`, `null_content` | file round-trip |
-| PDF (any agent) | `number_corruption`, `text_redaction`, `section_removal`, `page_removal`, `page_shuffle`, `null_content` | surgical in-place edits (extraction-fidelity preserving) |
-| PDF (built-in agent only) | `ocr_noise`, `paragraph_shuffle`, `encoding_error` | extracted-content injection |
-
-`traxr operators` prints the live catalog; full notes in
-[the operator catalog](docs/operators.md).
-
 ## Is my agent traceable?
 
 traxr captures traces at two tiers. **Tier 0** is automatic capture at the
@@ -264,6 +231,39 @@ Node transitions become routing events (so reroute metrics work) and carry
 agent names onto LLM events automatically, tool calls keep success/failure
 fidelity, and double-counting with an instrumented client is suppressed. For
 non-messages-state graphs, pass `input_builder=` / `output_extractor=`.
+
+## How it works
+
+1. **Perturb**: one operator is applied to a copy of your file (seeded,
+   deterministic, single-variable).
+2. **Paired runs**: your agent runs on the clean file, then on each
+   perturbed copy, with identical seeds and fresh temp dirs.
+3. **Diverging traces**: each run's LLM/tool/routing events form a trace;
+   paired traces are aligned and compared structurally.
+
+**The metrics:**
+
+| metric | meaning |
+|---|---|
+| `d_norm` | normalized edit distance between paired traces: 0 = identical process, 1 = completely different |
+| `t*` (+ `t*/T`) | the step where divergence first appears, and how early in the run that is |
+| manifestation | how the damage showed up: silent semantic corruption, strategy reroute, early termination, catastrophic failure, recovered, … |
+| `token_overhead` | perturbed-run tokens / baseline tokens |
+| noise floor | baseline-vs-itself `d_norm` from clean re-runs; divergence at or below it is indistinguishable from sampling noise (**defaults to 1 re-run for external agents; don't skip it**) |
+
+Full reference: [the metrics](docs/metrics.md).
+
+## Perturbation operators (v1)
+
+| input | operators | delivery |
+|---|---|---|
+| CSV / XLSX | `column_swap`, `label_corrupt`, `data_type_corrupt`, `row_duplicate`, `irrelevant_columns`, `unit_change`, `null_content` | file round-trip |
+| TXT / MD | `ocr_noise`, `number_corruption`, `text_redaction`, `paragraph_shuffle`, `encoding_error`, `section_removal`, `null_content` | file round-trip |
+| PDF (any agent) | `number_corruption`, `text_redaction`, `section_removal`, `page_removal`, `page_shuffle`, `null_content` | surgical in-place edits (extraction-fidelity preserving) |
+| PDF (built-in agent only) | `ocr_noise`, `paragraph_shuffle`, `encoding_error` | extracted-content injection |
+
+`traxr operators` prints the live catalog; full notes in
+[the operator catalog](docs/operators.md).
 
 ## Cost, honestly
 

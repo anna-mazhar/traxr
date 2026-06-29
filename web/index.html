@@ -169,28 +169,6 @@ traxr.emit(<span class="s">"routing_decision"</span>, {<span class="s">"chosen_a
     <p class="aside">
       <a href="https://github.com/anna-mazhar/traxr#2-your-multi-agent-system">Full multi-agent example (orchestrator + workers) →</a>
     </p>
-    <p class="aside">
-      Prefer the shell?
-      <code>traxr run --agent mypkg:my_agent --file data.csv --question "…" --dry-run</code>.
-      No agentic system?
-      <code>llm=traxr.OpenAICompatibleClient(model="gpt-4o-mini")</code> runs our
-      built-in reference system on your key. LangGraph graph?
-      <code>traxr.from_langgraph(graph)</code>.
-    </p>
-    <p class="aside">
-      Agent replies in full sentences? The default scorer is exact-match. Swap in
-      an LLM judge with
-      <code>config=ExperimentConfig(scorer=llm_judge_match)</code>
-      (<a href="docs/quickstart/#scoring-free-text-answers">scoring free-text answers →</a>).
-    </p>
-    <p class="aside">
-      <strong>API keys:</strong> traxr never reads or stores one of its own. Your
-      instrumented client picks up <code>OPENAI_API_KEY</code> as usual, and Tier 0
-      wraps the SDK above HTTP, so it never sees keys or headers. The built-in
-      agent, the LLM judge, and <code>traxr run --model</code> read
-      <code>OPENAI_API_KEY</code> too (or pass <code>api_key=</code>; any non-empty
-      string works for local servers).
-    </p>
   </section>
 
   <section id="how">
