@@ -105,6 +105,14 @@ traxr operators
 traxr selfcheck
 ```
 
+Two spend knobs: `--max-llm-calls N` caps LLM calls per run for an external
+`--agent` (the `max_llm_calls_per_run` budget, default 50; `RunBudgetExceeded`
+fires before the over-budget call), and `--max-retries N` sets how many times
+the built-in `--model` client retries a transient failure (default 2, the
+OpenAI SDK default; `0` disables). In Python they are
+`ExperimentConfig(max_llm_calls_per_run=...)` and
+`OpenAICompatibleClient(max_retries=...)`.
+
 ## The notebook
 
 [`notebooks/traxr_quickstart.ipynb`](https://github.com/anna-mazhar/traxr/blob/main/notebooks/traxr_quickstart.ipynb)

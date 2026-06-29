@@ -189,10 +189,18 @@ Two caveats that keep the numbers honest:
 
 One experiment = 1 baseline + up to ~7 perturbation runs (+ noise-floor
 re-runs) of **your agent on your key**. Spend cannot be estimated up front,
-so Traxr gives you enforcement instead: `run(dry_run=True)` prints the full
-plan with zero LLM calls; `max_llm_calls_per_run` is enforced *inside* the
-Tier 0 wrapper; live token totals print per run. See
-[SECURITY.md](SECURITY.md) for what cannot be bounded.
+so Traxr gives you enforcement instead:
+
+- `run(dry_run=True)` prints the full plan with zero LLM calls.
+- `ExperimentConfig(max_llm_calls_per_run=...)` caps LLM calls per run
+  (default 50) for external agents, enforced *inside* the Tier 0 wrapper, so
+  `RunBudgetExceeded` fires before the over-budget call goes out.
+- `OpenAICompatibleClient(max_retries=...)` bounds the built-in agent's
+  transient-failure retries (default 2, the OpenAI SDK default; 0 disables).
+- Live token totals print per run.
+
+Both knobs are on the CLI too: `traxr run ... --max-llm-calls 20 --max-retries 0`.
+See [SECURITY.md](SECURITY.md) for what cannot be bounded.
 
 ## Security
 
