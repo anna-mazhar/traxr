@@ -51,7 +51,7 @@ class PairResult:
     recovery: bool | None = None
     token_overhead: float | None = None
     manifestation: str | None = None
-    paper_group: str | None = None
+    manifestation_group: str | None = None
     within_noise_floor: bool | None = None
     order_nondeterministic: bool = False
     warnings: list[str] = field(default_factory=list)

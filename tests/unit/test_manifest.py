@@ -1,6 +1,6 @@
-"""Manifestation classification: every fine category, thresholds, paper groups.
+"""Manifestation classification: every fine category, thresholds, manifestation groups.
 
-Test category 4: each fine category + the 4 paper groups via constructed
+Test category 4: each fine category + the 4 manifestation groups via constructed
 PairMetrics; threshold boundaries (edn 0.5 / 0.2 / ~0, total_changes 3).
 """
 
@@ -15,10 +15,10 @@ from traxr.metrics.manifest import (
     EARLY_TERMINATION,
     FINE_CATEGORIES,
     LOOP_OR_EXTENDED_EXECUTION,
+    MANIFESTATION_GROUPS,
     NO_OBSERVABLE_EFFECT,
     NO_OBSERVABLE_EFFECT_GROUP,
     OUTCOME_CHANGE_UNCATEGORIZED,
-    PAPER_GROUPS,
     SILENT_CORRUPTION_GROUP,
     SILENT_SEMANTIC_CORRUPTION,
     STRATEGY_REROUTE,
@@ -26,7 +26,7 @@ from traxr.metrics.manifest import (
     STRUCTURAL_DIVERGENCE_WITH_OUTCOME_CHANGE,
     PairMetrics,
     classify_manifestation,
-    to_paper_group,
+    to_manifestation_group,
 )
 
 
@@ -139,7 +139,7 @@ class TestThresholdBoundaries:
         assert classify_manifestation(m) == STRATEGY_REROUTE
 
 
-class TestPaperGroups:
+class TestManifestationGroups:
     @pytest.mark.parametrize(
         ("fine", "group"),
         [
@@ -155,12 +155,12 @@ class TestPaperGroups:
         ],
     )
     def test_rollup(self, fine, group):
-        assert to_paper_group(fine) == group
+        assert to_manifestation_group(fine) == group
 
-    def test_every_fine_category_maps_to_a_paper_group(self):
+    def test_every_fine_category_maps_to_a_manifestation_group(self):
         for fine in FINE_CATEGORIES:
-            assert to_paper_group(fine) in PAPER_GROUPS
+            assert to_manifestation_group(fine) in MANIFESTATION_GROUPS
 
     def test_unknown_category_raises(self):
         with pytest.raises(ValueError, match="Unknown manifestation category"):
-            to_paper_group("not_a_category")
+            to_manifestation_group("not_a_category")

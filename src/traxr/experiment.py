@@ -34,7 +34,7 @@ from traxr.errors import (
 from traxr.llm.protocol import LLMClient
 from traxr.metrics.analyzer import ControlFlowChanges, TraceDivergenceAnalyzer
 from traxr.metrics.cost import CostProxy
-from traxr.metrics.manifest import PairMetrics, classify_manifestation, to_paper_group
+from traxr.metrics.manifest import PairMetrics, classify_manifestation, to_manifestation_group
 from traxr.perturb.engine import PerturbationEngine
 from traxr.perturb.matrix import (
     AgentKind,
@@ -545,7 +545,17 @@ class Experiment:
         )
         d_norm = report.edit_distance.normalized if report.edit_distance else None
         control_flow = report.control_flow_changes or ControlFlowChanges()
-        answer_changed = normalize_answer(baseline.answer) != normalize_answer(perturbed.answer)
+
+        pair_warnings = [*baseline.warnings, *perturbed.warnings]
+        # Reuse config.scorer for baseline-vs-perturbed comparison too, so a
+        # semantic scorer (e.g. an LLM judge) treats "same answer" consistently
+        # for both answer_changed and task_success rather than only the latter.
+        try:
+            answer_changed = not bool(self.config.scorer(baseline.answer, perturbed.answer))
+        except Exception as exc:
+            answer_changed = normalize_answer(baseline.answer) != normalize_answer(perturbed.answer)
+            pair_warnings.append(f"scorer raised {type(exc).__name__} comparing baseline/perturbed: {exc}")
+
         manifestation = classify_manifestation(
             PairMetrics(
                 answer_changed=answer_changed,
@@ -558,7 +568,6 @@ class Experiment:
             )
         )
 
-        pair_warnings = [*baseline.warnings, *perturbed.warnings]
         task_success: bool | None = None
         if self.expected_answer is not None and perturbed.status == STATUS_OK:
             try:
@@ -601,7 +610,7 @@ class Experiment:
             recovery=recovery,
             token_overhead=token_overhead,
             manifestation=manifestation,
-            paper_group=to_paper_group(manifestation),
+            manifestation_group=to_manifestation_group(manifestation),
             within_noise_floor=(None if floor is None or d_norm is None else d_norm <= floor),
             order_nondeterministic=baseline.concurrent or perturbed.concurrent,
             warnings=pair_warnings,

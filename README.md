@@ -155,6 +155,30 @@ traxr operators      # the live operator catalog
 traxr selfcheck      # offline end-to-end smoke test
 ```
 
+### Scoring free-text answers
+
+A real agent answers in full sentences, so the default scorer
+(`check_answer_match`, exact normalized string equality) won't match a bare
+`expected_answer` against a verbose reply. Bring your own via
+`ExperimentConfig(scorer=...)`, e.g. the built-in `llm_judge_match` for
+semantic matching (non-deterministic, costs an extra LLM call):
+
+```python
+from traxr import ExperimentConfig
+from traxr.scoring import llm_judge_match
+
+experiment = traxr.Experiment(
+    files="examples/sales.csv",
+    question="Which region had the highest Q3 revenue?",
+    expected_answer="EMEA",
+    agent=my_agent,
+    config=ExperimentConfig(scorer=llm_judge_match),  # semantic match instead of exact
+)
+```
+
+See [the quickstart](docs/quickstart.md#scoring-free-text-answers) for details
+and how to plug in your own deterministic scorer instead.
+
 ## How it works
 
 1. **Perturb**: one operator is applied to a copy of your file (seeded,

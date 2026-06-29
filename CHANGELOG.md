@@ -25,7 +25,7 @@ Contamination in Multi-Agent Systems”* (Mazhar, Suri, Galhotra) as an SDK.
   with crash/empty/skip statuses and partial-trace metrics.
 - `traxr.ExperimentResults` / `traxr.PairResult`: `d_norm`, `t*` (+
   normalized position), divergence type, control-flow changes,
-  manifestation (+ paper group), `task_success`, `answer_changed`,
+  manifestation (+ manifestation group), `task_success`, `answer_changed`,
   recovery, token overhead, `within_noise_floor`,
   `order_nondeterministic`; aggregates; canonical timestamp-free
   `to_json()` (byte-stable for deterministic experiments),
@@ -54,7 +54,7 @@ Contamination in Multi-Agent Systems”* (Mazhar, Suri, Galhotra) as an SDK.
 - Divergence analyzer: normalized edit distance over structural
   signatures, first-divergence point, control-flow change counts; pinned
   by committed golden fixtures.
-- Manifestation taxonomy (9 fine categories, 4 paper groups), answer
+- Manifestation taxonomy (9 fine categories, 4 manifestation groups), answer
   scoring, token-cost comparison.
 
 **Perturbation + data**

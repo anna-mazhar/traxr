@@ -47,6 +47,8 @@ unless noted.
 
 ::: traxr.scoring.check_answer_match
 
+::: traxr.scoring.llm_judge_match
+
 ::: traxr.viz.plot_d_norm
 
 ::: traxr.viz.plot_t_star
