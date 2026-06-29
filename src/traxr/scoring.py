@@ -76,9 +76,7 @@ def _default_judge_client() -> LLMClient:
     return OpenAICompatibleClient(model="gpt-4o-mini")
 
 
-def llm_judge_match(
-    expected: str | None, actual: str | None, llm: LLMClient | None = None
-) -> bool:
+def llm_judge_match(expected: str | None, actual: str | None, llm: LLMClient | None = None) -> bool:
     """Semantic match via LLM judge. Opt-in only, usable directly as
     ``ExperimentConfig(scorer=llm_judge_match)``.
 

@@ -241,9 +241,7 @@ class OpenAICompatibleClient:
                 'api_key="local").'
             )
 
-        self.client = openai.OpenAI(
-            api_key=api_key, base_url=base_url, max_retries=max_retries
-        )
+        self.client = openai.OpenAI(api_key=api_key, base_url=base_url, max_retries=max_retries)
 
     def _completion_kwargs(self, **kwargs: Any) -> dict[str, Any]:
         """Common chat.completions kwargs (seed; temperature only if set)."""
