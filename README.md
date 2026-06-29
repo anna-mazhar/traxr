@@ -72,6 +72,30 @@ your agent can never tell which condition it is in. Stateful agents (memory,
 vector stores) should use `agent_factory=` instead of `agent=` so every run
 starts fresh.
 
+### Scoring free-text answers
+
+A real agent answers in full sentences, so the default scorer
+(`check_answer_match`, exact normalized string equality) won't match a bare
+`expected_answer` against a verbose reply. Bring your own via
+`ExperimentConfig(scorer=...)` — e.g. the built-in `llm_judge_match` for
+semantic matching (non-deterministic, costs an extra LLM call):
+
+```python
+from traxr import ExperimentConfig
+from traxr.scoring import llm_judge_match
+
+experiment = traxr.Experiment(
+    files="examples/sales.csv",
+    question="Which region had the highest Q3 revenue?",
+    expected_answer="EMEA",
+    agent=my_agent,
+    config=ExperimentConfig(scorer=llm_judge_match),
+)
+```
+
+See [docs/quickstart.md](docs/quickstart.md#scoring-free-text-answers) for
+details and how to plug in your own deterministic scorer instead.
+
 ### No API key? Try the built-in reference agent + stub
 
 ```python

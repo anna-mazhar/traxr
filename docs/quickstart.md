@@ -35,6 +35,36 @@ results.to_json("results.json")
 Stateful agents (memory, vector stores) should pass `agent_factory=` —
 a zero-arg factory called once per run — so every run starts fresh.
 
+## Scoring free-text answers
+
+The default scorer, `check_answer_match`, is normalized string equality
+with numeric tolerance — exact on purpose. A real agent answers in full
+sentences ("The region with the highest Q3 revenue is EMEA, with a
+revenue of 181,400."), which will never literally equal a bare
+`expected_answer="EMEA"`. Bring your own scorer via `ExperimentConfig`:
+
+```python
+from traxr import ExperimentConfig
+from traxr.scoring import llm_judge_match
+
+experiment = traxr.Experiment(
+    files="examples/sales.csv",
+    question="Which region had the highest Q3 revenue?",
+    expected_answer="EMEA",
+    agent=my_agent,
+    config=ExperimentConfig(scorer=llm_judge_match),
+)
+```
+
+`llm_judge_match` asks an LLM whether the candidate answer reaches the
+same core conclusion as the expected one — useful for verbose answers,
+but **not deterministic**: it costs an extra LLM call per scored answer
+and can vary between runs. By default it lazily builds an
+`OpenAICompatibleClient(model="gpt-4o-mini")` from `OPENAI_API_KEY`; pass
+`functools.partial(llm_judge_match, llm=my_llm)` to use another provider.
+A `scorer` is just `(expected, actual) -> bool`, so a plain function works
+too if you want something deterministic but less strict than the default.
+
 ## No API key: the built-in reference agent
 
 ```python
