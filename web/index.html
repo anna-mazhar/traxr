@@ -166,6 +166,9 @@ print(results.summary())</code></pre>
 <span class="c"># No-op outside a Traxr run, so it's safe in production code.</span>
 traxr.emit(<span class="s">"routing_decision"</span>, {<span class="s">"chosen_agent"</span>: <span class="s">"researcher"</span>}, agent_name=<span class="s">"orchestrator"</span>)</code></pre>
     <p class="aside">
+      <a href="https://github.com/anna-mazhar/traxr#2-your-multi-agent-system">Full multi-agent example (orchestrator + workers) →</a>
+    </p>
+    <p class="aside">
       Prefer the shell?
       <code>traxr run --agent mypkg:my_agent --file data.csv --question "…" --dry-run</code>.
       No agentic system?
