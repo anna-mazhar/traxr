@@ -177,6 +177,12 @@ traxr.emit(<span class="s">"routing_decision"</span>, {<span class="s">"chosen_a
       built-in reference system on your key. LangGraph graph?
       <code>traxr.from_langgraph(graph)</code>.
     </p>
+    <p class="aside">
+      Agent replies in full sentences? The default scorer is exact-match. Swap in
+      an LLM judge with
+      <code>config=ExperimentConfig(scorer=llm_judge_match)</code>
+      (<a href="docs/quickstart/#scoring-free-text-answers">scoring free-text answers →</a>).
+    </p>
   </section>
 
   <section id="how">

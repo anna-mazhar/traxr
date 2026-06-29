@@ -25,6 +25,7 @@ OpenAI-compatible endpoint through the OpenAI SDK.
    an event; paired traces are aligned and compared structurally.
 
 Start with the [quickstart](quickstart.md), including how to
+[score free-text answers](quickstart.md#scoring-free-text-answers) and how to
 [expose your agents with `traxr.emit`](quickstart.md#expose-your-agents-with-traxremit).
 Check [which agents are traceable](traceable.md), and read the
 [security notes](security.md) before running an agent with real tools.
