@@ -49,7 +49,7 @@ QUESTION = (
     "food (not including drinks)? Express your answer in USD with two "
     "decimal places."
 )
-EXPECTED_ANSWER = "89706" 
+EXPECTED_ANSWER = "89706"
 
 if os.environ.get("OPENAI_API_KEY"):
     llm = traxr.OpenAICompatibleClient(model="gpt-4o-mini")
