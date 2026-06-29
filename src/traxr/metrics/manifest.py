@@ -20,7 +20,7 @@ fine category                               condition
 ``outcome_change_uncategorized``            fallback
 ==========================================  ==========================================
 
-``to_paper_group`` rolls the fine categories up to the paper's 4 groups
+``to_manifestation_group`` rolls the fine categories up to 4 broader groups
 (silent corruption / behavioral detours / combined disruption / no observable
 effect). The source maps 6 of the 9 fine categories explicitly
 (``paper_stats.py``); the remaining 3 are assigned here by definition:
@@ -55,20 +55,20 @@ FINE_CATEGORIES: tuple[str, ...] = (
     OUTCOME_CHANGE_UNCATEGORIZED,
 )
 
-# Paper groups
+# Manifestation groups
 SILENT_CORRUPTION_GROUP = "silent_corruption"
 BEHAVIORAL_DETOURS_GROUP = "behavioral_detours"
 COMBINED_DISRUPTION_GROUP = "combined_disruption"
 NO_OBSERVABLE_EFFECT_GROUP = "no_observable_effect"
 
-PAPER_GROUPS: tuple[str, ...] = (
+MANIFESTATION_GROUPS: tuple[str, ...] = (
     SILENT_CORRUPTION_GROUP,
     BEHAVIORAL_DETOURS_GROUP,
     COMBINED_DISRUPTION_GROUP,
     NO_OBSERVABLE_EFFECT_GROUP,
 )
 
-_PAPER_GROUP_BY_CATEGORY: dict[str, str] = {
+_MANIFESTATION_GROUP_BY_CATEGORY: dict[str, str] = {
     CATASTROPHIC_FAILURE: COMBINED_DISRUPTION_GROUP,
     EARLY_TERMINATION: COMBINED_DISRUPTION_GROUP,
     LOOP_OR_EXTENDED_EXECUTION: BEHAVIORAL_DETOURS_GROUP,
@@ -160,10 +160,10 @@ def classify_manifestation(metrics: PairMetrics) -> str:
     return OUTCOME_CHANGE_UNCATEGORIZED
 
 
-def to_paper_group(fine_category: str) -> str:
-    """Roll a fine category up to one of the paper's 4 groups."""
+def to_manifestation_group(fine_category: str) -> str:
+    """Roll a fine category up to one of the 4 broader manifestation groups."""
     try:
-        return _PAPER_GROUP_BY_CATEGORY[fine_category]
+        return _MANIFESTATION_GROUP_BY_CATEGORY[fine_category]
     except KeyError:
         raise ValueError(
             f"Unknown manifestation category {fine_category!r}; expected one of {FINE_CATEGORIES}"

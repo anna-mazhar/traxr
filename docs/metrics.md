@@ -37,7 +37,7 @@ A rule-based taxonomy over the pair:
 | `structural_divergence_recovered` | different path, same answer |
 | `no_observable_effect` | nothing changed |
 
-Each fine category rolls up to one of the paper's four groups: silent
+Each fine category rolls up to one of four manifestation groups: silent
 corruption, behavioral detours, combined disruption, no observable effect.
 
 ## Token overhead

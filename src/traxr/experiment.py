@@ -34,7 +34,7 @@ from traxr.errors import (
 from traxr.llm.protocol import LLMClient
 from traxr.metrics.analyzer import ControlFlowChanges, TraceDivergenceAnalyzer
 from traxr.metrics.cost import CostProxy
-from traxr.metrics.manifest import PairMetrics, classify_manifestation, to_paper_group
+from traxr.metrics.manifest import PairMetrics, classify_manifestation, to_manifestation_group
 from traxr.perturb.engine import PerturbationEngine
 from traxr.perturb.matrix import (
     AgentKind,
@@ -610,7 +610,7 @@ class Experiment:
             recovery=recovery,
             token_overhead=token_overhead,
             manifestation=manifestation,
-            paper_group=to_paper_group(manifestation),
+            manifestation_group=to_manifestation_group(manifestation),
             within_noise_floor=(None if floor is None or d_norm is None else d_norm <= floor),
             order_nondeterministic=baseline.concurrent or perturbed.concurrent,
             warnings=pair_warnings,

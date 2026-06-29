@@ -19,15 +19,15 @@ from traxr.metrics.analyzer import (
 from traxr.metrics.cost import BaselineStore, CostComparison, CostProxy
 from traxr.metrics.manifest import (
     FINE_CATEGORIES,
-    PAPER_GROUPS,
+    MANIFESTATION_GROUPS,
     PairMetrics,
     classify_manifestation,
-    to_paper_group,
+    to_manifestation_group,
 )
 
 __all__ = [
     "FINE_CATEGORIES",
-    "PAPER_GROUPS",
+    "MANIFESTATION_GROUPS",
     "STRUCTURAL_DIVERGENCE_TYPES",
     "AlignedEventPair",
     "BaselineStore",
@@ -39,5 +39,5 @@ __all__ = [
     "PairMetrics",
     "TraceDivergenceAnalyzer",
     "classify_manifestation",
-    "to_paper_group",
+    "to_manifestation_group",
 ]
