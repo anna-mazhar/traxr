@@ -114,6 +114,15 @@ The bundled multi-agent reference system (`llm=...`) runs entirely offline
 under the deterministic stub — it powers the demos, goldens, and
 `python -m traxr.selfcheck`.
 
+### Try it on a real benchmark task
+
+[`examples/gaia_menu_sales.py`](examples/gaia_menu_sales.py) runs a real
+GAIA benchmark question end-to-end through Traxr's built-in multi-agent
+system — no setup required (falls back to a deterministic stub without an
+API key, upgrades automatically to a real `gpt-4o-mini` agent if
+`OPENAI_API_KEY` is set). See [examples/README.md](examples/README.md) for
+a worked-through results writeup.
+
 ### LangGraph
 
 ```python

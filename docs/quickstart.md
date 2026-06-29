@@ -83,6 +83,16 @@ Swap the stub for a real endpoint with
 [`OpenAICompatibleClient`](api.md#llm-clients) — OpenAI, Azure, Ollama,
 vLLM, Together, Groq, OpenRouter, anything OpenAI-compatible.
 
+## Try it on a real benchmark task
+
+[`examples/gaia_menu_sales.py`](https://github.com/anna-mazhar/traxr/blob/main/examples/gaia_menu_sales.py)
+runs a real GAIA benchmark question end-to-end through Traxr's built-in
+multi-agent system — no setup required (falls back to a deterministic stub
+without an API key, upgrades automatically to a real `gpt-4o-mini` agent if
+`OPENAI_API_KEY` is set). See
+[examples/README.md](https://github.com/anna-mazhar/traxr/blob/main/examples/README.md)
+for a worked-through results writeup.
+
 ## LangGraph
 
 ```python

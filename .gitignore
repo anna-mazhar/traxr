@@ -227,3 +227,6 @@ staging/
 # Generated brand SVG copies — source of truth is assets/ (see `make assets`)
 web/assets/
 docs/assets/
+
+
+examples/*.json
