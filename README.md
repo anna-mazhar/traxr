@@ -71,9 +71,9 @@ stores) should pass `agent_factory=` instead of `agent=`.
 
 ### 2. Your multi-agent system
 
-Tier 0 captures LLM traffic, but it can't see *which* agent is acting.
-`traxr.emit()` is the escape hatch: call it where your code knows who is in
-charge (routing decisions, handoffs, memory reads) to expose agent-level
+traxr captures your LLM traffic automatically, but it can't see *which* agent
+is acting. `traxr.emit()` is the escape hatch: call it where your code knows who
+is in charge (routing decisions, handoffs, memory reads) to expose agent-level
 structure in the trace.
 
 ```python
@@ -190,8 +190,15 @@ Full reference: [the metrics](docs/metrics.md).
 
 ## Is my agent traceable?
 
-Tier 0 capture sees **OpenAI-SDK `chat.completions` calls**. That is the honest
-scope. You're covered if your agent:
+traxr captures traces at two tiers. **Tier 0** is automatic capture at the
+OpenAI-SDK boundary: wrap your client with `instrument()` and every
+`chat.completions` call (sync, async, streaming, tool calls) becomes a trace
+event, against any OpenAI-compatible endpoint. **Tier 1** is framework-native
+capture via callbacks: the [LangGraph adapter](#langgraph) is richer, since it
+also sees node transitions and tool success/failure.
+
+Tier 0 is the default, and its honest scope is OpenAI-SDK `chat.completions`
+calls. You're covered if your agent:
 
 - uses `openai.OpenAI` / `openai.AsyncOpenAI` against any OpenAI-compatible
   endpoint (OpenAI, Azure, Ollama, vLLM, Together, Groq, OpenRouter, …) and

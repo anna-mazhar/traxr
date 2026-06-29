@@ -37,9 +37,9 @@ Stateful agents (memory, vector stores) should pass `agent_factory=`
 
 ## Expose your agents with `traxr.emit`
 
-Tier 0 captures LLM traffic, but it cannot see *which* agent is acting; those
-calls are tagged `agent_name="external"`. In a multi-agent system that's the
-part you most want in the trace. [`traxr.emit()`](api.md#capture) is the escape
+`instrument()` captures your LLM traffic automatically, but it cannot see
+*which* agent is acting; those calls are tagged `agent_name="external"`. In a
+multi-agent system that's the part you most want in the trace. [`traxr.emit()`](api.md#capture) is the escape
 hatch: call it from inside your code, where you know who is in charge and what
 they just decided.
 
@@ -54,9 +54,9 @@ Two rules carry most of the value:
   `chosen_agent` is *who runs next*. Read the `chosen_agent`s down the trace and
   you reconstruct the route, which is exactly what lets the metrics flag a
   *reroute* when a perturbation changes it.
-- **Emit at decision points** Tier 0 can't see: route changes, handoffs, memory
-  reads, retrieval. Keep `instrument()` for the LLM/tool traffic; don't
-  duplicate it with `emit`.
+- **Emit at decision points** the automatic capture misses: route changes,
+  handoffs, memory reads, retrieval. Keep `instrument()` for the LLM/tool
+  traffic; don't duplicate it with `emit`.
 
 Outside a Traxr run `emit()` is a **no-op** (same passthrough principle as
 `instrument()`), so the calls are safe to leave in production code.

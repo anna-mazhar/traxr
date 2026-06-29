@@ -43,7 +43,7 @@ corruption, behavioral detours, combined disruption, no observable effect.
 ## Token overhead
 
 Perturbed-run tokens / baseline tokens, from captured usage. Corruption you
-pay for. External agents get this from the Tier 0 wrapper's captured
+pay for. External agents get this from the capture wrapper's captured
 `usage`; runs without usage data are reported as unavailable, never as 1.0.
 
 ## The noise floor

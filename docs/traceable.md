@@ -3,6 +3,12 @@
 The honest headline: traxr v1 measures **any Python agent that talks to an
 OpenAI-compatible endpoint via the OpenAI SDK**, not "any agent".
 
+traxr captures at two tiers. **Tier 0** is automatic capture at the OpenAI-SDK
+boundary (`instrument()` / `patch_openai()`): provider-agnostic, but coarse (no
+memory or retrieval events, tool success unknown). **Tier 1** is framework-native
+capture via callbacks (the LangGraph adapter): richer, with node transitions and
+tool success/failure. Everything below is Tier 0 unless noted.
+
 ## Covered
 
 - **`openai.OpenAI` / `openai.AsyncOpenAI` clients** you can pass into your

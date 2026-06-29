@@ -158,7 +158,8 @@ experiment.run(dry_run=<span class="k">True</span>)  <span class="c"># the full 
 results = experiment.run()
 print(results.summary())</code></pre>
     <p class="aside">
-      Multi-agent? Tier 0 can't see <em>which</em> agent is acting. Tag it with
+      Multi-agent? <code>instrument</code> captures the LLM calls, but not
+      <em>which</em> agent is acting. Tag it with
       <code>traxr.emit</code> at routes and handoffs
       (<a href="docs/quickstart/">expose your agents →</a>):
     </p>
@@ -235,14 +236,16 @@ traxr.emit(<span class="s">"routing_decision"</span>, {<span class="s">"chosen_a
     <section class="callout">
       <p class="eyebrow">Is my agent traceable?</p>
       <p>
-        Tier 0 capture sees <strong>OpenAI-SDK <code>chat.completions</code>
-        calls</strong> (sync, async, streaming, tool calls) against any
-        OpenAI-compatible endpoint. LangGraph graphs get their own adapter
-        with full tool fidelity; anything else your code knows (routes,
-        handoffs, memory reads) you surface with <code>traxr.emit</code>.
-        Other SDKs, raw HTTP, and subprocess calls are invisible in v1: runs
-        that capture nothing are <em>flagged</em>, not reported as zero
-        divergence. <a href="docs/traceable/">The honest scope →</a>
+        traxr captures at two tiers. <strong>Tier 0</strong> is automatic
+        capture at the OpenAI-SDK boundary: <code>chat.completions</code> calls
+        (sync, async, streaming, tool calls) against any OpenAI-compatible
+        endpoint. <strong>Tier 1</strong> is framework-native capture via
+        callbacks, so LangGraph graphs get a richer adapter with full tool
+        fidelity. Anything your code knows (routes, handoffs, memory reads) you
+        surface with <code>traxr.emit</code>. Other SDKs, raw HTTP, and
+        subprocess calls are invisible in v1: runs that capture nothing are
+        <em>flagged</em>, not reported as zero divergence.
+        <a href="docs/traceable/">The honest scope →</a>
       </p>
     </section>
 
