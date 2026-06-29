@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>traxr — evaluate multi-agent systems beyond the final answer</title>
-<meta name="description" content="Final-answer accuracy hides how multi-agent systems actually behave. traxr traces what your agent did — run paired experiments and measure how its execution diverged: how much, where, and what it cost.">
+<title>traxr: evaluate multi-agent systems beyond the final answer</title>
+<meta name="description" content="Final-answer accuracy hides how multi-agent systems actually behave. traxr traces what your agent did, then runs paired experiments and measures how its execution diverged: how much, where, and what it cost.">
 <meta property="og:title" content="traxr">
-<meta property="og:description" content="Evaluate multi-agent systems beyond final-answer accuracy — at the level of the execution trace.">
+<meta property="og:description" content="Evaluate multi-agent systems beyond final-answer accuracy, at the level of the execution trace.">
 <link rel="icon" type="image/svg+xml" href="assets/mark.svg">
 <link rel="stylesheet" href="style.css">
 </head>
@@ -42,10 +42,10 @@
     <h1>Look past the final answer.</h1>
     <p class="lede">
       A multi-agent system can reach the right answer through the wrong
-      process — and final-answer accuracy never sees it. traxr evaluates the
-      <em>execution trace itself</em>: run paired experiments on your own
-      agent and measure how its behavior diverged — how much, where it
-      started, and what it cost.
+      process, and final-answer accuracy never sees it. traxr evaluates the
+      <em>execution trace itself</em>: run paired experiments on your agent
+      and measure how its behavior diverged. How much, where it started, and
+      what it cost.
     </p>
 
     <figure class="strip" role="img"
@@ -95,7 +95,7 @@
           <text x="372" y="84" fill="#e11d48">same agent, divergent path</text>
         </g>
       </svg>
-      <figcaption>Fig. 1 — two runs of one agent share a prefix, then split at the first divergence point t*.</figcaption>
+      <figcaption>Fig. 1: two runs of one agent share a prefix, then split at the first divergence point t*.</figcaption>
     </figure>
 
     <div class="install">
@@ -133,9 +133,9 @@
     <p>
       Your agent is any Python callable <code>(Task) -&gt; str</code> that talks
       to an OpenAI-compatible endpoint. Wrap its client with
-      <code>traxr.instrument()</code> — that is the whole integration.
+      <code>traxr.instrument()</code>. That is the whole integration.
     </p>
-    <pre><code><span class="c"># your agent, unchanged — except the client is instrumented</span>
+    <pre><code><span class="c"># your agent, unchanged, except the client is instrumented</span>
 <span class="k">import</span> openai, traxr
 
 client = traxr.instrument(openai.OpenAI())
@@ -154,13 +154,20 @@ experiment = traxr.Experiment(
     expected_answer=<span class="s">"EMEA"</span>,
     agent=my_agent,
 )
-experiment.run(dry_run=<span class="k">True</span>)  <span class="c"># the full plan — zero LLM calls</span>
+experiment.run(dry_run=<span class="k">True</span>)  <span class="c"># the full plan: zero LLM calls</span>
 results = experiment.run()
 print(results.summary())</code></pre>
     <p class="aside">
-      No key? <code>llm=traxr.DeterministicLLMStub()</code> runs the bundled
-      reference agent entirely offline. LangGraph graph?
-      <code>traxr.from_langgraph(graph)</code>.
+      Multi-agent? <code>instrument</code> captures the LLM calls, but not
+      <em>which</em> agent is acting. Tag it with
+      <code>traxr.emit</code> at routes and handoffs
+      (<a href="docs/quickstart/">expose your agents →</a>):
+    </p>
+    <pre><code><span class="c"># agent_name = the agent acting now; chosen_agent = who the orchestrator picked.</span>
+<span class="c"># No-op outside a Traxr run, so it's safe in production code.</span>
+traxr.emit(<span class="s">"routing_decision"</span>, {<span class="s">"chosen_agent"</span>: <span class="s">"researcher"</span>}, agent_name=<span class="s">"orchestrator"</span>)</code></pre>
+    <p class="aside">
+      <a href="https://github.com/anna-mazhar/traxr#2-your-multi-agent-system">Full multi-agent example (orchestrator + workers) →</a>
     </p>
   </section>
 
@@ -170,20 +177,20 @@ print(results.summary())</code></pre>
     <ol class="steps">
       <li>
         <h3>Perturb</h3>
-        <p>One operator changes a copy of one input — seeded, deterministic,
+        <p>One operator changes a copy of one input: seeded, deterministic,
         single-variable. A swapped column, OCR noise, a redacted section, a
         missing page. The means, not the point.</p>
       </li>
       <li>
         <h3>Run paired</h3>
-        <p>Your agent runs on the original, then on each variant — identical
-        seeds, fresh temp dirs, original filenames. It cannot tell which
-        condition it is in.</p>
+        <p>Your agent runs on the original, then on each variant, with
+        identical seeds, fresh temp dirs, and original filenames. It cannot
+        tell which condition it is in.</p>
       </li>
       <li>
         <h3>Compare traces</h3>
         <p>Every LLM call, tool call, and routing decision becomes an event.
-        Paired traces are aligned and compared structurally — content noise
+        Paired traces are aligned and compared structurally: content noise
         ignored, behavior changes counted.</p>
       </li>
     </ol>
@@ -193,11 +200,11 @@ print(results.summary())</code></pre>
     <p class="eyebrow">The metrics</p>
     <h2>What the final answer hides.</h2>
     <dl class="metrics">
-      <div><dt>d_norm</dt><dd>Normalized edit distance between paired traces. 0 — the process was identical. 1 — a completely different execution.</dd></div>
+      <div><dt>d_norm</dt><dd>Normalized edit distance between paired traces. 0 is an identical process; 1 is a completely different execution.</dd></div>
       <div><dt>t*</dt><dd>The step where divergence first appears, and how early in the run that is (t*/T).</dd></div>
-      <div><dt>manifestation</dt><dd>How divergence showed up: silent semantic corruption, a strategy reroute, early termination, catastrophic failure — or a recovery that lands the same answer anyway.</dd></div>
+      <div><dt>manifestation</dt><dd>How divergence showed up: silent semantic corruption, a strategy reroute, early termination, catastrophic failure, or a recovery that lands the same answer anyway.</dd></div>
       <div><dt>token overhead</dt><dd>Perturbed-run tokens over baseline. The cost of a wobble you would never see in the output.</dd></div>
-      <div><dt>noise floor</dt><dd>Baseline-vs-itself divergence from clean re-runs. Anything at or below it is indistinguishable from sampling noise — measured by default for external agents.</dd></div>
+      <div><dt>noise floor</dt><dd>Baseline-vs-itself divergence from clean re-runs. Anything at or below it is indistinguishable from sampling noise. Measured by default for external agents.</dd></div>
     </dl>
   </section>
 
@@ -210,8 +217,8 @@ print(results.summary())</code></pre>
       <tbody>
         <tr><td>csv / xlsx</td><td>column_swap · label_corrupt · data_type_corrupt · row_duplicate · irrelevant_columns · unit_change · null_content</td><td>file round-trip</td></tr>
         <tr><td>txt / md</td><td>ocr_noise · number_corruption · text_redaction · paragraph_shuffle · encoding_error · section_removal · null_content</td><td>file round-trip</td></tr>
-        <tr><td>pdf — any agent</td><td>number_corruption · text_redaction · section_removal · page_removal · page_shuffle · null_content</td><td>surgical in-place edits</td></tr>
-        <tr><td>pdf — built-in agent</td><td>ocr_noise · paragraph_shuffle · encoding_error</td><td>content injection</td></tr>
+        <tr><td>pdf (any agent)</td><td>number_corruption · text_redaction · section_removal · page_removal · page_shuffle · null_content</td><td>surgical in-place edits</td></tr>
+        <tr><td>pdf (built-in agent)</td><td>ocr_noise · paragraph_shuffle · encoding_error</td><td>content injection</td></tr>
       </tbody>
     </table>
     </div>
@@ -221,12 +228,15 @@ print(results.summary())</code></pre>
     <section class="callout">
       <p class="eyebrow">Is my agent traceable?</p>
       <p>
-        Tier 0 capture sees <strong>OpenAI-SDK <code>chat.completions</code>
-        calls</strong> — sync, async, streaming, tool calls — against any
-        OpenAI-compatible endpoint. LangGraph graphs get their own adapter
-        with full tool fidelity. Other SDKs, raw HTTP, and subprocess calls
-        are invisible in v1: runs that capture nothing are <em>flagged</em>,
-        not reported as zero divergence.
+        traxr captures at two tiers. <strong>Tier 0</strong> is automatic
+        capture at the OpenAI-SDK boundary: <code>chat.completions</code> calls
+        (sync, async, streaming, tool calls) against any OpenAI-compatible
+        endpoint. <strong>Tier 1</strong> is framework-native capture via
+        callbacks, so LangGraph graphs get a richer adapter with full tool
+        fidelity. Anything your code knows (routes, handoffs, memory reads) you
+        surface with <code>traxr.emit</code>. Other SDKs, raw HTTP, and
+        subprocess calls are invisible in v1: runs that capture nothing are
+        <em>flagged</em>, not reported as zero divergence.
         <a href="docs/traceable/">The honest scope →</a>
       </p>
     </section>

@@ -63,14 +63,14 @@ Scorer = Callable[[str | None, str | None], bool]
 
 @dataclass(frozen=True)
 class ExperimentConfig:
-    """Knobs for :class:`Experiment` (frozen — the controlled-variable invariant).
+    """Knobs for :class:`Experiment` (frozen; the controlled-variable invariant).
 
     Attributes:
         perturbations: ``"all"`` or an explicit operator list.
         max_steps / max_tokens / enable_web_tools / enable_python_tool:
             Built-in-agent knobs (ignored for external agents).
         max_llm_calls_per_run: External-agent budget, enforced inside the
-            Tier 0 wrapper — the only honest runaway bound for code we
+            Tier 0 wrapper; the only honest runaway bound for code we
             don't own.
         store_llm_content: Include raw LLM/tool content in trace payloads
             (hashes only by default; final answers are always stored raw).
@@ -168,7 +168,7 @@ class Experiment:
 
     Exactly one of ``agent`` (a stateless :data:`~traxr.agents.AgentRunner`
     callable, reused across runs), ``agent_factory`` (zero-arg factory called
-    once per run — the fresh-state path), or ``llm`` (the built-in reference
+    once per run, the fresh-state path), or ``llm`` (the built-in reference
     agent over your :class:`~traxr.llm.LLMClient`) must be given.
     """
 

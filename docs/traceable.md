@@ -1,20 +1,26 @@
 # Is my agent traceable?
 
 The honest headline: traxr v1 measures **any Python agent that talks to an
-OpenAI-compatible endpoint via the OpenAI SDK** — not "any agent".
+OpenAI-compatible endpoint via the OpenAI SDK**, not "any agent".
+
+traxr captures at two tiers. **Tier 0** is automatic capture at the OpenAI-SDK
+boundary (`instrument()` / `patch_openai()`): provider-agnostic, but coarse (no
+memory or retrieval events, tool success unknown). **Tier 1** is framework-native
+capture via callbacks (the LangGraph adapter): richer, with node transitions and
+tool success/failure. Everything below is Tier 0 unless noted.
 
 ## Covered
 
 - **`openai.OpenAI` / `openai.AsyncOpenAI` clients** you can pass into your
   agent: wrap once with `traxr.instrument(client)`. Sync, async, and
   streaming calls (with tool-call delta reassembly) all become trace
-  events. Works against any OpenAI-compatible endpoint — OpenAI, Azure,
+  events. Works against any OpenAI-compatible endpoint: OpenAI, Azure,
   Ollama, vLLM, Together, Groq, OpenRouter, a proxied Anthropic.
 - **Clients constructed inside code you can't change**: the
   `traxr.capture.patch_openai()` context manager patches the SDK at class
   level for the duration of the experiment.
 - **LangGraph graphs**: `traxr.from_langgraph(graph)` captures node
-  transitions (as routing events — reroute metrics work unchanged), tool
+  transitions (as routing events, so reroute metrics work unchanged), tool
   calls with full success/failure fidelity, and LLM calls, via
   `langchain-core` callbacks.
 - **Anything you emit yourself**: `traxr.emit("my_event", {...})` is the
@@ -29,14 +35,14 @@ OpenAI-compatible endpoint via the OpenAI SDK** — not "any agent".
 - LLM calls made in subprocesses
 
 Runs that capture nothing are flagged with `EmptyTraceWarning` and status
-`empty` — never silently reported as zero divergence. A localhost proxy and
+`empty`, never silently reported as zero divergence. A localhost proxy and
 OpenTelemetry ingestion are the roadmap answers for the rest.
 
 ## Caveats that keep the numbers honest
 
 **External traces are coarser than built-in traces.** Tier 0 sees LLM
-calls, tool requests, and tool results — no memory or retrieval events, and
-tool success/failure is unknown at the SDK boundary. `d_norm` and `t*`
+calls, tool requests, and tool results, with no memory or retrieval events,
+and tool success/failure is unknown at the SDK boundary. `d_norm` and `t*`
 remain valid (the metrics are vocabulary-agnostic), but **built-in and
 external values are not cross-comparable**.
 

@@ -1,12 +1,12 @@
 # traxr
 
 **Evaluate multi-agent systems beyond final-answer accuracy.** A multi-agent
-system can land the right answer through the wrong process — and answer-level
-metrics never see it. traxr evaluates the **execution trace itself**: point
-your own agent at your own data, run paired experiments, and measure how its
-behavior diverged — how much (`d_norm`), where it started (`t*`), how it
-manifested, and what it cost in tokens. Controlled input perturbation is the
-instrument; the trace is the measurement.
+system can land the right answer through the wrong process, and answer-level
+metrics never see it. traxr evaluates the **execution trace itself**: point your
+agent at your data, run paired experiments, and measure how its behavior
+diverged. How much (`d_norm`), where it started (`t*`), how it manifested, and
+what it cost in tokens. Controlled input perturbation is the instrument; the
+trace is the measurement.
 
 traxr operationalizes the paper *“Trace-Level Analysis of Information
 Contamination in Multi-Agent Systems”*
@@ -16,16 +16,18 @@ OpenAI-compatible endpoint through the OpenAI SDK.
 
 ## How an experiment works
 
-1. **Perturb** — one operator corrupts a copy of one file: seeded,
+1. **Perturb**: one operator corrupts a copy of one file, seeded,
    deterministic, single-variable.
-2. **Run paired** — your agent runs on the clean file, then on each
+2. **Run paired**: your agent runs on the clean file, then on each
    corrupted copy, with identical seeds in fresh temp dirs under original
    basenames. The agent cannot tell which condition it is in.
-3. **Compare traces** — every LLM call, tool call, and routing decision is
+3. **Compare traces**: every LLM call, tool call, and routing decision is
    an event; paired traces are aligned and compared structurally.
 
-Start with the [quickstart](quickstart.md), check
-[which agents are traceable](traceable.md), and read the
+Start with the [quickstart](quickstart.md), including how to
+[score free-text answers](quickstart.md#scoring-free-text-answers) and how to
+[expose your agents with `traxr.emit`](quickstart.md#expose-your-agents-with-traxremit).
+Check [which agents are traceable](traceable.md), and read the
 [security notes](security.md) before running an agent with real tools.
 
 ## Install
