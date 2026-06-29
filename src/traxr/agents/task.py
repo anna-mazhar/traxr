@@ -55,7 +55,7 @@ def invoke_agent(
 ) -> str:
     """Run ``runner`` on ``task`` with Tier 0 capture bound to ``collector``.
 
-    The harness — not the agent — emits the ``final_answer`` event from the
+    The harness, not the agent, emits the ``final_answer`` event from the
     return value. An agent exception is recorded as an ``agent_error`` event
     (the partial trace stays analyzable) and re-raised; the record-vs-raise
     policy is the experiment runner's concern.

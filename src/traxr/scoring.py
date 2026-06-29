@@ -79,7 +79,7 @@ def _default_judge_client() -> LLMClient:
 def llm_judge_match(
     expected: str | None, actual: str | None, llm: LLMClient | None = None
 ) -> bool:
-    """Semantic match via LLM judge. Opt-in only — usable directly as
+    """Semantic match via LLM judge. Opt-in only, usable directly as
     ``ExperimentConfig(scorer=llm_judge_match)``.
 
     Unlike :func:`check_answer_match`, this is not deterministic: results
@@ -87,7 +87,7 @@ def llm_judge_match(
     matching is too strict for your question's expected phrasing.
 
     If ``llm`` is omitted, lazily constructs and caches a default
-    ``OpenAICompatibleClient`` — this reads ``OPENAI_API_KEY`` from the
+    ``OpenAICompatibleClient``; this reads ``OPENAI_API_KEY`` from the
     environment and makes a live network call per scored answer. Pass your
     own ``llm`` (e.g. via ``functools.partial``) to use another provider or
     avoid the implicit network/API-key dependency.
