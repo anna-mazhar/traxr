@@ -40,6 +40,19 @@ agent), `[langgraph]` (LangGraph adapter), `[viz]` (plots). **External agents
 that bring an OpenAI client need no extras at all.**
 </details>
 
+## API keys
+
+traxr never reads or stores a key of its own. Your instrumented agent uses its
+own OpenAI client, which picks up `OPENAI_API_KEY` (or the `api_key=` you pass to
+`openai.OpenAI(...)`) exactly as it always does. Tier 0 wraps the SDK above HTTP,
+so it never sees keys or headers.
+
+The built-in reference agent, the `llm_judge_match` scorer, and `traxr run
+--model ...` go through `OpenAICompatibleClient`, which reads `OPENAI_API_KEY`
+(or an explicit `api_key=`). For local OpenAI-compatible servers (Ollama, vLLM,
+LM Studio) any non-empty string works: `OpenAICompatibleClient(base_url=...,
+api_key="local")`.
+
 ## Quickstart
 
 Bring your agent, point it at your data. Three steps: instrument, expose

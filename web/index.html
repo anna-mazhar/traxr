@@ -183,6 +183,14 @@ traxr.emit(<span class="s">"routing_decision"</span>, {<span class="s">"chosen_a
       <code>config=ExperimentConfig(scorer=llm_judge_match)</code>
       (<a href="docs/quickstart/#scoring-free-text-answers">scoring free-text answers →</a>).
     </p>
+    <p class="aside">
+      <strong>API keys:</strong> traxr never reads or stores one of its own. Your
+      instrumented client picks up <code>OPENAI_API_KEY</code> as usual, and Tier 0
+      wraps the SDK above HTTP, so it never sees keys or headers. The built-in
+      agent, the LLM judge, and <code>traxr run --model</code> read
+      <code>OPENAI_API_KEY</code> too (or pass <code>api_key=</code>; any non-empty
+      string works for local servers).
+    </p>
   </section>
 
   <section id="how">
