@@ -13,12 +13,12 @@
 </p>
 
 **Evaluate multi-agent systems beyond final-answer accuracy.** A multi-agent
-system can land the right answer through the wrong process — and answer-level
-metrics never see it. Traxr evaluates the **execution trace itself**: point
-your own agent at your own data, run paired experiments, and measure how its
-behavior diverged — how much (`d_norm`), where it started (`t*`), how it
-manifested, and what it cost in tokens. Controlled input perturbation is the
-instrument; the trace is the measurement.
+system can land the right answer through the wrong process, and answer-level
+metrics never see it. Traxr evaluates the **execution trace itself**: point your
+agent at your data, run paired experiments, and measure how its behavior
+diverged. How much (`d_norm`), where it started (`t*`), how it manifested, and
+what it cost in tokens. Controlled input perturbation is the instrument; the
+trace is the measurement.
 
 Traxr operationalizes the paper *“Trace-Level Analysis of Information
 Contamination in Multi-Agent Systems”* ([CAIS 2026](https://dl.acm.org/doi/10.1145/3786335.3813147);
@@ -31,53 +31,159 @@ OpenAI-compatible endpoint through the OpenAI SDK.
 pip install "traxr[document,openai,pandas] @ git+https://github.com/anna-mazhar/traxr.git@main"
 ```
 
-Extras: `[document]` (PDF/XLSX support), `[openai]` (the built-in reference
-agent's client), `[pandas]` (DataFrame export; also required by the built-in
-reference agent), `[langgraph]` (LangGraph adapter), `[viz]` (plots).
-External agents with their own OpenAI client need **no extras at all**.
+<details>
+<summary>What the extras pull in</summary>
 
-## Quickstart — bring your own agent
+`[document]` (PDF/XLSX support), `[openai]` (the built-in reference agent's
+client), `[pandas]` (DataFrame export; also required by the built-in reference
+agent), `[langgraph]` (LangGraph adapter), `[viz]` (plots). **External agents
+that bring an OpenAI client need no extras at all.**
+</details>
+
+## API keys
+
+traxr never reads or stores a key of its own. Your instrumented agent uses its
+own OpenAI client, which picks up `OPENAI_API_KEY` (or the `api_key=` you pass to
+`openai.OpenAI(...)`) exactly as it always does. Tier 0 wraps the SDK above HTTP,
+so it never sees keys or headers.
+
+The built-in reference agent, the `llm_judge_match` scorer, and `traxr run
+--model ...` go through `OpenAICompatibleClient`, which reads `OPENAI_API_KEY`
+(or an explicit `api_key=`). For local OpenAI-compatible servers (Ollama, vLLM,
+LM Studio) any non-empty string works: `OpenAICompatibleClient(base_url=...,
+api_key="local")`.
+
+## Quickstart
+
+Bring your agent, point it at your data. Three steps: instrument, expose
+agent-level structure, run.
+
+### 1. Your agent
 
 Your agent is any callable `(Task) -> str`. Wrap its OpenAI client with
 `traxr.instrument()` and every `chat.completions` call (sync, async, or
-streaming, including tool calls) is captured into the trace:
+streaming, including tool calls) is captured, so each step of a tool-using loop
+becomes a step in the trace:
 
 ```python
 import openai, traxr
 
-client = traxr.instrument(openai.OpenAI())  # same client, now traced
+# Wrap your OpenAI client once so each call is recorded as a trace step.
+client = traxr.instrument(openai.OpenAI())
 
 def my_agent(task: traxr.Task) -> str:
-    data = task.files[0].read_text()
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[{"role": "user", "content": f"{task.question}\n\n{data}"}],
-    )
-    return response.choices[0].message.content or ""
+    messages = [{"role": "user", "content": task.question}]
+    while True:
+        reply = client.chat.completions.create(
+            model="gpt-4o-mini", messages=messages, tools=tools
+        ).choices[0].message
+        messages.append(reply)
+        if not reply.tool_calls:                 # no tool call -> final answer
+            return reply.content or ""
+        for call in reply.tool_calls:
+            output = run_tool(call, task.files)   # your tool reads the data
+            messages.append({"role": "tool",
+                             "tool_call_id": call.id, "content": output})
+```
 
+Here `tools` is your function-schema list and `run_tool` runs the selected tool
+over `task.files`. Each perturbation runs in a fresh temp dir under the
+**original basenames**, so your agent can't tell which condition it's in.
+Stateful agents (memory, vector stores) should pass `agent_factory=` instead of
+`agent=`.
+
+### 2. Your multi-agent system
+
+traxr captures your LLM traffic automatically, but it can't see *which* agent
+is acting. `traxr.emit()` is the escape hatch: call it where your code knows who
+is in charge (routing decisions, handoffs, memory reads) to expose agent-level
+structure in the trace.
+
+```python
+# agent_name = the agent acting now; chosen_agent = who the orchestrator picked.
+# Reuses the built-in "routing_decision" type, so it counts toward the metrics.
+# Outside a Traxr run this is a no-op, so it's safe to leave in production code.
+traxr.emit("routing_decision", {"chosen_agent": "researcher"}, agent_name="orchestrator")
+```
+
+<details>
+<summary>Full multi-agent example (orchestrator + workers)</summary>
+
+```python
+import openai, traxr
+
+client = traxr.instrument(openai.OpenAI())      # every LLM call below is captured
+
+def call(prompt: str) -> str:                   # one LLM hop, shared by the agents
+    r = client.chat.completions.create(
+        model="gpt-4o-mini", messages=[{"role": "user", "content": prompt}])
+    return r.choices[0].message.content or ""
+
+# Worker agents tag their own output. They don't decide who runs next.
+def planner(task, notes):
+    traxr.emit("agent_output", {"action": "plan"}, agent_name="planner")
+    return call(f"Plan how to answer: {task.question}")
+
+def researcher(task, notes):
+    traxr.emit("agent_output", {"action": "research"}, agent_name="researcher")
+    return call(f"{task.question}\n\n{task.files[0].read_text()}")
+
+def writer(task, notes):
+    traxr.emit("agent_output", {"action": "synthesize"}, agent_name="writer")
+    return call(f"Write the final answer from:\n{notes}")
+
+WORKERS = {"planner": planner, "researcher": researcher, "writer": writer}
+
+def my_mas(task: traxr.Task) -> str:            # your agent: still just (Task) -> str
+    notes = ""
+    while True:
+        nxt = orchestrate(task, notes)          # YOUR routing logic (an LLM, rules, a graph)
+        # The orchestrator picks who acts next, so it emits the routing decision:
+        traxr.emit("routing_decision", {"chosen_agent": nxt}, agent_name="orchestrator")
+        if nxt == "done":
+            return notes
+        notes = WORKERS[nxt](task, notes)
+```
+
+`agent_name` is who is acting now; `chosen_agent` is who the orchestrator routes
+to next. Only the orchestrator emits `routing_decision`; the workers emit their
+own `agent_output` and tool events. Custom event types work too: register them
+with `register_signature()` so they count toward `d_norm`. Full guide:
+[Expose your agents](docs/quickstart.md).
+</details>
+
+### 3. Run it (Python or CLI)
+
+```python
 experiment = traxr.Experiment(
     files="examples/sales.csv",
     question="Which region had the highest Q3 revenue?",
     expected_answer="EMEA",
-    agent=my_agent,
+    agent=my_mas,                 # or agent=my_agent
 )
-experiment.run(dry_run=True)   # the full plan — zero LLM calls, zero spend
-results = experiment.run()     # baseline + perturbed runs (+ noise floor)
+experiment.run(dry_run=True)      # the full plan: zero LLM calls, zero spend
+results = experiment.run()        # baseline + perturbed runs (+ noise floor)
 print(results.summary())
 results.to_json("results.json")
 ```
 
-Each perturbation gets a fresh temp dir with **original file basenames** —
-your agent can never tell which condition it is in. Stateful agents (memory,
-vector stores) should use `agent_factory=` instead of `agent=` so every run
-starts fresh.
+Prefer the shell? The CLI takes an `import:path` to your agent:
+
+```bash
+traxr run --agent mypkg.agents:my_mas --file examples/sales.csv \
+          --question "Which region won Q3?" --expected-answer EMEA \
+          --out results.json
+traxr run --agent mypkg.agents:my_mas --file report.pdf --question "..." --dry-run
+traxr operators      # the live operator catalog
+traxr selfcheck      # offline end-to-end smoke test
+```
 
 ### Scoring free-text answers
 
 A real agent answers in full sentences, so the default scorer
 (`check_answer_match`, exact normalized string equality) won't match a bare
 `expected_answer` against a verbose reply. Bring your own via
-`ExperimentConfig(scorer=...)` — e.g. the built-in `llm_judge_match` for
+`ExperimentConfig(scorer=...)`, e.g. the built-in `llm_judge_match` for
 semantic matching (non-deterministic, costs an extra LLM call):
 
 ```python
@@ -89,30 +195,40 @@ experiment = traxr.Experiment(
     question="Which region had the highest Q3 revenue?",
     expected_answer="EMEA",
     agent=my_agent,
-    config=ExperimentConfig(scorer=llm_judge_match),
+    config=ExperimentConfig(scorer=llm_judge_match),  # semantic match instead of exact
 )
 ```
 
-See [docs/quickstart.md](docs/quickstart.md#scoring-free-text-answers) for
-details and how to plug in your own deterministic scorer instead.
+See [the quickstart](docs/quickstart.md#scoring-free-text-answers) for details
+and how to plug in your own deterministic scorer instead.
 
-### No API key? Try the built-in reference agent + stub
+## Is my agent traceable?
 
-```python
-import traxr
+traxr captures traces at two tiers. **Tier 0** is automatic capture at the
+OpenAI-SDK boundary: wrap your client with `instrument()` and every
+`chat.completions` call (sync, async, streaming, tool calls) becomes a trace
+event, against any OpenAI-compatible endpoint. **Tier 1** is framework-native
+capture via callbacks: the [LangGraph adapter](#langgraph) is richer, since it
+also sees node transitions and tool success/failure.
 
-experiment = traxr.Experiment(
-    files="examples/sales.csv",
-    question="Which region had the highest Q3 revenue?",
-    expected_answer="EMEA",
-    llm=traxr.DeterministicLLMStub(scenario="identity", final_answer="EMEA"),
-)
-results = experiment.run()
-```
+Tier 0 is the default, and its honest scope is OpenAI-SDK `chat.completions`
+calls. You're covered if your agent:
 
-The bundled multi-agent reference system (`llm=...`) runs entirely offline
-under the deterministic stub — it powers the demos, goldens, and
-`python -m traxr.selfcheck`.
+- uses `openai.OpenAI` / `openai.AsyncOpenAI` against any OpenAI-compatible
+  endpoint (OpenAI, Azure, Ollama, vLLM, Together, Groq, OpenRouter, …) and
+  you can pass the instrumented client in,
+- constructs clients internally: use the `traxr.capture.patch_openai()`
+  context manager instead, or
+- is a LangGraph graph (`traxr.from_langgraph`).
+
+Anything Tier 0 can't see (orchestration, memory reads, retrieval) you surface
+yourself with [`traxr.emit()`](#2-your-multi-agent-system).
+
+**Not captured (yet):** other provider SDKs, raw HTTP, the
+Responses/Assistants APIs, subprocess-spawned LLM calls. Runs that capture
+nothing are flagged (`EmptyTraceWarning`) rather than silently reported as
+zero divergence. Full scope and caveats: [is my agent traceable?](docs/traceable.md).
+A local proxy and OTel ingestion are on the [roadmap](ROADMAP.md).
 
 ### Try it on a real benchmark task
 
@@ -130,17 +246,17 @@ agent = traxr.from_langgraph(compiled_graph)   # Tier 1 capture via callbacks
 experiment = traxr.Experiment(files="report.pdf", question="...", agent=agent)
 ```
 
-Node transitions become routing events (so reroute metrics work), tool calls
-keep success/failure fidelity, and double-counting with an instrumented
-client is suppressed automatically. For non-messages-state graphs, pass
-`input_builder=` / `output_extractor=`.
+Node transitions become routing events (so reroute metrics work) and carry
+agent names onto LLM events automatically, tool calls keep success/failure
+fidelity, and double-counting with an instrumented client is suppressed. For
+non-messages-state graphs, pass `input_builder=` / `output_extractor=`.
 
 ## How it works
 
 1. **Perturb**: one operator is applied to a copy of your file (seeded,
    deterministic, single-variable).
 2. **Paired runs**: your agent runs on the clean file, then on each
-   perturbed copy — identical seeds, fresh temp dirs.
+   perturbed copy, with identical seeds and fresh temp dirs.
 3. **Diverging traces**: each run's LLM/tool/routing events form a trace;
    paired traces are aligned and compared structurally.
 
@@ -148,11 +264,13 @@ client is suppressed automatically. For non-messages-state graphs, pass
 
 | metric | meaning |
 |---|---|
-| `d_norm` | normalized edit distance between paired traces — 0 = identical process, 1 = completely different |
+| `d_norm` | normalized edit distance between paired traces: 0 = identical process, 1 = completely different |
 | `t*` (+ `t*/T`) | the step where divergence first appears, and how early in the run that is |
 | manifestation | how the damage showed up: silent semantic corruption, strategy reroute, early termination, catastrophic failure, recovered, … |
 | `token_overhead` | perturbed-run tokens / baseline tokens |
-| noise floor | baseline-vs-itself `d_norm` from clean re-runs — divergence at or below it is indistinguishable from sampling noise (**defaults to 1 re-run for external agents; don't skip it**) |
+| noise floor | baseline-vs-itself `d_norm` from clean re-runs; divergence at or below it is indistinguishable from sampling noise (**defaults to 1 re-run for external agents; don't skip it**) |
+
+Full reference: [the metrics](docs/metrics.md).
 
 ## Perturbation operators (v1)
 
@@ -163,84 +281,73 @@ client is suppressed automatically. For non-messages-state graphs, pass
 | PDF (any agent) | `number_corruption`, `text_redaction`, `section_removal`, `page_removal`, `page_shuffle`, `null_content` | surgical in-place edits (extraction-fidelity preserving) |
 | PDF (built-in agent only) | `ocr_noise`, `paragraph_shuffle`, `encoding_error` | extracted-content injection |
 
-`traxr operators` prints the live catalog.
-
-## Is my agent traceable?
-
-Tier 0 capture sees **OpenAI-SDK `chat.completions` calls** — that's the
-honest scope. You're covered if your agent:
-
-- uses `openai.OpenAI` / `openai.AsyncOpenAI` against any OpenAI-compatible
-  endpoint (OpenAI, Azure, Ollama, vLLM, Together, Groq, OpenRouter, …) and
-  you can pass the instrumented client in,
-- constructs clients internally — use the `traxr.capture.patch_openai()`
-  context manager instead, or
-- is a LangGraph graph (`traxr.from_langgraph`).
-
-**Not captured (yet):** other provider SDKs, raw HTTP, the
-Responses/Assistants APIs, subprocess-spawned LLM calls. Runs that capture
-nothing are flagged (`EmptyTraceWarning`) rather than silently reported as
-zero divergence. A local proxy and OTel ingestion are on the
-[roadmap](ROADMAP.md). You can also hand-place events with `traxr.emit()`.
-
-Two caveats that keep the numbers honest:
-
-- External traces are **coarser** than built-in-agent traces (no
-  memory/retrieval events; tool success unknown at Tier 0). `d_norm`/`t*`
-  remain valid, but built-in and external values are **not
-  cross-comparable**.
-- Concurrent LLM calls make event order scheduling-dependent. Traxr detects
-  this (`order_nondeterministic` + `ConcurrentTraceWarning`), the noise
-  floor absorbs it empirically, and `require_sequential=True` fails fast
-  instead.
+`traxr operators` prints the live catalog; full notes in
+[the operator catalog](docs/operators.md).
 
 ## Cost, honestly
 
 One experiment = 1 baseline + up to ~7 perturbation runs (+ noise-floor
 re-runs) of **your agent on your key**. Spend cannot be estimated up front,
-so Traxr gives you enforcement instead: `run(dry_run=True)` prints the full
-plan with zero LLM calls; `max_llm_calls_per_run` is enforced *inside* the
-Tier 0 wrapper; live token totals print per run. See
-[SECURITY.md](SECURITY.md) for what cannot be bounded.
+so Traxr gives you enforcement instead:
+
+- `run(dry_run=True)` prints the full plan with zero LLM calls.
+- `ExperimentConfig(max_llm_calls_per_run=...)` caps LLM calls per run
+  (default 50) for external agents, enforced *inside* the Tier 0 wrapper, so
+  `RunBudgetExceeded` fires before the over-budget call goes out.
+- `OpenAICompatibleClient(max_retries=...)` bounds the built-in agent's
+  transient-failure retries (default 2, the OpenAI SDK default; 0 disables).
+- Live token totals print per run.
+
+Both knobs are on the CLI too: `traxr run ... --max-llm-calls 20 --max-retries 0`.
+See [SECURITY.md](SECURITY.md) for what cannot be bounded.
 
 ## Security
 
 Perturbed data is an injection-adjacent vector into your agent, and Traxr
 cannot sandbox your agent: run experiments with side-effectful tools
 disabled or inside a container/VM. Trace payloads are hash-only by default
-(raw final answers are stored — scoring needs them). Tier 0 never touches
+(raw final answers are stored, since scoring needs them). Tier 0 never touches
 HTTP headers or keys. Full notes: [SECURITY.md](SECURITY.md).
 
-## Bring any LLM provider (built-in agent)
+## Don't have an agentic system yet? Use ours.
 
-The reference agent speaks to anything OpenAI-compatible:
+Traxr ships a multi-agent reference system (planner, researcher, tools,
+synthesizer). Point it at your data with `llm=` plus your API key, and you get
+the full trace-level analysis without writing an agent:
 
 ```python
-llm = traxr.OpenAICompatibleClient(model="llama3.1", base_url="http://localhost:11434/v1")
+import traxr
+
+experiment = traxr.Experiment(
+    files="examples/sales.csv",
+    question="Which region had the highest Q3 revenue?",
+    expected_answer="EMEA",
+    llm=traxr.OpenAICompatibleClient(model="gpt-4o-mini"),  # reads OPENAI_API_KEY
+)
+results = experiment.run()
+```
+
+<details>
+<summary>Other providers (Azure, Ollama, vLLM, Together, …)</summary>
+
+```python
+# any OpenAI-compatible endpoint: pass base_url= and api_key=
+llm = traxr.OpenAICompatibleClient(
+    model="llama3.1", base_url="http://localhost:11434/v1", api_key="local")
 experiment = traxr.Experiment(files="examples/sales.csv", question="...", llm=llm)
 ```
 
-For other providers, implement the two-method
+For providers that aren't OpenAI-compatible, implement the two-method
 [`traxr.LLMClient`](src/traxr/llm/protocol.py) protocol (`generate`,
-`generate_with_tools`). External agents don't need any of this — they own
-their LLM and are captured at the SDK boundary.
-
-## CLI
-
-```bash
-traxr run --agent mypkg.agents:answer --file examples/sales.csv \
-          --question "Which region won Q3?" --expected-answer EMEA \
-          --out results.json
-traxr run --model gpt-4o-mini --file report.pdf --question "..." --dry-run
-traxr operators
-traxr selfcheck
-```
+`generate_with_tools`). External agents don't need any of this: they own their
+LLM and are captured at the SDK boundary.
+</details>
 
 ## Notebook
 
 [`notebooks/traxr_quickstart.ipynb`](notebooks/traxr_quickstart.ipynb) runs
-top-to-bottom **without an API key** (the real-model cells are skip-safe) —
-open it in Colab to try Traxr in two minutes.
+top-to-bottom **without an API key** (the real-model cells are skip-safe).
+Open it in Colab to try Traxr in two minutes.
 
 ## Development
 

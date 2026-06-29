@@ -1,11 +1,11 @@
 # Perturbation operators
 
 One operator per pair, applied to a copy of one file with a per-permutation
-derived seed — deterministic across re-runs (the controlled-variable
+derived seed, deterministic across re-runs (the controlled-variable
 invariant). `traxr operators` prints this catalog from the installed
 package.
 
-## Tabular (CSV / XLSX) — any agent
+## Tabular (CSV / XLSX): any agent
 
 Delivered by file round-trip: parse → perturb → re-serialize to disk.
 
@@ -19,7 +19,7 @@ Delivered by file round-trip: parse → perturb → re-serialize to disk.
 | `unit_change` | rescales numeric columns as if units changed |
 | `null_content` | replaces the file with empty content |
 
-## Text (TXT / MD) — any agent
+## Text (TXT / MD): any agent
 
 Also file round-trip.
 
@@ -33,11 +33,11 @@ Also file round-trip.
 | `section_removal` | deletes a section |
 | `null_content` | empty file |
 
-## PDF — any agent
+## PDF: any agent
 
 Delivered by **surgical in-place edits** (PyMuPDF): the perturbed PDF on
 disk differs only at the edit loci, preserving extraction fidelity
-everywhere else. Visual fidelity is *not* guaranteed at edit spans —
+everywhere else. Visual fidelity is *not* guaranteed at edit spans;
 agents doing layout/visual analysis may notice the reinserted font.
 
 | operator | what it does |
@@ -49,7 +49,7 @@ agents doing layout/visual analysis may notice the reinserted font.
 | `page_shuffle` | reorders pages |
 | `null_content` | blank document |
 
-## PDF — built-in agent only
+## PDF: built-in agent only
 
 Whole-text-flow operators (`ocr_noise`, `paragraph_shuffle`,
 `encoding_error`) cannot be applied surgically to a PDF. For the built-in

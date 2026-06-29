@@ -76,6 +76,23 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     run.add_argument("--dry-run", action="store_true", help="Print the plan; run nothing.")
     run.add_argument("--keep-artifacts", action="store_true", help="Keep perturbed file copies.")
+    run.add_argument(
+        "--max-llm-calls",
+        type=int,
+        default=None,
+        metavar="N",
+        help="External agent (--agent) budget: hard cap on LLM calls per run, "
+        "enforced inside the capture wrapper (default 50). Use 0 or a negative "
+        "value to disable.",
+    )
+    run.add_argument(
+        "--max-retries",
+        type=int,
+        default=2,
+        metavar="N",
+        help="Built-in agent (--model) only: how many times the OpenAI SDK "
+        "retries a transient failure before raising (default 2; 0 disables).",
+    )
 
     sub.add_parser("operators", help="List the perturbation catalog per agent kind.")
     sub.add_parser("selfcheck", help="Run the offline end-to-end self-check.")
@@ -90,6 +107,11 @@ def _cmd_run(args: argparse.Namespace) -> int:
     config_kwargs: dict[str, Any] = {
         "keep_artifacts": args.keep_artifacts,
     }
+    if args.max_llm_calls is not None:
+        # <= 0 disables the budget (ExperimentConfig treats None as "no cap").
+        config_kwargs["max_llm_calls_per_run"] = (
+            args.max_llm_calls if args.max_llm_calls > 0 else None
+        )
     if args.perturbations:
         config_kwargs["perturbations"] = [
             _parse_perturbation(name) for name in args.perturbations.split(",")
@@ -143,7 +165,11 @@ def _resolve_agent(args: argparse.Namespace) -> dict[str, Any]:
         return {"llm": DeterministicLLMStub()}
     from traxr.llm import OpenAICompatibleClient
 
-    return {"llm": OpenAICompatibleClient(model=args.model, base_url=args.base_url)}
+    return {
+        "llm": OpenAICompatibleClient(
+            model=args.model, base_url=args.base_url, max_retries=args.max_retries
+        )
+    }
 
 
 def _load_agent(spec: str) -> Any:

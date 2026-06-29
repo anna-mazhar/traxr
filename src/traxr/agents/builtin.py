@@ -321,7 +321,7 @@ def builtin_agent(
     Args:
         llm: Any :class:`~traxr.llm.LLMClient` (OpenAICompatibleClient,
             DeterministicLLMStub, or your own implementation).
-        enable_web_tools: Register web_search/web_fetch tools. Default OFF —
+        enable_web_tools: Register web_search/web_fetch tools. Default OFF;
             opt-in only, keeps runs offline and deterministic.
         enable_python_tool: Register the (subprocess-sandboxed) python tool.
         max_steps: Episode step budget.

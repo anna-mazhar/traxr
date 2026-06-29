@@ -201,6 +201,10 @@ class OpenAICompatibleClient:
         seed: Sampling seed forwarded to the endpoint (reproducibility).
         temperature: Sampling temperature; defaults to ``0.0`` for the
             controlled-variable invariant. ``None`` omits the parameter.
+        max_retries: How many times the OpenAI SDK retries a transient
+            failure (network error, ``429``, ``5xx``) before raising. Forwarded
+            to ``openai.OpenAI(max_retries=...)``; defaults to ``2`` (the SDK
+            default). Set ``0`` to disable automatic retries.
 
     Raises:
         OptionalDependencyError: If the ``openai`` package is not installed.
@@ -215,6 +219,7 @@ class OpenAICompatibleClient:
         base_url: str | None = None,
         seed: int = 42,
         temperature: float | None = 0.0,
+        max_retries: int = 2,
     ):
         openai = _import_openai()
         self._openai = openai
@@ -223,6 +228,7 @@ class OpenAICompatibleClient:
         self.seed = seed
         self.temperature = temperature
         self.base_url = base_url
+        self.max_retries = max_retries
         self._call_count = 0
 
         api_key = api_key or os.environ.get("OPENAI_API_KEY")
@@ -235,7 +241,7 @@ class OpenAICompatibleClient:
                 'api_key="local").'
             )
 
-        self.client = openai.OpenAI(api_key=api_key, base_url=base_url)
+        self.client = openai.OpenAI(api_key=api_key, base_url=base_url, max_retries=max_retries)
 
     def _completion_kwargs(self, **kwargs: Any) -> dict[str, Any]:
         """Common chat.completions kwargs (seed; temperature only if set)."""

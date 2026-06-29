@@ -72,8 +72,8 @@ class ExperimentResults:
     Attributes:
         pairs: One :class:`PairResult` per permutation.
         traces: ``run_label -> serialized trace`` (collector ``to_dict()``).
-        answers: ``run_label -> raw final answer`` (stored raw by design —
-            scoring and ``answer_changed`` need them; see the security docs).
+        answers: ``run_label -> raw final answer`` (stored raw by design,
+            since scoring and ``answer_changed`` need them; see the security docs).
         fingerprint: Environment/config fingerprint for reproducibility.
         noise_floor: Baseline-vs-itself ``d_norm`` (None when unmeasured).
         noise_floor_runs: How many clean re-runs measured the floor.
@@ -149,7 +149,7 @@ class ExperimentResults:
         return payload
 
     def to_json(self, path: Any = None, *, include_traces: bool = True) -> str:
-        """Canonical JSON: sorted keys, timestamps excluded — byte-stable
+        """Canonical JSON: sorted keys, timestamps excluded, byte-stable
         for deterministic (stub / mock-transport) experiments.
 
         Args:
@@ -178,8 +178,8 @@ class ExperimentResults:
         """Human-readable report (``"md"`` or ``"html"``).
 
         ``"md"`` is a plain markdown document (good for terminals and PRs).
-        ``"html"`` is a single self-contained file — inline styles, no scripts,
-        no external assets — that embeds the :mod:`traxr.viz` figures when
+        ``"html"`` is a single self-contained file (inline styles, no scripts,
+        no external assets) that embeds the :mod:`traxr.viz` figures when
         matplotlib is installed and degrades gracefully when it is not.
         """
         if fmt not in ("md", "html"):

@@ -250,8 +250,8 @@ def emit(
     :class:`~traxr.errors.UnknownEventTypeWarning`); upgrade them via
     :func:`traxr.register_signature`.
 
-    Outside a Traxr run this is a no-op — same passthrough principle as
-    ``instrument()`` — so agents that call ``traxr.emit()`` keep working
+    Outside a Traxr run this is a no-op (same passthrough principle as
+    ``instrument()``), so agents that call ``traxr.emit()`` keep working
     standalone.
     """
     session = current_session()
