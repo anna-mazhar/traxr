@@ -52,7 +52,9 @@ class _FakeLLM:
     def generate(self, prompt, response_type="default", context=None):
         return _FakeLLMResponse(content=self._content)
 
-    def generate_with_tools(self, prompt, tools, response_type="default", context=None, system_prompt_override=None):
+    def generate_with_tools(
+        self, prompt, tools, response_type="default", context=None, system_prompt_override=None
+    ):
         raise NotImplementedError
 
 
@@ -79,7 +81,5 @@ def test_llm_judge_match_none_short_circuits():
 def test_llm_judge_match_uses_default_client_when_omitted(monkeypatch):
     import traxr.scoring as scoring_module
 
-    monkeypatch.setattr(
-        scoring_module, "_default_judge_client", lambda: _FakeLLM("yes")
-    )
+    monkeypatch.setattr(scoring_module, "_default_judge_client", lambda: _FakeLLM("yes"))
     assert llm_judge_match("EMEA", "some verbose answer") is True

@@ -554,7 +554,9 @@ class Experiment:
             answer_changed = not bool(self.config.scorer(baseline.answer, perturbed.answer))
         except Exception as exc:
             answer_changed = normalize_answer(baseline.answer) != normalize_answer(perturbed.answer)
-            pair_warnings.append(f"scorer raised {type(exc).__name__} comparing baseline/perturbed: {exc}")
+            pair_warnings.append(
+                f"scorer raised {type(exc).__name__} comparing baseline/perturbed: {exc}"
+            )
 
         manifestation = classify_manifestation(
             PairMetrics(
