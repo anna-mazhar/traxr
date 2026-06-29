@@ -138,15 +138,17 @@
     <pre><code><span class="c"># your agent, unchanged, except the client is instrumented</span>
 <span class="k">import</span> openai, traxr
 
-client = traxr.instrument(openai.OpenAI())
+client = traxr.instrument(openai.OpenAI())   <span class="c"># records each call as a trace step</span>
 
 <span class="k">def</span> <span class="f">my_agent</span>(task: traxr.Task) -&gt; str:
-    data = task.files[0].read_text()
-    response = client.chat.completions.create(
-        model=<span class="s">"gpt-4o-mini"</span>,
-        messages=[{<span class="s">"role"</span>: <span class="s">"user"</span>, <span class="s">"content"</span>: f<span class="s">"{task.question}\n\n{data}"</span>}],
-    )
-    <span class="k">return</span> response.choices[0].message.content <span class="k">or</span> <span class="s">""</span>
+    messages = [{<span class="s">"role"</span>: <span class="s">"user"</span>, <span class="s">"content"</span>: task.question}]
+    <span class="k">while</span> <span class="k">True</span>:
+        reply = client.chat.completions.create(
+            model=<span class="s">"gpt-4o-mini"</span>, messages=messages, tools=tools,
+        ).choices[0].message
+        <span class="k">if</span> <span class="k">not</span> reply.tool_calls:                       <span class="c"># no tool call -&gt; done</span>
+            <span class="k">return</span> reply.content <span class="k">or</span> <span class="s">""</span>
+        messages += [reply, *run_tools(reply, task.files)]   <span class="c"># tools read the data</span>
 
 experiment = traxr.Experiment(
     files=<span class="s">"examples/sales.csv"</span>,
@@ -157,6 +159,11 @@ experiment = traxr.Experiment(
 experiment.run(dry_run=<span class="k">True</span>)  <span class="c"># the full plan: zero LLM calls</span>
 results = experiment.run()
 print(results.summary())</code></pre>
+    <p class="aside">
+      <code>tools</code> is your function-schema list; <code>run_tools</code>
+      runs them and returns the tool messages
+      (<a href="https://github.com/anna-mazhar/traxr#1-your-agent">full example →</a>).
+    </p>
     <p class="aside">
       Multi-agent? <code>instrument</code> captures the LLM calls, but not
       <em>which</em> agent is acting. Tag it with

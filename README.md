@@ -62,25 +62,35 @@ agent-level structure, run.
 
 Your agent is any callable `(Task) -> str`. Wrap its OpenAI client with
 `traxr.instrument()` and every `chat.completions` call (sync, async, or
-streaming, including tool calls) is captured into the trace:
+streaming, including tool calls) is captured, so each step of a tool-using loop
+becomes a step in the trace:
 
 ```python
 import openai, traxr
 
-client = traxr.instrument(openai.OpenAI())  # same client, now traced
+# Wrap your OpenAI client once so each call is recorded as a trace step.
+client = traxr.instrument(openai.OpenAI())
 
 def my_agent(task: traxr.Task) -> str:
-    data = task.files[0].read_text()
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[{"role": "user", "content": f"{task.question}\n\n{data}"}],
-    )
-    return response.choices[0].message.content or ""
+    messages = [{"role": "user", "content": task.question}]
+    while True:
+        reply = client.chat.completions.create(
+            model="gpt-4o-mini", messages=messages, tools=tools
+        ).choices[0].message
+        messages.append(reply)
+        if not reply.tool_calls:                 # no tool call -> final answer
+            return reply.content or ""
+        for call in reply.tool_calls:
+            output = run_tool(call, task.files)   # your tool reads the data
+            messages.append({"role": "tool",
+                             "tool_call_id": call.id, "content": output})
 ```
 
-Each perturbation runs in a fresh temp dir under the **original basenames**, so
-your agent can't tell which condition it's in. Stateful agents (memory, vector
-stores) should pass `agent_factory=` instead of `agent=`.
+Here `tools` is your function-schema list and `run_tool` runs the selected tool
+over `task.files`. Each perturbation runs in a fresh temp dir under the
+**original basenames**, so your agent can't tell which condition it's in.
+Stateful agents (memory, vector stores) should pass `agent_factory=` instead of
+`agent=`.
 
 ### 2. Your multi-agent system
 
